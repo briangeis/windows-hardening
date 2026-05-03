@@ -148,7 +148,7 @@
                         @{
                             Name          = 'Restrict Implicit Text Collection'
                             Description   = 'Prevents collection of text input data for personalization'
-                            Path          = 'HKCU:\SOFTWARE\Microsoft\InputPersonalization'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization'
                             ValueName     = 'RestrictImplicitTextCollection'
                             ValueType     = 'DWord'
                             HardenedValue = 1
@@ -159,13 +159,13 @@
                         @{
                             Name          = 'Restrict Implicit Ink Collection'
                             Description   = 'Prevents collection of inking data for personalization'
-                            Path          = 'HKCU:\SOFTWARE\Microsoft\InputPersonalization'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization'
                             ValueName     = 'RestrictImplicitInkCollection'
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'User Configuration > Administrative Templates > Control Panel > Regional and Language Options > Handwriting personalization > Turn off automatic learning'
-                            GPOState      = 'Disabled'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Control Panel > Regional and Language Options > Handwriting personalization > Turn off automatic learning'
+                            GPOState      = 'Enabled'
                         }
                     )
                 }

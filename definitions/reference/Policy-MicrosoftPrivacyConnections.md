@@ -40,7 +40,7 @@ The highest-priority privacy decisions. Defender cloud reporting is grouped here
 |--------------------------|:---------------:|:----:|:----:|:-----:|
 | Feedback & Diagnostics   | 18.16           | 3    | 3    | 6     |
 | Defender Cloud Reporting | 24              | 4    | 0    | 4     |
-| Inking & Typing          | 18.21           | 0    | 2    | 2     |
+| Inking & Typing          | 18.21           | 2    | 0    | 2     |
 
 ## Microsoft Cloud Services
 
@@ -174,14 +174,14 @@ The technical catch-all for background infrastructure settings. Sections are ord
 
 | Area                     |  HKLM   |  HKCU  |  Total  |
 |--------------------------|:-------:|:------:|:-------:|
-| Telemetry & Diagnostics  | 7       | 5      | 12      |
+| Telemetry & Diagnostics  | 9       | 3      | 12      |
 | Microsoft Cloud Services | 12      | 1      | 13      |
 | App Permissions          | 30      | 3      | 33      |
 | Windows Features         | 11      | 2      | 13      |
 | Windows Update           | 10      | 0      | 10      |
 | Browsers                 | 34      | 5      | 39      |
 | Background Services      | 11      | 0      | 11      |
-| **Totals**               | **115** | **16** | **131** |
+| **Totals**               | **117** | **14** | **131** |
 
 ## Settings with Notable Side Effects
 
@@ -242,6 +242,14 @@ The article specifies the registry path at `HKCU\...\Policies\Microsoft\Windows\
 ### Disable Recommendations (Section 33)
 
 The article specifies `HKCU\...\Explorer\Advanced\Start_TrackDocs` set to `0`, which disables document tracking that feeds the Recommendations section. The definitions file instead uses `HKLM\...\Policies\Microsoft\Windows\Explorer\HideRecommendedSection` set to `1`, which is the registry key corresponding to the article's own GPO recommendation ("Remove Recommended from Start Menu"). This approach is machine-wide (HKLM, consistent with the majority of settings in the file), directly hides the Recommendations UI element rather than indirectly reducing its content, and aligns with the article's GPO guidance rather than its registry guidance.
+
+### Inking & Typing Settings (Section 18.21)
+
+Two settings are affected: Restrict Implicit Text Collection (`RestrictImplicitTextCollection`) and Restrict Implicit Ink Collection (`RestrictImplicitInkCollection`). The article contains two errors for these settings: the wrong GPO configuration level for the ink setting, and the wrong registry paths for both.
+
+For Restrict Implicit Ink Collection, the article assigns a User Configuration GPO (`User Configuration > ... > Handwriting personalization > Turn off automatic learning`). The same GPO exists under Computer Configuration and is the correct choice for a standalone device: it applies machine-wide and is consistent with the rest of the file.
+
+For both settings, the article specifies registry values at `HKCU\Software\Microsoft\InputPersonalization`. Applying the Computer Configuration GPOs on a Windows 11 Pro device shows that both write to `HKLM\SOFTWARE\Policies\Microsoft\InputPersonalization` instead. The article's registry paths are the raw user preference values, not the policy-managed equivalents written by the GPOs. The definitions file uses the HKLM Policies paths.
 
 ## Known Article Inconsistencies
 
