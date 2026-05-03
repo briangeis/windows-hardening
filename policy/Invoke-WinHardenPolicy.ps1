@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Applies registry and Group Policy hardening settings to Windows devices.
+    Applies registry and Local Group Policy hardening settings.
 
 .DESCRIPTION
     A data-driven hardening script for standalone Windows devices.
@@ -12,8 +12,9 @@
     Interactive Mode
       Presents a menu of settings from a definitions file, showing the current
       registry state of each setting against its hardened and default values.
-      Settings can be applied or restored in real time. A snapshot is saved
-      automatically on startup. Requires administrator privileges.
+      Settings can be applied or restored individually, or all at once within
+      a section. A snapshot is saved automatically on startup. Requires
+      administrator privileges.
 
     Silent Mode
       Reads a profile file and applies all settings without prompting.
@@ -22,9 +23,9 @@
 
     Build Mode
       Presents the same menu as Interactive Mode but saves selections to a
-      profile file instead of applying them to the registry. Can be run on
-      Linux to prepare a profile before applying it to a Windows device.
-      Does not require administrator privileges.
+      profile file instead of applying them to the device. Does not require
+      administrator privileges. Can be run on Windows or Linux to prepare
+      a profile before applying it to a Windows device.
 
     Snapshot Mode
       Reads the current registry state of every setting in a definitions
@@ -42,12 +43,12 @@
 .PARAMETER Build
     Path to the profile file to build. Triggers Build Mode: presents the same
     settings menu as Interactive Mode, saving selections to the profile file
-    instead of the registry. An existing file loads as the starting state.
+    instead of the device. An existing file loads as the starting state.
     A new file is created on the first save. No elevation required.
 
 .PARAMETER Snapshot
     Triggers Snapshot Mode: reads the current registry state for every setting
-    in the definitions file and writes a profile capturing it without prompting.
+    in the definitions file and saves a profile capturing it without prompting.
     Requires administrator privileges.
 
 .PARAMETER SnapshotPath
@@ -77,7 +78,7 @@
 .EXAMPLE
     .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Build .\my-profile.psd1
     Build Mode: opens the profile builder for my-profile.psd1.
-    Does not require elevation and can be run on Linux.
+    Does not require elevation and can be run on Windows or Linux.
 
 .EXAMPLE
     .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Snapshot

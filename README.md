@@ -60,7 +60,7 @@ A snapshot of the current system state is saved automatically before any changes
 
 | Script | Component | Description | Status |
 |---|---|---|---|
-| `Invoke-WinHardenPolicy` | [Policy](policy/README.md) | Registry and Group Policy settings | In progress |
+| `Invoke-WinHardenPolicy` | [Policy](policy/README.md) | Registry and Local Group Policy settings | In progress |
 | `Invoke-WinHardenServices` | Services | Windows service startup configuration | Planned |
 | `Invoke-WinHardenPackages` | Packages | Preinstalled appx package removal | Planned |
 | `Invoke-WinHardenSuite` | Orchestrator | Coordinates silent execution of all components | Planned |

@@ -11,7 +11,7 @@
         # ===== Category: Telemetry & Diagnostics =====
         @{
             Name        = 'Telemetry & Diagnostics'
-            Description = 'Settings controlling what this machine reports to Microsoft'
+            Description = 'Settings controlling what this device reports to Microsoft'
             Sections    = @(
 
                 # -- Section: Feedback & Diagnostics --
@@ -597,7 +597,7 @@
                                 }
                                 @{
                                     Name          = 'Deny Access to Trusted Devices'
-                                    Description   = 'Prevents apps from using trusted devices (hardware already connected or bundled with the PC)'
+                                    Description   = 'Prevents apps from using trusted devices (hardware already connected or bundled with this device)'
                                     Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy'
                                     ValueName     = 'LetAppsAccessTrustedDevices'
                                     ValueType     = 'DWord'
