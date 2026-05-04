@@ -153,8 +153,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Text Input > Improve inking and typing recognition'
-                            GPOState      = 'Disabled'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Control Panel > Regional and Language Options > Handwriting personalization > Turn off automatic learning'
+                            GPOState      = 'Enabled'
                         }
                         @{
                             Name          = 'Restrict Implicit Ink Collection'
@@ -874,7 +874,7 @@
                                     ValueType     = 'DWord'
                                     HardenedValue = 0
                                     DefaultValue  = $null
-                                    GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Speech > Allow automatic update of Speech Data'
+                                    GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Speech > Allow Automatic Update of Speech Data'
                                     GPOState      = 'Disabled'
                                 }
                             )
@@ -993,7 +993,7 @@
                             HardenedValue = 1
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Store > Disable all apps from Microsoft Store'
-                            GPOState      = 'Disabled'
+                            GPOState      = 'Enabled'
                         }
                         @{
                             Name          = 'Disable Auto Download and Install of Updates'
@@ -1014,7 +1014,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Defender SmartScreen > Explorer > Configure app install control'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Defender SmartScreen > Explorer > Configure App Install Control'
                             GPOState      = 'Enabled (Turn off app recommendations)'
                         }
                         @{
@@ -1025,7 +1025,7 @@
                             ValueType     = 'String'
                             HardenedValue = 'Anywhere'
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Defender SmartScreen > Explorer > Configure app install control'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Defender SmartScreen > Explorer > Configure App Install Control'
                             GPOState      = 'Enabled (Turn off app recommendations)'
                         }
                         @{
@@ -1104,7 +1104,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'User Configuration > Administrative Templates > Start Menu and Taskbar > Remove Recommended from Start Menu'
+                            GPOPath       = 'User Configuration > Administrative Templates > Start Menu and Taskbar > Remove Recommended section from Start Menu'
                             GPOState      = 'Enabled'
                         }
                     )
@@ -1153,7 +1153,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Start Menu and Taskbar > Notifications > Turn Off notifications network usage'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Start Menu and Taskbar > Notifications > Turn off notifications network usage'
                             GPOState      = 'Enabled'
                         }
                     )
@@ -1172,7 +1172,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Group Policy > Configure web-to-app linking with URI handlers'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Group Policy > Configure web-to-app linking with app URI handlers'
                             GPOState      = 'Disabled'
                         }
                     )
@@ -1200,7 +1200,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Internet Communication Management > Internet Communication Settings > Turn off access to all Windows Update features'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Internet Communication Management > Internet Communication settings > Turn off access to all Windows Update features'
                             GPOState      = 'Enabled'
                         }
                         @{
@@ -1211,7 +1211,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Do not connect to any Windows Update Internet locations'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Manage updates offered from Windows Server Update Service > Do not connect to any Windows Update Internet locations'
                             GPOState      = 'Enabled'
                         }
                         @{
@@ -1222,7 +1222,7 @@
                             ValueType     = 'String'
                             HardenedValue = ' '  # Space character; article specifies ' ' rather than empty string
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Specify intranet Microsoft update service location'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Manage updates offered from Windows Server Update Service > Specify intranet Microsoft update service location'
                             GPOState      = 'Enabled (Blank)'
                         }
                         @{
@@ -1233,7 +1233,7 @@
                             ValueType     = 'String'
                             HardenedValue = ' '  # Space character; article specifies ' ' rather than empty string
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Specify intranet Microsoft update service location'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Manage updates offered from Windows Server Update Service > Specify intranet Microsoft update service location'
                             GPOState      = 'Enabled (Blank)'
                         }
                         @{
@@ -1244,7 +1244,7 @@
                             ValueType     = 'String'
                             HardenedValue = ' '  # Space character; article specifies ' ' rather than empty string
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Specify intranet Microsoft update service location'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Manage updates offered from Windows Server Update Service > Specify intranet Microsoft update service location'
                             GPOState      = 'Enabled (Blank)'
                         }
                         @{
@@ -1255,7 +1255,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Specify intranet Microsoft update service location'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Manage updates offered from Windows Server Update Service > Specify intranet Microsoft update service location'
                             GPOState      = 'Enabled (Blank)'
                         }
                     )
@@ -1459,7 +1459,7 @@
                             HardenedValue = 'about:blank'
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Startup, home page and new tab page > Sites to open when the browser starts'
-                            GPOState      = 'Disabled'
+                            GPOState      = 'Enabled (about:blank)'
                         }
                         @{
                             Name          = 'Disable First Run Experience'
@@ -1821,7 +1821,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Device Installation > Prevent device metadata retrieval from the Internet'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Device Installation > Prevent automatic download of applications associated with device metadata'
                             GPOState      = 'Enabled'
                         }
                     )
@@ -1935,7 +1935,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Internet Communication Management > Internet Communication Settings > Turn off Windows Network Connectivity Status Indicator active tests'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Internet Communication Management > Internet Communication settings > Turn off Windows Network Connectivity Status Indicator active tests'
                             GPOState      = 'Enabled'
                         }
                     )
@@ -2003,7 +2003,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Internet Communication Management > Internet Communication Settings > Turn off Automatic Root Certificates Update'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Internet Communication Management > Internet Communication settings > Turn off Automatic Root Certificates Update'
                             GPOState      = 'Enabled'
                         }
                     )

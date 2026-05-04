@@ -24,7 +24,9 @@ The areas are organized navigation-first: each area answers a specific question 
 **Reference**
 - [Settings Distribution by Area](#settings-distribution-by-area)
 - [Settings with Notable Side Effects](#settings-with-notable-side-effects)
+- [Windows Version Notes](#windows-version-notes)
 - [Settings Without a Group Policy Equivalent](#settings-without-a-group-policy-equivalent)
+- [Settings Sharing a Group Policy](#settings-sharing-a-group-policy)
 - [Intentional Deviations from Source Article](#intentional-deviations-from-source-article)
 - [Known Article Inconsistencies](#known-article-inconsistencies)
 - [Article Sections Not Included as Registry Settings](#article-sections-not-included-as-registry-settings)
@@ -207,6 +209,10 @@ Disabling removes system-wide malware and phishing protection in Explorer and fo
 
 The most consequential setting in the file. Disabling automatic root certificate updates can break the TLS trust chain in ways that are difficult to diagnose: certificate validation failures, software refusing to run, and websites becoming inaccessible without an obvious error pointing to the root cause.
 
+## Windows Version Notes
+
+The source article targets Windows 10 and Windows 11. Some Group Policy display names were renamed between Windows 10 and Windows 11. Where names differ, the `GPOPath` and `GPOState` fields in the definitions file use the Windows 11 names as shown in `gpedit.msc` on Windows 11. The definitions file is the authoritative record of the correct current names.
+
 ## Settings Without a Group Policy Equivalent
 
 The following 13 settings have no corresponding Group Policy per the article. Their `GPOPath` and `GPOState` fields are set to `$null` in the definitions file. On Pro/Enterprise editions, these must be configured via registry even when Group Policy is available for all other settings.
@@ -227,6 +233,18 @@ The following 13 settings have no corresponding Group Policy per the article. Th
 | Disable MSRT Diagnostic Data                | 24              | Defender Cloud Reporting | Article explicitly notes no GPO for MSRT diagnostic data     |
 | Disable Services Configuration              | 31              | Services Configuration   | Registry-only; article provides no GPO                       |
 
+## Settings Sharing a Group Policy
+
+The following GPOs are each controlled by more than one setting in the definitions file. A single entry appears in gpedit.msc for each GPO regardless of how many registry values it controls, so the total number of gpedit.msc entries is lower than the total number of settings in the file.
+
+| GPO | PSD1 Settings | Count |
+|-----|---------------|:-----:|
+| `Turn off automatic learning` | Restrict Implicit Text Collection; Restrict Implicit Ink Collection | 2 |
+| `Specify intranet Microsoft update service location` | Set WSUS Server to Blank; Set WSUS Status Server to Blank; Set Alternate Download Server to Blank; Enforce Intranet Update Server | 4 |
+| `Do not sync` | Disable Settings Sync; Disable Settings Sync User Override | 2 |
+| `Configure app install control` | Suppress Store App Recommendations (Policy); Suppress Store App Recommendations (Source) | 2 |
+| `Turn off the advertising ID` | Disable Advertising ID (Feature); Disable Advertising ID (Policy) | 2 |
+
 ## Intentional Deviations from Source Article
 
 The following settings use a different registry approach than the article specifies. These are deliberate choices where the definitions file favors the registry path that aligns with how the policy actually functions in Windows, rather than the path the article literally provides. Each deviation is documented here for traceability.
@@ -245,15 +263,13 @@ The article specifies `HKCU\...\Explorer\Advanced\Start_TrackDocs` set to `0`, w
 
 ### Inking & Typing Settings (Section 18.21)
 
-Two settings are affected: Restrict Implicit Text Collection (`RestrictImplicitTextCollection`) and Restrict Implicit Ink Collection (`RestrictImplicitInkCollection`). The article contains two errors for these settings: the wrong GPO configuration level for the ink setting, and the wrong registry paths for both.
+Two settings are affected: Restrict Implicit Text Collection (`RestrictImplicitTextCollection`) and Restrict Implicit Ink Collection (`RestrictImplicitInkCollection`). The article specifies both registry values at `HKCU\Software\Microsoft\InputPersonalization`. The Computer Configuration GPO that controls both values (`Control Panel > Regional and Language Options > Handwriting personalization > Turn off automatic learning`) writes to `HKLM\SOFTWARE\Policies\Microsoft\InputPersonalization` when set to Enabled, confirmed by applying the policy on a Windows 11 Pro device. The definitions file uses the HKLM Policies path consistent with Computer Configuration policy behavior.
 
-For Restrict Implicit Ink Collection, the article assigns a User Configuration GPO (`User Configuration > ... > Handwriting personalization > Turn off automatic learning`). The same GPO exists under Computer Configuration and is the correct choice for a standalone device: it applies machine-wide and is consistent with the rest of the file.
-
-For both settings, the article specifies registry values at `HKCU\Software\Microsoft\InputPersonalization`. Applying the Computer Configuration GPOs on a Windows 11 Pro device shows that both write to `HKLM\SOFTWARE\Policies\Microsoft\InputPersonalization` instead. The article's registry paths are the raw user preference values, not the policy-managed equivalents written by the GPOs. The definitions file uses the HKLM Policies paths.
+The article assigns `RestrictImplicitTextCollection` to `Windows Components > Text Input > Improve inking and typing recognition` and `RestrictImplicitInkCollection` to a User Configuration variant of `Handwriting personalization > Turn off automatic learning`. Both attributions are incorrect. Both values are written by the Computer Configuration `Turn off automatic learning` GPO; the Text Input GPO controls a different registry value unrelated to these settings. The definitions file assigns both values to the Computer Configuration `Turn off automatic learning` GPO.
 
 ## Known Article Inconsistencies
 
-The following settings have guidance in the article that is internally inconsistent. The registry values for these settings are correct and produce the intended hardened state; only the article's documentation is affected. The `GPOPath` and `GPOState` fields in the definitions file preserve the article's literal text.
+The following settings have guidance in the article that is internally inconsistent. The registry values for these settings are correct and produce the intended hardened state; only the article's documentation is affected.
 
 ### Set Startup URL to Blank (Section 13.2)
 
