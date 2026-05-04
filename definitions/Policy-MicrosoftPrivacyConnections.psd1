@@ -858,8 +858,8 @@
                                 @{
                                     Name          = 'Disable Online Speech Recognition'
                                     Description   = 'Turns off online speech recognition services'
-                                    Path          = 'HKCU:\SOFTWARE\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy'
-                                    ValueName     = 'HasAccepted'
+                                    Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization'
+                                    ValueName     = 'AllowInputPersonalization'
                                     ValueType     = 'DWord'
                                     HardenedValue = 0
                                     DefaultValue  = $null
@@ -1104,7 +1104,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'User Configuration > Administrative Templates > Start Menu and Taskbar > Remove Recommended section from Start Menu'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Start Menu and Taskbar > Remove Recommended section from Start Menu'
                             GPOState      = 'Enabled'
                         }
                     )
@@ -1346,10 +1346,10 @@
             Description = 'Settings for Internet Explorer and Microsoft Edge'
             Sections    = @(
 
-                # -- Section: Microsoft Edge (Chromium) --
+                # -- Section: Microsoft Edge --
                 @{
-                    Name        = 'Microsoft Edge (Chromium)'
-                    Description = 'Controls Chromium-based Microsoft Edge features (version 77+)'
+                    Name        = 'Microsoft Edge'
+                    Description = 'Controls Microsoft Edge features'
                     Settings    = @(
                         @{
                             Name          = 'Disable Search Suggestions'
@@ -1359,8 +1359,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Enable search suggestions'
-                            GPOState      = 'Disabled'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Enable Do Not Track'
@@ -1370,8 +1370,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Configure Do Not Track'
-                            GPOState      = 'Enabled'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Disable Password Manager'
@@ -1381,8 +1381,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Password manager and protection > Enable saving passwords to the password manager'
-                            GPOState      = 'Disabled'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Disable Address Autofill'
@@ -1392,8 +1392,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Enable AutoFill for addresses'
-                            GPOState      = 'Disabled'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Disable Credit Card Autofill'
@@ -1403,8 +1403,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Enable AutoFill for credit cards'
-                            GPOState      = 'Disabled'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Disable Default Search Provider'
@@ -1414,18 +1414,18 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Default search provider > Enable the default search provider'
-                            GPOState      = 'Disabled'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Disable Edge SmartScreen'
-                            Description   = 'Turns off Microsoft Defender SmartScreen in Chromium Edge'
+                            Description   = 'Turns off Microsoft Defender SmartScreen in Microsoft Edge'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'SmartScreenEnabled'
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > SmartScreen settings > Configure Microsoft Defender SmartScreen'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Defender SmartScreen > Microsoft Edge > Configure Windows Defender SmartScreen'
                             GPOState      = 'Disabled'
                         }
                         @{
@@ -1436,8 +1436,8 @@
                             ValueType     = 'String'
                             HardenedValue = 'about:blank'
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Startup, home page and new tab page > Configure the new tab page URL'
-                            GPOState      = 'Enabled (about:blank)'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Disable Startup Restore'
@@ -1445,10 +1445,10 @@
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'RestoreOnStartup'
                             ValueType     = 'DWord'
-                            HardenedValue = 5  # 5 = Edge opens a new tab instead
+                            HardenedValue = 5  # 5 = Open a specific page or pages
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Startup, home page and new tab page > Action to take on startup'
-                            GPOState      = 'Disabled'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Set Startup URL to Blank'
@@ -1458,8 +1458,8 @@
                             ValueType     = 'String'
                             HardenedValue = 'about:blank'
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Startup, home page and new tab page > Sites to open when the browser starts'
-                            GPOState      = 'Enabled (about:blank)'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Disable First Run Experience'
@@ -1469,8 +1469,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Hide the First-run experience and splash screen'
-                            GPOState      = 'Enabled'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Disable Edge Auto Update'
@@ -1480,8 +1480,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge Update > Applications > Update policy override default'
-                            GPOState      = 'Enabled (Updates disabled)'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Disable Auto Update Check'
@@ -1491,8 +1491,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge Update > Preferences > Auto-update check period override'
-                            GPOState      = 'Enabled (0 minutes)'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                         @{
                             Name          = 'Disable Experimentation Service'
@@ -1502,137 +1502,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge Update > Preferences > Auto-update check period override'
-                            GPOState      = 'Enabled (RestrictedMode)'
-                        }
-                    )
-                }
-
-                # -- Section: Microsoft Edge (Legacy) --
-                @{
-                    Name        = 'Microsoft Edge (Legacy)'
-                    Description = 'Controls legacy Microsoft Edge features (pre-Chromium)'
-                    Settings    = @(
-                        @{
-                            Name          = 'Disable Address Bar Suggestions'
-                            Description   = 'Turns off address bar drop-down list suggestions'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\ServiceUI'
-                            ValueName     = 'ShowOneBox'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Allow Address bar drop-down list suggestions'
-                            GPOState      = 'Disabled'
-                        }
-                        @{
-                            Name          = 'Disable Search Suggestions'
-                            Description   = 'Turns off search suggestions in the Address Bar'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\SearchScopes'
-                            ValueName     = 'ShowSearchSuggestionsGlobal'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Configure search suggestions in Address Bar'
-                            GPOState      = 'Disabled'
-                        }
-                        @{
-                            Name          = 'Enable Do Not Track'
-                            Description   = 'Sends Do Not Track headers with browsing requests'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main'
-                            ValueName     = 'DoNotTrack'
-                            ValueType     = 'DWord'
-                            HardenedValue = 1
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Configure Do Not Track'
-                            GPOState      = 'Enabled'
-                        }
-                        @{
-                            Name          = 'Disable Password Manager'
-                            Description   = 'Prevents saving passwords locally'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main'
-                            ValueName     = 'FormSuggest Passwords'
-                            ValueType     = 'String'
-                            HardenedValue = 'No'
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Configure Password Manager'
-                            GPOState      = 'Disabled'
-                        }
-                        @{
-                            Name          = 'Disable Autofill'
-                            Description   = 'Turns off autofill for forms'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main'
-                            ValueName     = 'Use FormSuggest'
-                            ValueType     = 'String'
-                            HardenedValue = 'No'
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Configure Autofill'
-                            GPOState      = 'Disabled'
-                        }
-                        @{
-                            Name          = 'Disable Edge SmartScreen'
-                            Description   = 'Turns off Microsoft Defender SmartScreen in legacy Edge'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\PhishingFilter'
-                            ValueName     = 'EnabledV9'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Configure Windows Defender SmartScreen'
-                            GPOState      = 'Disabled'
-                        }
-                        @{
-                            Name          = 'Set New Tab to Blank'
-                            Description   = 'Prevents web content from appearing on the New Tab page'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\ServiceUI'
-                            ValueName     = 'AllowWebContentOnNewTabPage'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Allow web content on New Tab page'
-                            GPOState      = 'Disabled'
-                        }
-                        @{
-                            Name          = 'Set Home Page to Blank'
-                            Description   = 'Sets the corporate home page to about:blank'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\Internet Settings'
-                            ValueName     = 'ProvisionedHomePages'
-                            ValueType     = 'String'
-                            HardenedValue = '<<about:blank>>'
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Configure Start pages'
-                            GPOState      = 'Enabled (<<about:blank>>)'
-                        }
-                        @{
-                            Name          = 'Disable First Run Page'
-                            Description   = 'Prevents the First Run webpage from opening'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\Main'
-                            ValueName     = 'PreventFirstRunPage'
-                            ValueType     = 'DWord'
-                            HardenedValue = 1
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Prevent the First Run webpage from opening on Microsoft Edge'
-                            GPOState      = 'Enabled'
-                        }
-                        @{
-                            Name          = 'Disable Compatibility List'
-                            Description   = 'Turns off the Microsoft Compatibility List'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\BrowserEmulation'
-                            ValueName     = 'MSCompatibilityMode'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Allow Microsoft Compatibility List'
-                            GPOState      = 'Disabled'
-                        }
-                        @{
-                            Name          = 'Disable Books Library Updates'
-                            Description   = 'Turns off configuration updates for the Books Library'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\BooksLibrary'
-                            ValueName     = 'AllowConfigurationUpdateForBooksLibrary'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Edge > Allow configuration updates for the Books Library'
-                            GPOState      = 'Disabled'
+                            GPOPath       = $null
+                            GPOState      = $null
                         }
                     )
                 }
@@ -1716,7 +1587,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Internet Explorer > Prevent managing Microsoft Defender SmartScreen'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Internet Explorer > Prevent managing SmartScreen Filter'
                             GPOState      = 'Enabled (Off)'
                         }
                         @{
@@ -1755,23 +1626,23 @@
                         @{
                             Name          = 'Disable IE First Run Wizard'
                             Description   = 'Prevents running the First Run wizard'
-                            Path          = 'HKCU:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main'
                             ValueName     = 'DisableFirstRunCustomize'
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = 'User Configuration > Administrative Templates > Windows Components > Internet Explorer > Prevent running First Run wizard'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Internet Explorer > Prevent running First Run wizard'
                             GPOState      = 'Enabled (Go directly to home page)'
                         }
                         @{
                             Name          = 'Set IE New Tab to Blank'
                             Description   = 'Sets the new tab page to about:blank'
-                            Path          = 'HKCU:\SOFTWARE\Policies\Microsoft\Internet Explorer\TabbedBrowsing'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\TabbedBrowsing'
                             ValueName     = 'NewTabPageShow'
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'User Configuration > Administrative Templates > Windows Components > Internet Explorer > Specify default behavior for a new tab'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Internet Explorer > Specify default behavior for a new tab'
                             GPOState      = 'Enabled (about:blank)'
                         }
                         @{
