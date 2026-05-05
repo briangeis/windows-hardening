@@ -1,6 +1,6 @@
 # Definitions
 
-Definitions files describe the settings each component script can configure, curated from authoritative sources rather than exhaustive configuration checklists. They are the data layer of the toolkit, kept separate from script logic, and organized into categories and sections that drive the interactive menu.
+Definitions files describe the settings each component script can configure, curated from authoritative sources rather than exhaustive configuration checklists. They are the data layer of the toolkit, kept separate from script logic, and organized into categories, subcategories, and sections that drive the interactive menu.
 
 ## Naming Convention
 
@@ -102,4 +102,4 @@ A reference document maps every setting in the definitions file to its correspon
 ### Policy
 
 - [Policy-MicrosoftPrivacyConnections.psd1](Policy-MicrosoftPrivacyConnections.psd1) ([reference](reference/Policy-MicrosoftPrivacyConnections.md))
-  Covers 131 registry settings controlling connections and data sharing between Windows and Microsoft services, drawn from the Microsoft article "Manage connections from Windows 10 and Windows 11 operating system components to Microsoft services."
+  Covers 120 registry settings controlling connections and data sharing between Windows and Microsoft services, drawn from the Microsoft article "Manage connections from Windows 10 and Windows 11 operating system components to Microsoft services."

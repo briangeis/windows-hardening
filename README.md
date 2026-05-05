@@ -69,7 +69,7 @@ A snapshot of the current system state is saved automatically before any changes
 
 Definitions files describe the settings each component script can configure, curated from authoritative sources rather than exhaustive configuration checklists. Each definitions file is specific to one component, and each component may have multiple definitions files.
 
-The Policy component's definitions file, `Policy-MicrosoftPrivacyConnections.psd1`, covers Microsoft privacy and connection settings across 131 registry values. The [Policy-MicrosoftPrivacyConnections reference](definitions/reference/Policy-MicrosoftPrivacyConnections.md) maps every setting to its corresponding section in the Microsoft source article, documenting where the article's own registry guidance is incorrect, identifying inconsistencies in the article's documentation, and flagging settings with significant side effects.
+The Policy component's definitions file, `Policy-MicrosoftPrivacyConnections.psd1`, covers Microsoft privacy and connection settings across 120 registry values. The [Policy-MicrosoftPrivacyConnections reference](definitions/reference/Policy-MicrosoftPrivacyConnections.md) maps every setting to its corresponding section in the Microsoft source article, documenting where the article's own registry guidance is incorrect, identifying inconsistencies in the article's documentation, and flagging settings with significant side effects.
 
 The full list of available definitions files is maintained in [definitions/](definitions/).
 

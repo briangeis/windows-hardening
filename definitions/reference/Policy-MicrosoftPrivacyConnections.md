@@ -4,13 +4,13 @@
 
 This document maps each setting in [Policy-MicrosoftPrivacyConnections.psd1](Policy-MicrosoftPrivacyConnections.psd1) to its corresponding section in the Microsoft article. It also covers the distribution of settings across registry hives, settings with notable side effects, settings that have no Group Policy equivalent, intentional deviations from the article's registry recommendations, and known inconsistencies in the article's guidance.
 
-The areas are organized navigation-first: each area answers a specific question a sysadmin asks when hardening a standalone device. Telemetry & Diagnostics, Microsoft Cloud Services, and App Permissions cover the highest-priority privacy and compliance decisions. Windows Features and Windows Update cover feature hardening and update policy. Browsers groups all browser-specific configuration. Background Services is a technical catch-all for background infrastructure that does not fit naturally elsewhere and is the least likely to be browsed by most users.
+The categories are organized navigation-first: each category answers a specific question a sysadmin asks when hardening a standalone device. Telemetry & Diagnostics, Microsoft Cloud Services, and App Permissions cover the highest-priority privacy and compliance decisions. Windows Features and Windows Update cover feature hardening and update policy. Browsers groups all browser-specific configuration. Background Services is a technical catch-all for background infrastructure that does not fit naturally elsewhere and is the least likely to be browsed by most users.
 
 The source article covers both Windows 10 and Windows 11, and some Group Policy display names were renamed between versions. Where names differ, this document uses the Windows 11 names as they appear in the Local Group Policy Editor on Windows 11.
 
 ## Contents
 
-**Areas**
+**Categories**
 - [Telemetry & Diagnostics](#telemetry--diagnostics)
 - [Microsoft Cloud Services](#microsoft-cloud-services)
 - [App Permissions](#app-permissions)
@@ -24,7 +24,7 @@ The source article covers both Windows 10 and Windows 11, and some Group Policy 
 - [Background Services](#background-services)
 
 **Reference**
-- [Settings Distribution by Area](#settings-distribution-by-area)
+- [Settings Distribution by Category](#settings-distribution-by-category)
 - [Settings with Notable Side Effects](#settings-with-notable-side-effects)
 - [Settings Without a Group Policy Equivalent](#settings-without-a-group-policy-equivalent)
 - [Settings Sharing a Group Policy](#settings-sharing-a-group-policy)
@@ -172,9 +172,9 @@ The technical catch-all for background infrastructure settings. Sections are ord
 
 ---
 
-## Settings Distribution by Area
+## Settings Distribution by Category
 
-| Area                     |  HKLM   |  HKCU  |  Total  |
+| Category                 |  HKLM   |  HKCU  |  Total  |
 |--------------------------|:-------:|:------:|:-------:|
 | Telemetry & Diagnostics  | 9       | 3      | 12      |
 | Microsoft Cloud Services | 12      | 1      | 13      |
@@ -301,8 +301,6 @@ The article instructs to "Disable" the GPO named "Disable all apps from Microsof
 | 17              | Preinstalled apps | Handled via PowerShell `Remove-AppxPackage` commands, not registry settings   |
 
 ## Settings Tree
-
-Complete map of all 131 settings organized by area, category, and section.
 
 ```
 Policy-MicrosoftPrivacyConnections.psd1
