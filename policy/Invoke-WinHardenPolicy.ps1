@@ -602,45 +602,51 @@ function Start-InteractiveMode {
     [CmdletBinding()]
     param()
 
-    while ($true) {
-        Clear-Host
+    [Console]::CursorVisible = $false
+    try {
+        while ($true) {
+            Clear-Host
 
-        $categoryNames = @()
-        $statusIcons   = @()
-        foreach ($category in $script:Definitions.Categories) {
-            $categoryNames += $category.Name
-            $counts         = if ($category.Subcategories) {
-                $h = 0; $t = 0
-                foreach ($subcategory in $category.Subcategories) {
-                    $c  = Get-SectionCounts -Sections $subcategory.Sections
-                    $h += $c.Hardened
-                    $t += $c.Total
+            $categoryNames = @()
+            $statusIcons   = @()
+            foreach ($category in $script:Definitions.Categories) {
+                $categoryNames += $category.Name
+                $counts         = if ($category.Subcategories) {
+                    $h = 0; $t = 0
+                    foreach ($subcategory in $category.Subcategories) {
+                        $c  = Get-SectionCounts -Sections $subcategory.Sections
+                        $h += $c.Hardened
+                        $t += $c.Total
+                    }
+                    @{ Hardened = $h; Total = $t }
                 }
-                @{ Hardened = $h; Total = $t }
+                else {
+                    Get-SectionCounts -Sections $category.Sections
+                }
+                $statusIcons += "($($counts.Hardened)/$($counts.Total))"
             }
-            else {
-                Get-SectionCounts -Sections $category.Sections
-            }
-            $statusIcons += "($($counts.Hardened)/$($counts.Total))"
-        }
 
-        $params = @{
-            Title       = 'Windows Hardening - Select a Category'
-            Items       = $categoryNames
-            StatusIcons = $statusIcons
-            FooterText  = '[Enter] Select  [Q] Quit'
-        }
-        $result = Show-Menu @params
+            $params = @{
+                Title       = 'Windows Hardening - Select a Category'
+                Items       = $categoryNames
+                StatusIcons = $statusIcons
+                FooterText  = '[Enter] Select  [Q] Quit'
+            }
+            $result = Show-Menu @params
 
-        switch ($result) {
-            -2 { Invoke-Quit }
-            -1 { }  # Esc: no-op at top level
-            -3 { }
-            default {
-                $category = $script:Definitions.Categories[$result]
-                Enter-Category -Category $category -Breadcrumb $category.Name
+            switch ($result) {
+                -2 { Invoke-Quit }
+                -1 { }  # Esc: no-op at top level
+                -3 { }
+                default {
+                    $category = $script:Definitions.Categories[$result]
+                    Enter-Category -Category $category -Breadcrumb $category.Name
+                }
             }
         }
+    }
+    finally {
+        [Console]::CursorVisible = $true
     }
 }
 
@@ -1134,7 +1140,6 @@ function Show-Menu {
 
     while ($true) {
         [Console]::SetCursorPosition(0, 0)
-        [Console]::CursorVisible = $false
 
         # Breadcrumb
         if ($Breadcrumb) {
@@ -1178,22 +1183,10 @@ function Show-Menu {
             'DownArrow' {
                 $selectedIndex = ($selectedIndex + 1) % $Items.Count
             }
-            'Enter' {
-                [Console]::CursorVisible = $true
-                return $selectedIndex
-            }
-            'Escape' {
-                [Console]::CursorVisible = $true
-                return -1
-            }
-            'Q' {
-                [Console]::CursorVisible = $true
-                return -2
-            }
-            'A' {
-                [Console]::CursorVisible = $true
-                return -3
-            }
+            'Enter'  { return $selectedIndex }
+            'Escape' { return -1 }
+            'Q'      { return -2 }
+            'A'      { return -3 }
         }
     }
 }
