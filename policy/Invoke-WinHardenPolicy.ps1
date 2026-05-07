@@ -591,342 +591,156 @@ function Invoke-SettingRemove {
 
 #endregion
 
-#region INTERACTIVE MODE
+#region MENU ENGINE
 
-function Start-InteractiveMode {
+function Invoke-Menu {
     <#
     .SYNOPSIS
-        Entry point for the interactive session. Renders the category list
-        and dispatches to Enter-Category on selection.
+        Drives the interactive menu for the given context level,
+        recursing into child levels on selection and returning on exit.
+    .OUTPUTS
+        Returns 'Back' on Esc or 'Quit' on Q when called with -IsChild;
+        'Quit' cascades through all callers. Root calls return nothing.
     #>
     [CmdletBinding()]
-    param()
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [hashtable]$Context,
+        [string]$Breadcrumb = '',
+        [switch]$IsChild
+    )
 
-    [Console]::CursorVisible = $false
+    $selectedIndex   = 0
+    $refresh         = $true
+    $exitReason      = $null
+
+    $children        = @()
+    $isSettingsLevel = $false
+    $items           = @()
+    $icons           = @()
+    $title           = ''
+    $footer          = ''
+
+    function Pad([string]$Text) {
+        $w = [Console]::WindowWidth
+        if ($Text.Length -ge $w) { return $Text.Substring(0, $w - 1) }
+        return $Text + (' ' * ($w - $Text.Length))
+    }
+
+    if (-not $IsChild) { [Console]::CursorVisible = $false }
     try {
-        while ($true) {
-            Clear-Host
+        while (-not $exitReason) {
+            # Refresh: recompute display data for the current context
+            if ($refresh) {
+                $children = @(
+                    if     ($Context.Categories) { $Context.Categories }
+                    elseif ($Context.Sections)   { $Context.Sections }
+                    else                         { $Context.Settings }
+                )
 
-            $categoryNames = @()
-            $statusIcons   = @()
-            foreach ($category in $script:Definitions.Categories) {
-                $categoryNames += $category.Name
-                $counts         = if ($category.Subcategories) {
-                    $h = 0; $t = 0
-                    foreach ($subcategory in $category.Subcategories) {
-                        $c  = Get-SectionCounts -Sections $subcategory.Sections
-                        $h += $c.Hardened
-                        $t += $c.Total
+                $isSettingsLevel = $Context.ContainsKey('Settings')
+
+                $items = @()
+                $icons = @()
+
+                if ($isSettingsLevel) {
+                    $hardenedCount = 0
+                    foreach ($setting in $children) {
+                        $state  = Test-SettingState -Setting $setting
+                        $items += $setting.Name
+                        if ($state -eq 'HARDENED') { $hardenedCount++ }
+                        $icon  = "[$state]"
+                        if ($setting.Path -like 'HKCU:*') { $icon += ' [USER]' }
+                        $icons += $icon
                     }
-                    @{ Hardened = $h; Total = $t }
+                    $title  = "$($Context.Name) ($hardenedCount of $($children.Count) hardened)"
+                    $footer = '[Enter] View Detail  [A] Apply All  [Esc] Back  [Q] Quit'
                 }
                 else {
-                    Get-SectionCounts -Sections $category.Sections
+                    foreach ($child in $children) {
+                        $items  += $child.Name
+                        $counts  = Get-SectionCounts -Node $child
+                        $icons  += if ($counts.Total -gt 0) {
+                            "($($counts.Hardened)/$($counts.Total))"
+                        }
+                        else { '' }
+                    }
+                    $title  = if ($IsChild) { $Context.Name }
+                              else          { 'Windows Hardening - Select a Category' }
+                    $footer = if ($IsChild) { '[Enter] Select  [Esc] Back  [Q] Quit' }
+                              else          { '[Enter] Select  [Q] Quit' }
                 }
-                $statusIcons += "($($counts.Hardened)/$($counts.Total))"
+
+                Clear-Host
+                $refresh = $false
             }
 
-            $params = @{
-                Title       = 'Windows Hardening - Select a Category'
-                Items       = $categoryNames
-                StatusIcons = $statusIcons
-                FooterText  = '[Enter] Select  [Q] Quit'
-            }
-            $result = Show-Menu @params
+            # Render: overwrite the current view in place
+            [Console]::SetCursorPosition(0, 0)
 
-            switch ($result) {
-                -2 { Invoke-Quit }
-                -1 { }  # Esc: no-op at top level
-                -3 { }
-                default {
-                    $category = $script:Definitions.Categories[$result]
-                    Enter-Category -Category $category -Breadcrumb $category.Name
+            Write-Host (Pad "  $Breadcrumb") -ForegroundColor DarkGray
+
+            Write-Host (Pad '')
+            Write-Host (Pad "  $title") -ForegroundColor Cyan
+            Write-Host (Pad ('  ' + ('-' * $title.Length))) -ForegroundColor DarkCyan
+            Write-Host (Pad '')
+
+            for ($i = 0; $i -lt $items.Count; $i++) {
+                $indicator = if ($i -eq $selectedIndex) { '>' } else { ' ' }
+                $status    = if ($icons[$i]) { "  $($icons[$i])" } else { '' }
+                $line      = "  $indicator $($items[$i])$status"
+                if ($i -eq $selectedIndex) {
+                    Write-Host (Pad $line) -ForegroundColor Black -BackgroundColor White
+                }
+                else {
+                    Write-Host (Pad $line)
+                }
+            }
+
+            Write-Host (Pad '')
+            Write-Host (Pad "  $footer") -ForegroundColor DarkYellow
+
+            # Input: read one key and update navigation state
+            $key = [Console]::ReadKey($true).Key
+
+            switch ($key) {
+                'UpArrow'   { $selectedIndex = ($selectedIndex - 1 + $items.Count) % $items.Count }
+                'DownArrow' { $selectedIndex = ($selectedIndex + 1) % $items.Count }
+                'Escape'    { if ($IsChild) { $exitReason = 'Back' } }
+                'Q'         { $exitReason = 'Quit' }
+                'Enter'     {
+                    $selected = $children[$selectedIndex]
+                    if ($isSettingsLevel) {
+                        Show-SettingDetail -Setting $selected -Breadcrumb $Breadcrumb
+                        $refresh = $true
+                    }
+                    else {
+                        $childBreadcrumb = if ($Breadcrumb) { "$Breadcrumb > $($selected.Name)" }
+                                           else             { $selected.Name }
+                        $result = Invoke-Menu -Context $selected -Breadcrumb $childBreadcrumb -IsChild
+                        if ($result -eq 'Quit') { $exitReason = 'Quit' } else { $refresh = $true }
+                    }
+                }
+                'A'         {
+                    if ($isSettingsLevel) {
+                        Invoke-ApplyAll -Settings $children -SectionName $Context.Name
+                        $refresh = $true
+                    }
                 }
             }
         }
+
+        if ($IsChild) { return $exitReason }
     }
     finally {
-        [Console]::CursorVisible = $true
+        if (-not $IsChild) { [Console]::CursorVisible = $true }
     }
 }
 
-function Enter-Category {
-    <#
-    .SYNOPSIS
-        Handles navigation within a category. Detects whether
-        the category uses subcategories or direct sections.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [hashtable]$Category,
-        [string]$Breadcrumb = ''
-    )
+#endregion
 
-    if ($Category.Subcategories) {
-        while ($true) {
-            Clear-Host
-
-            $subcategoryNames = @()
-            $statusIcons      = @()
-            foreach ($subcategory in $Category.Subcategories) {
-                $subcategoryNames += $subcategory.Name
-                $counts            = Get-SectionCounts -Sections $subcategory.Sections
-                $statusIcons      += "($($counts.Hardened)/$($counts.Total))"
-            }
-
-            $params = @{
-                Title       = $Category.Name
-                Items       = $subcategoryNames
-                StatusIcons = $statusIcons
-                Breadcrumb  = $Breadcrumb
-                FooterText  = '[Enter] Select  [Esc] Back  [Q] Quit'
-            }
-            $result = Show-Menu @params
-
-            switch ($result) {
-                -2 { Invoke-Quit }
-                -1 { return }
-                -3 { }
-                default {
-                    $subcategory = $Category.Subcategories[$result]
-                    $params = @{
-                        Sections   = $subcategory.Sections
-                        Title      = $subcategory.Name
-                        Breadcrumb = "$Breadcrumb > $($subcategory.Name)"
-                    }
-                    Enter-Section @params
-                }
-            }
-        }
-    }
-    else {
-        $params = @{
-            Sections   = $Category.Sections
-            Title      = $Category.Name
-            Breadcrumb = $Breadcrumb
-        }
-        Enter-Section @params
-    }
-}
-
-function Enter-Section {
-    <#
-    .SYNOPSIS
-        Displays a list of sections and handles navigation into each.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [array]$Sections,
-        [Parameter(Mandatory)]
-        [string]$Title,
-        [string]$Breadcrumb = ''
-    )
-
-    while ($true) {
-        Clear-Host
-
-        $sectionNames = $Sections.Name
-
-        $statusIcons = @()
-        foreach ($section in $Sections) {
-            if ($section.Settings -and $section.Settings.Count -gt 0) {
-                $hardened     = @($section.Settings | Where-Object { (Test-SettingState -Setting $_) -eq 'HARDENED' }).Count
-                $statusIcons += "($hardened/$($section.Settings.Count))"
-            }
-            else {
-                $statusIcons += ''
-            }
-        }
-
-        $params = @{
-            Title       = $Title
-            Items       = $sectionNames
-            StatusIcons = $statusIcons
-            Breadcrumb  = $Breadcrumb
-            FooterText  = '[Enter] Select  [Esc] Back  [Q] Quit'
-        }
-        $result = Show-Menu @params
-
-        switch ($result) {
-            -2 { Invoke-Quit }
-            -1 { return }
-            -3 { }
-            default {
-                $section = $Sections[$result]
-                $params = @{
-                    SectionName = $section.Name
-                    Settings    = $section.Settings
-                    Breadcrumb  = "$Breadcrumb > $($section.Name)"
-                }
-                Show-SettingsView @params
-            }
-        }
-    }
-}
-
-function Show-SettingsView {
-    <#
-    .SYNOPSIS
-        Displays individual settings within a section, showing current state,
-        and allows the user to view details or apply all hardened values.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [string]$SectionName,
-        [Parameter(Mandatory)]
-        [array]$Settings,
-        [string]$Breadcrumb = ''
-    )
-
-    while ($true) {
-        Clear-Host
-
-        # Live registry read on every render so state reflects writes made mid-session
-        $itemNames = @()
-        $statusIcons = @()
-        $hardenedCount = 0
-
-        foreach ($setting in $Settings) {
-            $state = Test-SettingState -Setting $setting
-            $itemNames += $setting.Name
-
-            if ($state -eq 'HARDENED') { $hardenedCount++ }
-
-            $icon = "[$state]"
-
-            if ($setting.Path -like 'HKCU:*') {
-                $icon += ' [USER]'
-            }
-
-            $statusIcons += $icon
-        }
-
-        $title = "$SectionName ($hardenedCount of $($Settings.Count) hardened)"
-
-        $footer = '[Enter] View Detail  [A] Apply All  [Esc] Back  [Q] Quit'
-
-        $params = @{
-            Title       = $title
-            Items       = $itemNames
-            StatusIcons = $statusIcons
-            Breadcrumb  = $Breadcrumb
-            FooterText  = $footer
-        }
-        $result = Show-Menu @params
-
-        switch ($result) {
-            -2 { Invoke-Quit }
-            -1 { return }
-            -3 { Invoke-ApplyAll -Settings $Settings -SectionName $SectionName }
-            default {
-                $selected = $Settings[$result]
-                Show-SettingDetail -Setting $selected -Breadcrumb $Breadcrumb
-            }
-        }
-    }
-}
-
-function Invoke-ApplyAll {
-    <#
-    .SYNOPSIS
-        Applies the hardened value to all settings
-        in a section after user confirmation.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [array]$Settings,
-        [Parameter(Mandatory)]
-        [string]$SectionName
-    )
-
-    Clear-Host
-    Write-Host ''
-    Write-Host "  Apply all hardened values for: $SectionName" -ForegroundColor Cyan
-    Write-Host ''
-
-    # Identify settings that need hardening
-    $toApply = @()
-    foreach ($setting in $Settings) {
-        $state = Test-SettingState -Setting $setting
-        if ($state -ne 'HARDENED') {
-            $toApply += $setting
-            Write-Host "    $($setting.Name)  [$state -> HARDENED]" -ForegroundColor Yellow
-        }
-    }
-
-    if ($toApply.Count -eq 0) {
-        Write-Host '  All settings in this section are already hardened.' -ForegroundColor Green
-        Write-Host ''
-        Write-Host '  Press any key to continue...' -ForegroundColor DarkYellow
-        [void][Console]::ReadKey($true)
-        return
-    }
-
-    # Confirm with user
-    Write-Host ''
-    Write-Host "  Apply hardened values to $($toApply.Count) setting(s)? [Y/N] " -ForegroundColor DarkYellow -NoNewline
-    $confirm = [Console]::ReadKey($true).Key
-
-    if ($confirm -ne 'Y') {
-        return
-    }
-
-    Write-Host ''
-    Write-Host ''
-
-    # Apply each setting
-    $applied = 0
-    $failed  = 0
-
-    foreach ($setting in $toApply) {
-        $scopeLabel = if ($setting.Path -like 'HKCU:*') { '[USER]' } else { '[MACHINE]' }
-
-        $before = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
-        $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(not set)' }
-
-        $params = @{
-            Path      = $setting.Path
-            ValueName = $setting.ValueName
-            ValueType = $setting.ValueType
-            Value     = $setting.HardenedValue
-        }
-        $result = Invoke-SettingWrite @params
-
-        switch ($result) {
-            'Written' {
-                $applied++
-                $script:AppliedCount++
-                Write-Host "  [OK] $scopeLabel $($setting.Name)" -ForegroundColor Green
-                Write-Log "CHANGED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $($setting.HardenedValue) | Verified"
-            }
-            'AlreadyPresent' {
-                Write-Host "  [--] $scopeLabel $($setting.Name) - already hardened" -ForegroundColor Green
-            }
-            'VerifyFailed' {
-                $failed++
-                $script:FailedCount++
-                Write-Host "  [!!] $scopeLabel $($setting.Name) - verification failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Validation failed"
-            }
-            'WriteFailed' {
-                $failed++
-                $script:FailedCount++
-                Write-Host "  [!!] $scopeLabel $($setting.Name) - write failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Write failed"
-            }
-        }
-    }
-
-    Write-Host ''
-    Write-Host "  Results: $applied applied, $failed failed" -ForegroundColor Cyan
-    Write-Host ''
-    Write-Host '  Press any key to continue...' -ForegroundColor DarkYellow
-    [void][Console]::ReadKey($true)
-}
+#region INTERACTIVE MODE
 
 function Show-SettingDetail {
     <#
@@ -941,13 +755,13 @@ function Show-SettingDetail {
         [string]$Breadcrumb = ''
     )
 
-    while ($true) {
-        Clear-Host
-
-        # Render current state
+    $done = $false
+    while (-not $done) {
+        # Render: read current state and display setting detail
         $current = Get-SettingCurrentValue -Path $Setting.Path -ValueName $Setting.ValueName
         $state   = Test-SettingState -Setting $Setting
 
+        Clear-Host
         Write-Host "  $Breadcrumb" -ForegroundColor DarkGray
         Write-Host ''
         Write-Host "  $($Setting.Name)" -ForegroundColor Cyan
@@ -969,10 +783,10 @@ function Show-SettingDetail {
         Write-Host "  Default Value : $defaultDisplay" -ForegroundColor Gray
         Write-Host "  Status        : $state" -ForegroundColor $(
             switch ($state) {
-                'HARDENED' { 'Green'  }
-                'DEFAULT'  { 'Yellow' }
-                'CUSTOM'   { 'Magenta'}
-                'NOT SET'  { 'Yellow' }
+                'HARDENED' { 'Green'   }
+                'DEFAULT'  { 'Yellow'  }
+                'CUSTOM'   { 'Magenta' }
+                'NOT SET'  { 'Yellow'  }
             }
         )
 
@@ -982,13 +796,14 @@ function Show-SettingDetail {
         }
 
         Write-Host ''
-        Write-Host '  [H] Apply Hardened  [D] Restore Default  [Esc] Back  [Q] Quit' -ForegroundColor DarkYellow
+        # Input: apply hardened value, restore default, or exit
+        Write-Host '  [H] Apply Hardened  [D] Restore Default  [Esc] Back' -ForegroundColor DarkYellow
         $key = [Console]::ReadKey($true).Key
 
         switch ($key) {
             'H' {
                 $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(not set)' }
-                $scopeLabel = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[MACHINE]' }
+                $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[MACHINE]' }
 
                 Write-Host ''
                 $params = @{
@@ -1019,12 +834,8 @@ function Show-SettingDetail {
                         Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Write failed"
                     }
                 }
-                # Any key other than Esc/Q loops back and re-renders the detail view
                 $nextKey = [Console]::ReadKey($true).Key
-                switch ($nextKey) {
-                    'Escape' { return }
-                    'Q'      { Invoke-Quit }
-                }
+                if ($nextKey -eq 'Escape') { $done = $true }
             }
             'D' {
                 $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[MACHINE]' }
@@ -1089,112 +900,116 @@ function Show-SettingDetail {
                         }
                     }
                 }
-                # Any key other than Esc/Q loops back and re-renders the detail view
                 $nextKey = [Console]::ReadKey($true).Key
-                switch ($nextKey) {
-                    'Escape' { return }
-                    'Q'      { Invoke-Quit }
-                }
+                if ($nextKey -eq 'Escape') { $done = $true }
             }
             'Escape' {
-                return
-            }
-            'Q' {
-                Invoke-Quit
+                $done = $true
             }
         }
     }
 }
 
-function Show-Menu {
+function Invoke-ApplyAll {
     <#
     .SYNOPSIS
-        Displays a navigable menu with arrow key support and returns
-        the user's selection index, or a negative value for special actions.
-    .OUTPUTS
-        Returns index (0+) for selection, -1 for Escape,
-        -2 for Quit, or -3 for Apply All.
+        Applies the hardened value to all settings
+        in a section after user confirmation.
     #>
     [CmdletBinding()]
-    [OutputType([int])]
     param(
         [Parameter(Mandatory)]
-        [string]$Title,
+        [array]$Settings,
         [Parameter(Mandatory)]
-        [string[]]$Items,
-        [string]$Breadcrumb = '',
-        [string[]]$StatusIcons = @(),
-        [string]$FooterText = '[Enter] Select  [Esc] Back  [Q] Quit'
+        [string]$SectionName
     )
 
-    # Uses SetCursorPosition for flicker-free in-place rendering.
-    # Caller must call Clear-Host before invoking when transitioning between menu levels.
-    $selectedIndex = 0
-    $consoleWidth = [Console]::WindowWidth
+    Clear-Host
+    Write-Host ''
+    Write-Host "  Apply all hardened values for: $SectionName" -ForegroundColor Cyan
+    Write-Host ''
 
-    function Pad([string]$Text) {
-        # Truncate at console width - 1 to prevent accidental line wrapping
-        if ($Text.Length -ge $consoleWidth) { return $Text.Substring(0, $consoleWidth - 1) }
-        return $Text + (' ' * ($consoleWidth - $Text.Length))
-    }
-
-    while ($true) {
-        [Console]::SetCursorPosition(0, 0)
-
-        # Breadcrumb
-        if ($Breadcrumb) {
-            Write-Host (Pad "  $Breadcrumb") -ForegroundColor DarkGray
-        }
-        else {
-            Write-Host (Pad '')
-        }
-
-        # Title
-        Write-Host (Pad '')
-        Write-Host (Pad "  $Title") -ForegroundColor Cyan
-        Write-Host (Pad ('  ' + ('-' * ($Title.Length)))) -ForegroundColor DarkCyan
-        Write-Host (Pad '')
-
-        # Menu items
-        for ($i = 0; $i -lt $Items.Count; $i++) {
-            $indicator = if ($i -eq $selectedIndex) { '>' } else { ' ' }
-            $status = if ($StatusIcons.Count -gt $i -and $StatusIcons[$i]) { "  $($StatusIcons[$i])" } else { '' }
-            $line = "  $indicator $($Items[$i])$status"
-
-            if ($i -eq $selectedIndex) {
-                Write-Host (Pad $line) -ForegroundColor Black -BackgroundColor White
-            }
-            else {
-                Write-Host (Pad $line)
-            }
-        }
-
-        # Footer
-        Write-Host (Pad '')
-        Write-Host (Pad "  $FooterText") -ForegroundColor DarkYellow
-
-        # Input
-        $key = [Console]::ReadKey($true).Key
-
-        switch ($key) {
-            'UpArrow' {
-                $selectedIndex = ($selectedIndex - 1 + $Items.Count) % $Items.Count
-            }
-            'DownArrow' {
-                $selectedIndex = ($selectedIndex + 1) % $Items.Count
-            }
-            'Enter'  { return $selectedIndex }
-            'Escape' { return -1 }
-            'Q'      { return -2 }
-            'A'      { return -3 }
+    $toApply = @()
+    foreach ($setting in $Settings) {
+        $state = Test-SettingState -Setting $setting
+        if ($state -ne 'HARDENED') {
+            $toApply += $setting
+            Write-Host "    $($setting.Name)  [$state -> HARDENED]" -ForegroundColor Yellow
         }
     }
+
+    if ($toApply.Count -eq 0) {
+        Write-Host '  All settings in this section are already hardened.' -ForegroundColor Green
+        Write-Host ''
+        Write-Host '  Press any key to continue...' -ForegroundColor DarkYellow
+        [void][Console]::ReadKey($true)
+        return
+    }
+
+    Write-Host ''
+    Write-Host "  Apply hardened values to $($toApply.Count) setting(s)? [Y/N] " -ForegroundColor DarkYellow -NoNewline
+    $confirm = [Console]::ReadKey($true).Key
+
+    if ($confirm -ne 'Y') {
+        return
+    }
+
+    Write-Host ''
+    Write-Host ''
+
+    $applied = 0
+    $failed  = 0
+
+    foreach ($setting in $toApply) {
+        $scopeLabel    = if ($setting.Path -like 'HKCU:*') { '[USER]' } else { '[MACHINE]' }
+        $before        = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
+        $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(not set)' }
+
+        $params = @{
+            Path      = $setting.Path
+            ValueName = $setting.ValueName
+            ValueType = $setting.ValueType
+            Value     = $setting.HardenedValue
+        }
+        $result = Invoke-SettingWrite @params
+
+        switch ($result) {
+            'Written' {
+                $applied++
+                $script:AppliedCount++
+                Write-Host "  [OK] $scopeLabel $($setting.Name)" -ForegroundColor Green
+                Write-Log "CHANGED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $($setting.HardenedValue) | Verified"
+            }
+            'AlreadyPresent' {
+                Write-Host "  [--] $scopeLabel $($setting.Name) - already hardened" -ForegroundColor Green
+            }
+            'VerifyFailed' {
+                $failed++
+                $script:FailedCount++
+                Write-Host "  [!!] $scopeLabel $($setting.Name) - verification failed" -ForegroundColor Red
+                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Validation failed"
+            }
+            'WriteFailed' {
+                $failed++
+                $script:FailedCount++
+                Write-Host "  [!!] $scopeLabel $($setting.Name) - write failed" -ForegroundColor Red
+                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Write failed"
+            }
+        }
+    }
+
+    Write-Host ''
+    Write-Host "  Results: $applied applied, $failed failed" -ForegroundColor Cyan
+    Write-Host ''
+    Write-Host '  Press any key to continue...' -ForegroundColor DarkYellow
+    [void][Console]::ReadKey($true)
 }
 
 function Get-SectionCounts {
     <#
     .SYNOPSIS
-        Aggregates hardened and total setting counts across an array of sections.
+        Returns the hardened and total setting counts for a given node,
+        recursing into categories and sections as needed.
     .OUTPUTS
         Returns a hashtable with Hardened and Total integer counts.
     #>
@@ -1202,32 +1017,27 @@ function Get-SectionCounts {
     [OutputType([hashtable])]
     param(
         [Parameter(Mandatory)]
-        [array]$Sections
+        [hashtable]$Node
     )
+
+    if ($Node.Settings) {
+        $settings = @($Node.Settings)
+        return @{
+            Hardened = @($settings | Where-Object { (Test-SettingState -Setting $_) -eq 'HARDENED' }).Count
+            Total    = $settings.Count
+        }
+    }
 
     $hardened = 0
     $total    = 0
-    foreach ($section in $Sections) {
-        if ($section.Settings) {
-            $total    += @($section.Settings).Count
-            $hardened += @($section.Settings | Where-Object { (Test-SettingState -Setting $_) -eq 'HARDENED' }).Count
-        }
+    $children = if ($Node.Categories) { $Node.Categories } else { $Node.Sections }
+    foreach ($child in $children) {
+        $c        = Get-SectionCounts -Node $child
+        $hardened += $c.Hardened
+        $total    += $c.Total
     }
     return @{ Hardened = $hardened; Total = $total }
 }
-
-function Invoke-Quit {
-    <#
-    .SYNOPSIS
-        Writes the session summary to the log and exits cleanly.
-    #>
-    [CmdletBinding()]
-    param()
-    Write-LogSessionEnd
-    Clear-Host
-    exit 0
-}
-
 
 #endregion
 
@@ -1353,20 +1163,6 @@ function Invoke-ProfileMode {
 #endregion
 
 #region BUILD MODE
-
-function Start-BuildMode {
-    <#
-    .SYNOPSIS
-        Entry point for Build Mode. Loads the build profile
-        and launches the interactive menu.
-    #>
-    [CmdletBinding()]
-    param()
-
-    $script:IsBuildMode = $true
-    Import-BuildProfile
-    Start-InteractiveMode
-}
 
 function Import-BuildProfile {
     <#
@@ -1588,23 +1384,18 @@ function Export-SnapshotProfile {
         [string]$OutputPath
     )
 
+    function CollectSettings([hashtable]$Node) {
+        if ($Node.Settings) { return @($Node.Settings) }
+        $out      = @()
+        $children = if ($Node.Categories) { $Node.Categories } else { $Node.Sections }
+        foreach ($child in $children) { $out += CollectSettings $child }
+        return $out
+    }
+
     if ($PSCmdlet.ParameterSetName -eq 'FromDefinitions') {
         $source = @()
         foreach ($category in $Definitions.Categories) {
-            if ($category.Subcategories) {
-                foreach ($subcategory in $category.Subcategories) {
-                    foreach ($section in $subcategory.Sections) {
-                        $source += $section.Settings
-                    }
-                }
-            }
-            elseif ($category.Sections) {
-                foreach ($section in $category.Sections) {
-                    if ($section.Settings) {
-                        $source += $section.Settings
-                    }
-                }
-            }
+            $source += CollectSettings $category
         }
     }
     else {
@@ -1733,7 +1524,11 @@ if ($DefinitionsPath) {
 if ($Build) {
     # Build Mode
     Write-LogSessionStart -Mode 'Build' -DefinitionsPath $DefinitionsPath -ProfilePath $Build
-    Start-BuildMode
+    $script:IsBuildMode = $true
+    Import-BuildProfile
+    Invoke-Menu -Context $script:Definitions
+    Write-LogSessionEnd
+    exit 0
 }
 elseif ($Snapshot) {
     # Snapshot Mode
@@ -1788,7 +1583,9 @@ else {
     $snapshotPath = Get-SnapshotProfilePath
     Export-SnapshotProfile -Definitions $script:Definitions -OutputPath $snapshotPath
 
-    Start-InteractiveMode
+    Invoke-Menu -Context $script:Definitions
+    Write-LogSessionEnd
+    exit 0
 }
 
 #endregion
