@@ -377,7 +377,7 @@
         @{
             Name        = 'App Permissions'
             Description = 'Controls app access to device capabilities and personal data'
-            Subcategories = @(
+            Categories = @(
 
                 # === Subcategory: Personalization & Tracking ===
                 @{
@@ -970,7 +970,7 @@
                     ) # End App Behavior Sections
                 }
 
-            ) # End App Permissions Subcategories
+            ) # End App Permissions Categories
         }
 
         # ===== Category: Windows Features =====
