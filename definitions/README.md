@@ -1,6 +1,6 @@
 # Definitions
 
-Definitions files describe the settings each component script can configure, curated from authoritative sources rather than exhaustive configuration checklists. They are the data layer of the toolkit, kept separate from script logic, and organized into categories, subcategories, and sections that drive the interactive menu.
+Definitions files describe the settings each component script can configure, curated from authoritative sources rather than exhaustive configuration checklists. They are the data layer of the toolkit, kept separate from script logic, and organized into categories and sections that drive the interactive menu.
 
 ## Naming Convention
 
@@ -27,9 +27,9 @@ The title follows the pattern `Component Definitions: Human-Readable Name`, mirr
 
 ### Hierarchy
 
-Settings are organized into a three-tier hierarchy: categories at the top, sections at the leaf, and an optional subcategory tier in between. Both structures can coexist within the same file, allowing each category to use either structure independently.
+Settings are organized into a hierarchy of categories and sections. A category may contain either sections directly or nested categories, but not both. Both structures can coexist within the same file, allowing each category to use whichever form fits its size.
 
-**Category > Section** (two-tier): used when a category is small enough that its sections can be listed directly.
+**Category > Section**: used when a category is small enough that its sections can be listed directly.
 
 ```powershell
 Categories = @(
@@ -49,14 +49,14 @@ Categories = @(
 )
 ```
 
-**Category > Subcategory > Section** (three-tier): used when a category is large enough that its sections benefit from intermediate grouping.
+**Category > Category > Section**: used when a category is large enough that its sections benefit from intermediate grouping.
 
 ```powershell
 Categories = @(
     @{
-        Name          = 'App Permissions'
-        Description   = 'Controls app access to device capabilities and personal data'
-        Subcategories = @(
+        Name        = 'App Permissions'
+        Description = 'Controls app access to device capabilities and personal data'
+        Categories  = @(
             @{
                 Name        = 'Personalization & Tracking'
                 Description = 'Advertising ID and cross-device experience settings'

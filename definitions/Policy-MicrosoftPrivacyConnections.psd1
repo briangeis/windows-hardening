@@ -379,7 +379,7 @@
             Description = 'Controls app access to device capabilities and personal data'
             Categories = @(
 
-                # === Subcategory: Personalization & Tracking ===
+                # === Category: Personalization & Tracking ===
                 @{
                     Name        = 'Personalization & Tracking'
                     Description = 'General privacy settings including advertising ID, language list, and cross-device experiences'
@@ -467,7 +467,7 @@
                     ) # End Personalization & Tracking Sections
                 }
 
-                # === Subcategory: Device Access ===
+                # === Category: Device Access ===
                 @{
                     Name        = 'Device Access'
                     Description = 'Controls app access to hardware capabilities'
@@ -612,7 +612,7 @@
                     ) # End Device Access Sections
                 }
 
-                # === Subcategory: Communication ===
+                # === Category: Communication ===
                 @{
                     Name        = 'Communication'
                     Description = 'Controls app access to contacts, calendar, email, messaging, calls, and account info'
@@ -765,7 +765,7 @@
                     ) # End Communication Sections
                 }
 
-                # === Subcategory: App Behavior ===
+                # === Category: App Behavior ===
                 @{
                     Name        = 'App Behavior'
                     Description = 'Controls general app behavior and permissions'
