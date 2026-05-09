@@ -189,7 +189,7 @@ function Write-LogSessionEnd {
 function Write-FatalError {
     <#
     .SYNOPSIS
-        Writes a fatal error to the console and exits with code 1.
+        Logs a fatal error, writes it to the console, and exits with code 1.
     #>
     [CmdletBinding()]
     param(
@@ -197,6 +197,8 @@ function Write-FatalError {
         [string]$Message,
         [string]$Detail = ''
     )
+    Write-Log "ERROR: $Message"
+    Write-LogSessionEnd
     Write-Host "  [X] $Message" -ForegroundColor Red
     if ($Detail) { Write-Host "      $Detail" -ForegroundColor Red }
     exit 1
@@ -755,7 +757,10 @@ function Show-SettingDetail {
         [string]$Breadcrumb = ''
     )
 
-    $done = $false
+    $done          = $false
+    $statusMessage = ''
+    $statusColor   = 'White'
+
     while (-not $done) {
         # Render: read current state and display setting detail
         $current = Get-SettingCurrentValue -Path $Setting.Path -ValueName $Setting.ValueName
@@ -795,17 +800,21 @@ function Show-SettingDetail {
             Write-Host '  * Per-user setting: applies to current user only' -ForegroundColor DarkYellow
         }
 
-        Write-Host ''
+        if ($statusMessage) {
+            Write-Host ''
+            Write-Host "  $statusMessage" -ForegroundColor $statusColor
+        }
+
         # Input: apply hardened value, restore default, or exit
+        Write-Host ''
         Write-Host '  [H] Apply Hardened  [D] Restore Default  [Esc] Back' -ForegroundColor DarkYellow
         $key = [Console]::ReadKey($true).Key
 
         switch ($key) {
             'H' {
+                $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
                 $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(not set)' }
-                $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[MACHINE]' }
 
-                Write-Host ''
                 $params = @{
                     Path      = $Setting.Path
                     ValueName = $Setting.ValueName
@@ -816,32 +825,33 @@ function Show-SettingDetail {
 
                 switch ($result) {
                     'Written' {
-                        Write-Host '  Applied and verified.' -ForegroundColor Green
                         $script:AppliedCount++
                         Write-Log "CHANGED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.HardenedValue) | Verified"
+                        $statusMessage = 'Applied and verified.'
+                        $statusColor   = 'Green'
                     }
                     'AlreadyPresent' {
-                        Write-Host '  Already at hardened value.' -ForegroundColor Green
+                        $statusMessage = 'Already at the hardened value.'
+                        $statusColor   = 'Green'
                     }
                     'VerifyFailed' {
-                        Write-Host '  Applied but verification failed.' -ForegroundColor Red
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Validation failed"
+                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Verification failed"
+                        $statusMessage = 'Applied but verification failed.'
+                        $statusColor   = 'Red'
                     }
                     'WriteFailed' {
-                        Write-Host '  Write failed.' -ForegroundColor Red
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Write failed"
+                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Apply failed"
+                        $statusMessage = 'Failed to apply.'
+                        $statusColor   = 'Red'
                     }
                 }
-                $nextKey = [Console]::ReadKey($true).Key
-                if ($nextKey -eq 'Escape') { $done = $true }
             }
             'D' {
-                $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[MACHINE]' }
+                $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
                 $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(not set)' }
 
-                Write-Host ''
                 if ($null -eq $Setting.DefaultValue) {
                     $params = @{
                         Path      = $Setting.Path
@@ -851,22 +861,26 @@ function Show-SettingDetail {
 
                     switch ($result) {
                         'Removed' {
-                            Write-Host '  Restored to default (removed registry value).' -ForegroundColor Green
                             $script:AppliedCount++
                             Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | Removed registry value"
+                            $statusMessage = 'Restored to default.'
+                            $statusColor   = 'Green'
                         }
                         'AlreadyAbsent' {
-                            Write-Host '  Already absent; default state satisfied.' -ForegroundColor Green
+                            $statusMessage = 'Already not set.'
+                            $statusColor   = 'Green'
                         }
                         'VerifyFailed' {
-                            Write-Host '  Remove appeared to succeed but value is still present.' -ForegroundColor Red
                             $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Remove verify failed"
+                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Remove verification failed"
+                            $statusMessage = 'Removed but verification failed.'
+                            $statusColor   = 'Red'
                         }
                         'RemoveFailed' {
-                            Write-Host '  Failed to remove registry value.' -ForegroundColor Red
                             $script:FailedCount++
                             Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Remove failed"
+                            $statusMessage = 'Failed to remove.'
+                            $statusColor   = 'Red'
                         }
                     }
                 }
@@ -881,27 +895,29 @@ function Show-SettingDetail {
 
                     switch ($result) {
                         'Written' {
-                            Write-Host '  Restored to default.' -ForegroundColor Green
                             $script:AppliedCount++
                             Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.DefaultValue)"
+                            $statusMessage = 'Restored to default.'
+                            $statusColor   = 'Green'
                         }
                         'AlreadyPresent' {
-                            Write-Host '  Already at default value.' -ForegroundColor Green
+                            $statusMessage = 'Already at the default value.'
+                            $statusColor   = 'Green'
                         }
                         'VerifyFailed' {
-                            Write-Host '  Restore appeared to succeed but verification failed.' -ForegroundColor Red
                             $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Restore verify failed"
+                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Restore verification failed"
+                            $statusMessage = 'Restored but verification failed.'
+                            $statusColor   = 'Red'
                         }
                         'WriteFailed' {
-                            Write-Host '  Failed to restore default.' -ForegroundColor Red
                             $script:FailedCount++
                             Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Restore failed"
+                            $statusMessage = 'Failed to restore.'
+                            $statusColor   = 'Red'
                         }
                     }
                 }
-                $nextKey = [Console]::ReadKey($true).Key
-                if ($nextKey -eq 'Escape') { $done = $true }
             }
             'Escape' {
                 $done = $true
@@ -961,7 +977,7 @@ function Invoke-ApplyAll {
     $failed  = 0
 
     foreach ($setting in $toApply) {
-        $scopeLabel    = if ($setting.Path -like 'HKCU:*') { '[USER]' } else { '[MACHINE]' }
+        $scopeLabel    = if ($setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
         $before        = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
         $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(not set)' }
 
@@ -980,20 +996,17 @@ function Invoke-ApplyAll {
                 Write-Host "  [OK] $scopeLabel $($setting.Name)" -ForegroundColor Green
                 Write-Log "CHANGED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $($setting.HardenedValue) | Verified"
             }
-            'AlreadyPresent' {
-                Write-Host "  [--] $scopeLabel $($setting.Name) - already hardened" -ForegroundColor Green
-            }
             'VerifyFailed' {
                 $failed++
                 $script:FailedCount++
                 Write-Host "  [!!] $scopeLabel $($setting.Name) - verification failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Validation failed"
+                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Verification failed"
             }
             'WriteFailed' {
                 $failed++
                 $script:FailedCount++
-                Write-Host "  [!!] $scopeLabel $($setting.Name) - write failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Write failed"
+                Write-Host "  [!!] $scopeLabel $($setting.Name) - apply failed" -ForegroundColor Red
+                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Apply failed"
             }
         }
     }
@@ -1062,9 +1075,7 @@ function Invoke-ProfileMode {
     $profileData = Import-PowerShellDataFile -Path $ProfilePath
 
     if (-not $profileData.Settings) {
-        Write-Host '  [X] Profile file contains no settings.' -ForegroundColor Red
-        Write-Log 'ERROR: Profile file contains no settings.'
-        return $false
+        Write-FatalError 'Profile file contains no settings.'
     }
 
     # Generate snapshot of settings about to be changed
@@ -1082,7 +1093,7 @@ function Invoke-ProfileMode {
     Write-Host ''
 
     foreach ($entry in $profileData.Settings) {
-        $scopeLabel = if ($entry.Path -like 'HKCU:*') { '[USER]' } else { '[MACHINE]' }
+        $scopeLabel = if ($entry.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
 
         if (-not $entry.Exists) {
             # Exists = $false: desired state is absent; remove the value if present
@@ -1096,7 +1107,7 @@ function Invoke-ProfileMode {
                 'Removed' {
                     $applied++
                     $script:AppliedCount++
-                    Write-Host "  [OK] $scopeLabel Removed: $($entry.ValueName)" -ForegroundColor Green
+                    Write-Host "  [OK] $scopeLabel $($entry.ValueName) - removed" -ForegroundColor Green
                     Write-Log "RESTORED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Removed registry value"
                 }
                 'AlreadyAbsent' {
@@ -1105,13 +1116,13 @@ function Invoke-ProfileMode {
                 'VerifyFailed' {
                     $failed++
                     $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel Remove verify failed: $($entry.ValueName)" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Remove verify failed"
+                    Write-Host "  [!!] $scopeLabel $($entry.ValueName) - verification failed" -ForegroundColor Red
+                    Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Remove verification failed"
                 }
                 'RemoveFailed' {
                     $failed++
                     $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel Failed to remove: $($entry.ValueName)" -ForegroundColor Red
+                    Write-Host "  [!!] $scopeLabel $($entry.ValueName) - remove failed" -ForegroundColor Red
                     Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Remove failed"
                 }
             }
@@ -1133,7 +1144,7 @@ function Invoke-ProfileMode {
                 'Written' {
                     $applied++
                     $script:AppliedCount++
-                    Write-Host "  [OK] $scopeLabel Set: $($entry.ValueName) = $($entry.Value)" -ForegroundColor Green
+                    Write-Host "  [OK] $scopeLabel $($entry.ValueName) - set to $($entry.Value)" -ForegroundColor Green
                     Write-Log "CHANGED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $($entry.Value) | Verified"
                 }
                 'AlreadyPresent' {
@@ -1142,14 +1153,14 @@ function Invoke-ProfileMode {
                 'VerifyFailed' {
                     $failed++
                     $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel Validation failed: $($entry.ValueName)" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Validation failed"
+                    Write-Host "  [!!] $scopeLabel $($entry.ValueName) - verification failed" -ForegroundColor Red
+                    Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Verification failed"
                 }
                 'WriteFailed' {
                     $failed++
                     $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel Write failed: $($entry.ValueName)" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Write failed"
+                    Write-Host "  [!!] $scopeLabel $($entry.ValueName) - apply failed" -ForegroundColor Red
+                    Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Apply failed"
                 }
             }
         }
@@ -1554,11 +1565,11 @@ elseif ($Snapshot) {
 }
 elseif ($ProfilePath) {
     # Silent Mode
+    Write-LogSessionStart -Mode 'Silent' -ProfilePath $ProfilePath
+
     if (-not (Test-Path $ProfilePath -PathType Leaf)) {
         Write-FatalError "Profile file not found: $ProfilePath"
     }
-
-    Write-LogSessionStart -Mode 'Silent' -ProfilePath $ProfilePath
     Initialize-EditionContext
 
     Write-Host ''
@@ -1570,14 +1581,15 @@ elseif ($ProfilePath) {
     $success = Invoke-ProfileMode -ProfilePath $ProfilePath
     Write-LogSessionEnd
     if (-not $success) { exit 1 }
+    exit 0
 }
 else {
     # Interactive Mode
+    Write-LogSessionStart -Mode 'Interactive' -DefinitionsPath $DefinitionsPath
+
     if (-not $DefinitionsPath) {
         Write-FatalError '-DefinitionsPath is required for Interactive Mode.'
     }
-
-    Write-LogSessionStart -Mode 'Interactive' -DefinitionsPath $DefinitionsPath
     Initialize-EditionContext
 
     $snapshotPath = Get-SnapshotProfilePath
