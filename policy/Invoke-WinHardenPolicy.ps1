@@ -433,6 +433,7 @@ function Invoke-LGPOWrite {
         Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type $ValueType -Force
     }
     catch {
+        Write-Log "Set-ItemProperty: $_"
         return 'WriteFailed'
     }
     finally {
@@ -477,9 +478,15 @@ function Invoke-LGPORemove {
         }
 
         # Remove directly from registry for immediate effect
-        Remove-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
+        if ($null -ne (Get-ItemProperty -Path $Path -Name $ValueName -ErrorAction SilentlyContinue)) {
+            Remove-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
+        }
     }
     catch {
+        if ($null -eq (Get-ItemProperty -Path $Path -Name $ValueName -ErrorAction SilentlyContinue)) {
+            return 'Removed'
+        }
+        Write-Log "Remove-ItemProperty: $_"
         return 'RemoveFailed'
     }
     finally {
@@ -519,14 +526,13 @@ function Invoke-SettingWrite {
         return Invoke-BuildSettingWrite @params
     }
 
-    # Pre-check: return early if the value is already correct
+    # Pre-check: capture current state to determine return value
     $current = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-    if ($current.Exists -and $current.Value -eq $Value) {
-        return 'AlreadyPresent'
-    }
+    $alreadyPresent = $current.Exists -and $current.Value -eq $Value
 
     # Write: dispatch to direct registry write (Home) or LGPO (non-Home)
     if ($script:IsHomeEdition) {
+        if ($alreadyPresent) { return 'AlreadyPresent' }
         try {
             if (-not (Test-Path $Path)) {
                 New-Item -Path $Path -Force | Out-Null
@@ -534,12 +540,14 @@ function Invoke-SettingWrite {
             Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type $ValueType -Force
         }
         catch {
+            Write-Log "Set-ItemProperty: $_"
             return 'WriteFailed'
         }
     }
     else {
         $lgpoResult = Invoke-LGPOWrite -Path $Path -ValueName $ValueName -ValueType $ValueType -Value $Value
         if ($lgpoResult -eq 'WriteFailed') { return 'WriteFailed' }
+        if ($alreadyPresent) { return 'AlreadyPresent' }
     }
 
     # Verify: confirm the write took effect
@@ -575,24 +583,25 @@ function Invoke-SettingRemove {
         return Invoke-BuildSettingRemove @params
     }
 
-    # Pre-check: return early if the value is already absent
+    # Pre-check: capture current state to determine return value
     $current = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-    if (-not $current.Exists) {
-        return 'AlreadyAbsent'
-    }
+    $alreadyAbsent = -not $current.Exists
 
     # Remove: dispatch to direct registry remove (Home) or LGPO (non-Home)
     if ($script:IsHomeEdition) {
+        if ($alreadyAbsent) { return 'AlreadyAbsent' }
         try {
             Remove-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
         }
         catch {
+            Write-Log "Remove-ItemProperty: $_"
             return 'RemoveFailed'
         }
     }
     else {
         $lgpoResult = Invoke-LGPORemove -Path $Path -ValueName $ValueName
         if ($lgpoResult -eq 'RemoveFailed') { return 'RemoveFailed' }
+        if ($alreadyAbsent) { return 'AlreadyAbsent' }
     }
 
     # Verify: confirm the removal took effect
