@@ -405,9 +405,11 @@ function Invoke-LGPOWrite {
         default       { 'DWORD' }
     }
 
-    # Format value: DWORD as 8-digit hex, all others as literal string
+    # Format value: DWORD and QWORD as decimal, all others as literal string
     $lgpoValue = if ($lgpoType -eq 'DWORD') {
-        '{0:X8}' -f [int]$Value
+        [uint32]$Value
+    } elseif ($lgpoType -eq 'QWORD') {
+        [uint64]$Value
     } else {
         "$Value"
     }
