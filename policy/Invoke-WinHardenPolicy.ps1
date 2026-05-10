@@ -418,8 +418,11 @@ function Invoke-LGPOWrite {
     try {
         # Write to LGPO first: the authoritative record that survives any Group Policy refresh
         [System.IO.File]::WriteAllText($tempFile, $content, [System.Text.Encoding]::ASCII)
-        & $script:LGPOExePath /t $tempFile 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) { return 'WriteFailed' }
+        $lgpoOutput = & $script:LGPOExePath /t $tempFile 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Log "LGPO.exe: $($lgpoOutput -join ' ')"
+            return 'WriteFailed'
+        }
 
         # Write directly to registry for immediate effect
         if (-not (Test-Path $Path)) {
@@ -465,8 +468,11 @@ function Invoke-LGPORemove {
     try {
         # Write to LGPO first: the authoritative record that survives any Group Policy refresh
         [System.IO.File]::WriteAllText($tempFile, $content, [System.Text.Encoding]::ASCII)
-        & $script:LGPOExePath /t $tempFile 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) { return 'RemoveFailed' }
+        $lgpoOutput = & $script:LGPOExePath /t $tempFile 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Log "LGPO.exe: $($lgpoOutput -join ' ')"
+            return 'RemoveFailed'
+        }
 
         # Remove directly from registry for immediate effect
         Remove-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
