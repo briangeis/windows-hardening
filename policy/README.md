@@ -7,7 +7,7 @@ Applies registry and Local Group Policy hardening settings to a standalone Windo
 - PowerShell 5.1 or later
 - Administrator privileges (all modes except Build Mode)
 - `LGPO.exe` from the [Microsoft Security Compliance Toolkit](https://www.microsoft.com/en-us/download/details.aspx?id=55319)
-  is required on Pro, Enterprise, Education, and LTSC editions in Interactive and Silent modes
+  is required on Pro, Enterprise, Education, and LTSC editions in Interactive and Profile modes
 
 Place `LGPO.exe` in the `policy` directory alongside the script, or ensure it is available on the system `PATH`. Windows Home editions do not require `LGPO.exe`.
 
@@ -25,14 +25,14 @@ Use Interactive Mode for initial configuration of a device, reviewing the curren
 .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1
 ```
 
-### Silent Mode
+### Profile Mode
 
 Reads a profile file and applies all settings without prompting. A snapshot of the current system state is saved automatically before any changes are applied.
 
-Use Silent Mode to apply a pre-built profile to a device, or as part of an automated hardening workflow.
+Use Profile Mode to apply a pre-built profile to a device, or as part of an automated hardening workflow.
 
 ```powershell
-.\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\Policy-Snapshot_WIN11-HOME_20260426_042606.psd1
+.\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\my-profile.psd1
 ```
 
 ### Build Mode
@@ -52,7 +52,7 @@ Reads the current registry state for every setting in a definitions file and wri
 Use Snapshot Mode to capture the state of a configured device for replication on other devices, or as a backup before reimaging.
 
 ```powershell
-.\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Snapshot
+.\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Snapshot .\my-snapshot.psd1
 ```
 
 ## Output Files
@@ -63,7 +63,7 @@ Every session appends to a log file in the current working directory. The file i
 
 ### Snapshots
 
-Interactive Mode and Silent Mode each save a snapshot of the current registry state before any changes are made. Snapshots are written to the current working directory using a generated filename: `Policy-Snapshot_ComputerName_yyyyMMdd_HHmmss.psd1`. Specify a different path with `-SnapshotPath`, which accepts either a full file path or a directory. When a directory is provided, the file is written there with the generated filename.
+Interactive Mode and Profile Mode each save a snapshot of the current registry state before any changes are made. Snapshots are written to the current working directory using a generated filename: `Policy-Snapshot_ComputerName_yyyyMMdd_HHmmss.psd1`. Snapshot Mode writes to the path provided via `-Snapshot`; passing a directory causes the same generated filename to be used in that directory.
 
 ### Build Profiles
 
@@ -74,10 +74,9 @@ Build Mode writes selections to the profile file path provided with `-Build`. If
 | Parameter | Type | Description |
 |---|---|---|
 | `-DefinitionsPath` | String | Path to a definitions file. Required for Interactive, Build, and Snapshot modes. |
-| `-ProfilePath` | String | Path to a profile file to apply. Triggers Silent Mode. |
+| `-ProfilePath` | String | Path to a profile file to apply. Triggers Profile Mode. |
 | `-Build` | String | Path to the profile file to build. Triggers Build Mode. |
-| `-Snapshot` | Switch | Triggers Snapshot Mode. |
-| `-SnapshotPath` | String | Output path for the snapshot profile. Accepts a full file path or a directory. Only valid with `-Snapshot`. |
+| `-Snapshot` | String | File or directory path for the snapshot profile. Triggers Snapshot Mode. |
 | `-LogPath` | String | Output path for the log file. Accepts a full file path or a directory. |
 | `-LGPOPath` | String | Explicit path to `LGPO.exe`. If not provided, the script searches the `policy` directory and then the system `PATH`. |
 
