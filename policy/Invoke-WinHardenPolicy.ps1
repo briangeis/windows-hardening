@@ -16,7 +16,7 @@
       a section. A snapshot is saved automatically on startup. Requires
       administrator privileges.
 
-    Silent Mode
+    Profile Mode
       Reads a profile file and applies all settings without prompting.
       A snapshot is saved automatically before applying any changes.
       Requires administrator privileges.
@@ -37,7 +37,7 @@
     Build Mode, and Snapshot Mode.
 
 .PARAMETER ProfilePath
-    Path to a PSD1 profile file to apply. Triggers Silent Mode: all settings
+    Path to a PSD1 profile file to apply. Triggers Profile Mode: all settings
     in the profile are applied to the registry without prompting.
 
 .PARAMETER Build
@@ -47,14 +47,10 @@
     A new file is created on the first save. No elevation required.
 
 .PARAMETER Snapshot
-    Triggers Snapshot Mode: reads the current registry state for every setting
-    in the definitions file and saves a profile capturing it without prompting.
-    Requires administrator privileges.
-
-.PARAMETER SnapshotPath
-    File or directory path for the snapshot profile. If a directory is given,
-    a generated filename is used. Defaults to the current working directory
-    with a generated filename if not specified. Only valid with -Snapshot.
+    File or directory path for the snapshot profile. Triggers Snapshot Mode:
+    reads the current registry state for every setting in the definitions file
+    and saves a profile to the specified path. If a directory is given, a
+    generated filename is used. Requires administrator privileges.
 
 .PARAMETER LogPath
     File or directory path for the log file. If a directory is given,
@@ -72,8 +68,8 @@
     Interactive Mode: opens the settings menu. Run from the project root.
 
 .EXAMPLE
-    .\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\Policy-Snapshot_WIN11-HOME_20260426_042606.psd1
-    Silent Mode: applies all settings in the profile without prompting.
+    .\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\my-profile.psd1
+    Profile Mode: applies all settings in the profile without prompting.
 
 .EXAMPLE
     .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Build .\my-profile.psd1
@@ -81,22 +77,31 @@
     Does not require elevation and can be run on Windows or Linux.
 
 .EXAMPLE
-    .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Snapshot
-    Snapshot Mode: captures current registry state to the working directory.
+    .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Snapshot .\my-snapshot.psd1
+    Snapshot Mode: captures current registry state to the specified file.
     Requires administrator privileges.
 #>
 
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName = 'Interactive')]
 param(
+    [Parameter(ParameterSetName = 'Interactive', Mandatory)]
+    [Parameter(ParameterSetName = 'Build',       Mandatory)]
+    [Parameter(ParameterSetName = 'Snapshot',    Mandatory)]
     [string]$DefinitionsPath,
 
+    [Parameter(ParameterSetName = 'Profile', Mandatory)]
     [string]$ProfilePath,
 
+    [Parameter(ParameterSetName = 'Build', Mandatory)]
     [string]$Build,
-    [switch]$Snapshot,
-    [string]$SnapshotPath,
+
+    [Parameter(ParameterSetName = 'Snapshot', Mandatory)]
+    [string]$Snapshot,
 
     [string]$LogPath,
+
+    [Parameter(ParameterSetName = 'Interactive')]
+    [Parameter(ParameterSetName = 'Profile')]
     [string]$LGPOPath
 )
 
@@ -800,14 +805,15 @@ function Show-SettingDetail {
             Write-Host '  * Per-user setting: applies to current user only' -ForegroundColor DarkYellow
         }
 
+        # Input: apply hardened value, restore default, or exit
+        Write-Host ''
+        Write-Host '  [H] Apply Hardened  [D] Restore Default  [Esc] Back' -ForegroundColor DarkYellow
+
         if ($statusMessage) {
             Write-Host ''
             Write-Host "  $statusMessage" -ForegroundColor $statusColor
         }
 
-        # Input: apply hardened value, restore default, or exit
-        Write-Host ''
-        Write-Host '  [H] Apply Hardened  [D] Restore Default  [Esc] Back' -ForegroundColor DarkYellow
         $key = [Console]::ReadKey($true).Key
 
         switch ($key) {
@@ -1054,7 +1060,7 @@ function Get-SectionCounts {
 
 #endregion
 
-#region SILENT MODE
+#region PROFILE MODE
 
 function Invoke-ProfileMode {
     <#
@@ -1463,62 +1469,12 @@ function Export-SnapshotProfile {
 
 #region MAIN ENTRY POINT
 
-# Validate parameter combinations
-if ($ProfilePath -and $DefinitionsPath) {
-    $params = @{
-        Message = '-ProfilePath and -DefinitionsPath cannot be used together.'
-        Detail  = 'Use -DefinitionsPath for Interactive Mode; use -ProfilePath alone for Silent Mode.'
-    }
-    Write-FatalError @params
-}
-if ($ProfilePath -and $Build) {
-    $params = @{
-        Message = '-ProfilePath and -Build cannot be used together.'
-        Detail  = 'Pass the profile file path directly to -Build.'
-    }
-    Write-FatalError @params
-}
-if ($ProfilePath -and $Snapshot) {
-    $params = @{
-        Message = '-ProfilePath and -Snapshot cannot be used together.'
-        Detail  = 'Use -SnapshotPath to set the Snapshot Mode output path.'
-    }
-    Write-FatalError @params
-}
-if ($Build -and $Snapshot) {
-    $params = @{
-        Message = '-Build and -Snapshot cannot be used together.'
-        Detail  = 'Use -Build <path> to save settings; use -Snapshot to capture system state.'
-    }
-    Write-FatalError @params
-}
-if ($PSBoundParameters.ContainsKey('Build') -and -not $Build) {
-    $params = @{
-        Message = '-Build requires a file path.'
-        Detail  = 'Provide the path to the profile file as the argument: -Build <path>.'
-    }
-    Write-FatalError @params
-}
-if ($Build -and -not $DefinitionsPath) {
-    Write-FatalError '-Build requires -DefinitionsPath.'
-}
-if ($Snapshot -and -not $DefinitionsPath) {
-    Write-FatalError '-Snapshot requires -DefinitionsPath.'
-}
-if ($SnapshotPath -and -not $Snapshot) {
-    $params = @{
-        Message = '-SnapshotPath requires -Snapshot.'
-        Detail  = 'Pass -Snapshot to trigger Snapshot Mode, then use -SnapshotPath to set the output path.'
-    }
-    Write-FatalError @params
-}
-
 if ($DefinitionsPath -and -not (Test-Path $DefinitionsPath -PathType Leaf)) {
     Write-FatalError "Definitions file not found: $DefinitionsPath"
 }
 
-# Run prerequisite checks (-Build is cross-platform and unprivileged)
-Test-Prerequisites -RequireElevation (-not $Build)
+# Run prerequisite checks (Build Mode is cross-platform and unprivileged)
+Test-Prerequisites -RequireElevation ($PSCmdlet.ParameterSetName -ne 'Build')
 
 # Load definitions file once for all modes that require it
 $script:Definitions = $null
@@ -1531,73 +1487,64 @@ if ($DefinitionsPath) {
     }
 }
 
-# Mode priority: Build > Snapshot > ProfilePath > Interactive
-if ($Build) {
-    # Build Mode
-    Write-LogSessionStart -Mode 'Build' -DefinitionsPath $DefinitionsPath -ProfilePath $Build
-    $script:IsBuildMode = $true
-    Import-BuildProfile
-    Invoke-Menu -Context $script:Definitions
-    Write-LogSessionEnd
-    exit 0
-}
-elseif ($Snapshot) {
-    # Snapshot Mode
-    Write-LogSessionStart -Mode 'Snapshot' -DefinitionsPath $DefinitionsPath -ProfilePath $SnapshotPath
+switch ($PSCmdlet.ParameterSetName) {
+    'Interactive' {
+        Write-LogSessionStart -Mode 'Interactive' -DefinitionsPath $DefinitionsPath
+        Initialize-EditionContext
 
-    Write-Host ''
-    Write-Host '  ================================================' -ForegroundColor Cyan
-    Write-Host '  Invoke-WinHardenPolicy - Snapshot Mode' -ForegroundColor Cyan
-    Write-Host '  ================================================' -ForegroundColor Cyan
+        $snapshotPath = Get-SnapshotProfilePath
+        Export-SnapshotProfile -Definitions $script:Definitions -OutputPath $snapshotPath
 
-    $outputPath = if (-not $SnapshotPath) {
-        Get-SnapshotProfilePath
-    } elseif (Test-Path $SnapshotPath -PathType Container) {
-        $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-        Join-Path $SnapshotPath "Policy-Snapshot_${env:COMPUTERNAME}_${timestamp}.psd1"
-    } else {
-        $SnapshotPath
+        Invoke-Menu -Context $script:Definitions
+        Write-LogSessionEnd
+        exit 0
     }
-    Write-Host ''
-    Export-SnapshotProfile -Definitions $script:Definitions -OutputPath $outputPath
-    Write-LogSessionEnd
-    exit 0
-}
-elseif ($ProfilePath) {
-    # Silent Mode
-    Write-LogSessionStart -Mode 'Silent' -ProfilePath $ProfilePath
+    'Profile' {
+        Write-LogSessionStart -Mode 'Profile' -ProfilePath $ProfilePath
 
-    if (-not (Test-Path $ProfilePath -PathType Leaf)) {
-        Write-FatalError "Profile file not found: $ProfilePath"
+        if (-not (Test-Path $ProfilePath -PathType Leaf)) {
+            Write-FatalError "Profile file not found: $ProfilePath"
+        }
+        Initialize-EditionContext
+
+        Write-Host ''
+        Write-Host '  ================================================' -ForegroundColor Cyan
+        Write-Host '  Invoke-WinHardenPolicy - Profile Mode' -ForegroundColor Cyan
+        Write-Host '  ================================================' -ForegroundColor Cyan
+        Write-Host "  Profile: $ProfilePath"
+
+        $success = Invoke-ProfileMode -ProfilePath $ProfilePath
+        Write-LogSessionEnd
+        if (-not $success) { exit 1 }
+        exit 0
     }
-    Initialize-EditionContext
-
-    Write-Host ''
-    Write-Host '  ================================================' -ForegroundColor Cyan
-    Write-Host '  Invoke-WinHardenPolicy - Silent Mode' -ForegroundColor Cyan
-    Write-Host '  ================================================' -ForegroundColor Cyan
-    Write-Host "  Profile: $ProfilePath"
-
-    $success = Invoke-ProfileMode -ProfilePath $ProfilePath
-    Write-LogSessionEnd
-    if (-not $success) { exit 1 }
-    exit 0
-}
-else {
-    # Interactive Mode
-    Write-LogSessionStart -Mode 'Interactive' -DefinitionsPath $DefinitionsPath
-
-    if (-not $DefinitionsPath) {
-        Write-FatalError '-DefinitionsPath is required for Interactive Mode.'
+    'Build' {
+        Write-LogSessionStart -Mode 'Build' -DefinitionsPath $DefinitionsPath -ProfilePath $Build
+        $script:IsBuildMode = $true
+        Import-BuildProfile
+        Invoke-Menu -Context $script:Definitions
+        Write-LogSessionEnd
+        exit 0
     }
-    Initialize-EditionContext
+    'Snapshot' {
+        Write-LogSessionStart -Mode 'Snapshot' -DefinitionsPath $DefinitionsPath -ProfilePath $Snapshot
 
-    $snapshotPath = Get-SnapshotProfilePath
-    Export-SnapshotProfile -Definitions $script:Definitions -OutputPath $snapshotPath
+        Write-Host ''
+        Write-Host '  ================================================' -ForegroundColor Cyan
+        Write-Host '  Invoke-WinHardenPolicy - Snapshot Mode' -ForegroundColor Cyan
+        Write-Host '  ================================================' -ForegroundColor Cyan
 
-    Invoke-Menu -Context $script:Definitions
-    Write-LogSessionEnd
-    exit 0
+        $outputPath = if (Test-Path $Snapshot -PathType Container) {
+            $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+            Join-Path $Snapshot "Policy-Snapshot_${env:COMPUTERNAME}_${timestamp}.psd1"
+        } else {
+            $Snapshot
+        }
+        Write-Host ''
+        Export-SnapshotProfile -Definitions $script:Definitions -OutputPath $outputPath
+        Write-LogSessionEnd
+        exit 0
+    }
 }
 
 #endregion
