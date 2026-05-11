@@ -422,7 +422,7 @@ function Import-ProfileFile {
         Write-FatalError @params
     }
 
-    $requiredKeys = 'Path', 'ValueName', 'ValueType', 'Value', 'Exists'
+    $requiredKeys = 'Name', 'Path', 'ValueName', 'ValueType', 'Value', 'Exists'
     $index = 0
     foreach ($entry in @($profileData.Settings)) {
         $index++
@@ -461,6 +461,7 @@ function Export-ProfileFile {
 
     foreach ($entry in $Entries) {
         [void]$sb.AppendLine('        @{')
+        [void]$sb.AppendLine("            Name      = '$($entry.Name)'")
         [void]$sb.AppendLine("            Path      = '$($entry.Path)'")
         [void]$sb.AppendLine("            ValueName = '$($entry.ValueName)'")
         [void]$sb.AppendLine("            ValueType = '$($entry.ValueType)'")
@@ -686,6 +687,8 @@ function Invoke-SettingWrite {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [string]$Name,
+        [Parameter(Mandatory)]
         [string]$Path,
         [Parameter(Mandatory)]
         [string]$ValueName,
@@ -697,6 +700,7 @@ function Invoke-SettingWrite {
 
     if ($script:IsBuildMode) {
         $params = @{
+            Name      = $Name
             Path      = $Path
             ValueName = $ValueName
             ValueType = $ValueType
@@ -1018,6 +1022,7 @@ function Show-SettingDetail {
                 $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(not set)' }
 
                 $params = @{
+                    Name      = $Setting.Name
                     Path      = $Setting.Path
                     ValueName = $Setting.ValueName
                     ValueType = $Setting.ValueType
@@ -1088,6 +1093,7 @@ function Show-SettingDetail {
                 }
                 else {
                     $params = @{
+                        Name      = $Setting.Name
                         Path      = $Setting.Path
                         ValueName = $Setting.ValueName
                         ValueType = $Setting.ValueType
@@ -1184,6 +1190,7 @@ function Invoke-ApplyAll {
         $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(not set)' }
 
         $params = @{
+            Name      = $setting.Name
             Path      = $setting.Path
             ValueName = $setting.ValueName
             ValueType = $setting.ValueType
@@ -1304,8 +1311,8 @@ function Invoke-ProfileMode {
                 'Removed' {
                     $applied++
                     $script:AppliedCount++
-                    Write-Host "  [OK] $scopeLabel $($entry.ValueName) - removed" -ForegroundColor Green
-                    Write-Log "RESTORED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Removed registry value"
+                    Write-Host "  [OK] $scopeLabel $($entry.Name) - removed" -ForegroundColor Green
+                    Write-Log "RESTORED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Removed registry value"
                 }
                 'AlreadyAbsent' {
                     $skipped++
@@ -1313,14 +1320,14 @@ function Invoke-ProfileMode {
                 'VerifyFailed' {
                     $failed++
                     $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel $($entry.ValueName) - verification failed" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Remove verification failed"
+                    Write-Host "  [!!] $scopeLabel $($entry.Name) - verification failed" -ForegroundColor Red
+                    Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Remove verification failed"
                 }
                 'RemoveFailed' {
                     $failed++
                     $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel $($entry.ValueName) - remove failed" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Remove failed"
+                    Write-Host "  [!!] $scopeLabel $($entry.Name) - remove failed" -ForegroundColor Red
+                    Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Remove failed"
                 }
             }
         }
@@ -1330,6 +1337,7 @@ function Invoke-ProfileMode {
             $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(not set)' }
 
             $params = @{
+                Name      = $entry.Name
                 Path      = $entry.Path
                 ValueName = $entry.ValueName
                 ValueType = $entry.ValueType
@@ -1341,8 +1349,8 @@ function Invoke-ProfileMode {
                 'Written' {
                     $applied++
                     $script:AppliedCount++
-                    Write-Host "  [OK] $scopeLabel $($entry.ValueName) - set to $($entry.Value)" -ForegroundColor Green
-                    Write-Log "CHANGED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $($entry.Value) | Verified"
+                    Write-Host "  [OK] $scopeLabel $($entry.Name) - applied" -ForegroundColor Green
+                    Write-Log "CHANGED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $($entry.Value) | Verified"
                 }
                 'AlreadyPresent' {
                     $skipped++
@@ -1350,14 +1358,14 @@ function Invoke-ProfileMode {
                 'VerifyFailed' {
                     $failed++
                     $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel $($entry.ValueName) - verification failed" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Verification failed"
+                    Write-Host "  [!!] $scopeLabel $($entry.Name) - verification failed" -ForegroundColor Red
+                    Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Verification failed"
                 }
                 'WriteFailed' {
                     $failed++
                     $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel $($entry.ValueName) - apply failed" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.ValueName) | $($entry.Path)\$($entry.ValueName) | Apply failed"
+                    Write-Host "  [!!] $scopeLabel $($entry.Name) - apply failed" -ForegroundColor Red
+                    Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Apply failed"
                 }
             }
         }
@@ -1440,6 +1448,8 @@ function Invoke-BuildSettingWrite {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [string]$Name,
+        [Parameter(Mandatory)]
         [string]$Path,
         [Parameter(Mandatory)]
         [string]$ValueName,
@@ -1460,6 +1470,7 @@ function Invoke-BuildSettingWrite {
     # Write: update in-memory store and persist to file
     try {
         $script:BuildData[$key] = @{
+            Name      = $Name
             Path      = $Path
             ValueName = $ValueName
             ValueType = $ValueType
@@ -1579,6 +1590,7 @@ function Export-SnapshotProfile {
     foreach ($setting in $source) {
         $current = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
         $entries += @{
+            Name      = $setting.Name
             Path      = $setting.Path
             ValueName = $setting.ValueName
             ValueType = $setting.ValueType
