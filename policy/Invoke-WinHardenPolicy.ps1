@@ -1485,7 +1485,7 @@ function Invoke-BuildSettingRemove {
 
     # Remove: delete from in-memory store and persist to file
     try {
-        [void]$script:BuildData.Remove($key)
+        $script:BuildData.Remove($key)
         Export-BuildProfile
     }
     catch {
@@ -1554,14 +1554,15 @@ function Export-SnapshotProfile {
 
     $entries = @()
 
+    # Collect: Exists = $false captures absent values for removal when applied
     foreach ($setting in $source) {
         $current = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
         $entries += @{
             Path      = $setting.Path
             ValueName = $setting.ValueName
             ValueType = $setting.ValueType
-            Value     = $current.Value       # $null if the value does not exist
-            Exists    = $current.Exists       # $false flags this value for removal on restore
+            Value     = $current.Value
+            Exists    = $current.Exists
         }
     }
 
