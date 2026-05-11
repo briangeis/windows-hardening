@@ -1279,6 +1279,7 @@ function Invoke-ProfileMode {
     Write-Host ''
     Write-Host '  Generating snapshot before applying profile...' -ForegroundColor Cyan
     Export-SnapshotProfile -Settings $ProfileData.Settings -OutputPath $snapshotPath
+    Write-Host "  Snapshot saved to: $snapshotPath" -ForegroundColor Green
 
     $applied = 0
     $failed  = 0
@@ -1587,7 +1588,6 @@ function Export-SnapshotProfile {
     }
 
     Export-ProfileFile -Entries $entries -OutputPath $OutputPath
-    Write-Host "  Snapshot saved to: $OutputPath" -ForegroundColor Green
     Write-Log "Snapshot saved: $OutputPath"
 }
 
@@ -1665,6 +1665,7 @@ switch ($PSCmdlet.ParameterSetName) {
         }
         Write-Host ''
         Export-SnapshotProfile -Definitions $definitions -OutputPath $outputPath
+        Write-Host "  Snapshot saved to: $outputPath" -ForegroundColor Green
         Write-LogSessionEnd
         exit 0
     }
