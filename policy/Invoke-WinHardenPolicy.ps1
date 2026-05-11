@@ -239,6 +239,75 @@ function Test-Prerequisites {
     }
 }
 
+function Initialize-EditionContext {
+    <#
+    .SYNOPSIS
+        Detects the Windows edition and resolves the LGPO.exe path
+        for Pro, Enterprise, Education, and LTSC editions.
+    #>
+    [CmdletBinding()]
+    param()
+
+    function GetWindowsEdition {
+        try {
+            $caption = (Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop).Caption
+            if ($caption -like '*Home*') { return 'Home' }
+            return 'NonHome'
+        }
+        catch {
+            $params = @{
+                Message = 'Could not determine the Windows edition.'
+                Detail  = 'Ensure WMI is available and the Win32_OperatingSystem class is accessible.'
+            }
+            Write-FatalError @params
+        }
+    }
+
+    function ResolveLGPOPath {
+        # If -LGPOPath was provided, treat it as a hard requirement
+        if ($LGPOPath) {
+            if (Test-Path $LGPOPath -PathType Leaf) { return $LGPOPath }
+            $params = @{
+                Message = "LGPO.exe not found at the specified path: $LGPOPath"
+                Detail  = 'Verify the path is correct and the file exists.'
+            }
+            Write-FatalError @params
+        }
+
+        # Check script directory
+        $scriptDirPath = Join-Path $PSScriptRoot 'LGPO.exe'
+        if (Test-Path $scriptDirPath -PathType Leaf) {
+            return $scriptDirPath
+        }
+
+        # Check system PATH
+        $pathResult = Get-Command 'LGPO.exe' -ErrorAction SilentlyContinue
+        if ($pathResult) {
+            return $pathResult.Source
+        }
+
+        $params = @{
+            Message = 'LGPO.exe not found.'
+            Detail  = 'Pro, Enterprise, Education, and LTSC editions require LGPO.exe to apply Group Policy settings. Direct registry writes would be overridden at the next Group Policy refresh. Download LGPO.exe from the Microsoft Security Compliance Toolkit.'
+        }
+        Write-FatalError @params
+    }
+
+    $edition = GetWindowsEdition
+
+    if ($edition -eq 'Home') {
+        $script:IsHomeEdition = $true
+    }
+    else {
+        $script:IsHomeEdition = $false
+        $script:LGPOExePath   = ResolveLGPOPath
+    }
+}
+
+#endregion
+
+#region FILE I/O
+
 function Import-DefinitionsFile {
     <#
     .SYNOPSIS
@@ -371,69 +440,47 @@ function Import-ProfileFile {
     return $profileData
 }
 
-function Initialize-EditionContext {
+function Export-ProfileFile {
     <#
     .SYNOPSIS
-        Detects the Windows edition and resolves the LGPO.exe path
-        for Pro, Enterprise, Education, and LTSC editions.
+        Serializes an array of profile entries to a PSD1 profile file.
     #>
     [CmdletBinding()]
-    param()
+    param(
+        [Parameter(Mandatory)]
+        [array]$Entries,
+        [Parameter(Mandatory)]
+        [string]$OutputPath
+    )
 
-    function GetWindowsEdition {
-        try {
-            $caption = (Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop).Caption
-            if ($caption -like '*Home*') { return 'Home' }
-            return 'NonHome'
+    $sb = [System.Text.StringBuilder]::new()
+    [void]$sb.AppendLine('@{')
+    [void]$sb.AppendLine("    GeneratedOn  = '$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')'")
+    [void]$sb.AppendLine("    ComputerName = '$env:COMPUTERNAME'")
+    [void]$sb.AppendLine('    Settings = @(')
+
+    foreach ($entry in $Entries) {
+        [void]$sb.AppendLine('        @{')
+        [void]$sb.AppendLine("            Path      = '$($entry.Path)'")
+        [void]$sb.AppendLine("            ValueName = '$($entry.ValueName)'")
+        [void]$sb.AppendLine("            ValueType = '$($entry.ValueType)'")
+        if ($null -eq $entry.Value) {
+            [void]$sb.AppendLine('            Value     = $null')
         }
-        catch {
-            $params = @{
-                Message = 'Could not determine the Windows edition.'
-                Detail  = 'Ensure WMI is available and the Win32_OperatingSystem class is accessible.'
-            }
-            Write-FatalError @params
+        elseif ($entry.Value -is [string]) {
+            [void]$sb.AppendLine("            Value     = '$($entry.Value)'")
         }
+        else {
+            [void]$sb.AppendLine("            Value     = $($entry.Value)")
+        }
+        [void]$sb.AppendLine("            Exists    = `$$($entry.Exists)")
+        [void]$sb.AppendLine('        }')
     }
 
-    function ResolveLGPOPath {
-        # If -LGPOPath was provided, treat it as a hard requirement
-        if ($LGPOPath) {
-            if (Test-Path $LGPOPath -PathType Leaf) { return $LGPOPath }
-            $params = @{
-                Message = "LGPO.exe not found at the specified path: $LGPOPath"
-                Detail  = 'Verify the path is correct and the file exists.'
-            }
-            Write-FatalError @params
-        }
+    [void]$sb.AppendLine('    )')
+    [void]$sb.AppendLine('}')
 
-        # Check script directory
-        $scriptDirPath = Join-Path $PSScriptRoot 'LGPO.exe'
-        if (Test-Path $scriptDirPath -PathType Leaf) {
-            return $scriptDirPath
-        }
-
-        # Check system PATH
-        $pathResult = Get-Command 'LGPO.exe' -ErrorAction SilentlyContinue
-        if ($pathResult) {
-            return $pathResult.Source
-        }
-
-        $params = @{
-            Message = 'LGPO.exe not found.'
-            Detail  = 'Pro, Enterprise, Education, and LTSC editions require LGPO.exe to apply Group Policy settings. Direct registry writes would be overridden at the next Group Policy refresh. Download LGPO.exe from the Microsoft Security Compliance Toolkit.'
-        }
-        Write-FatalError @params
-    }
-
-    $edition = GetWindowsEdition
-
-    if ($edition -eq 'Home') {
-        $script:IsHomeEdition = $true
-    }
-    else {
-        $script:IsHomeEdition = $false
-        $script:LGPOExePath   = ResolveLGPOPath
-    }
+    $sb.ToString() | Out-File -FilePath $OutputPath -Encoding ASCII -Force
 }
 
 #endregion
@@ -1349,40 +1396,13 @@ function Import-BuildProfile {
 function Export-BuildProfile {
     <#
     .SYNOPSIS
-        Serializes the in-memory profile data to the build profile file.
+        Persists the in-memory build profile data to the build file.
     #>
     [CmdletBinding()]
     param()
 
-    $sb = [System.Text.StringBuilder]::new()
-    [void]$sb.AppendLine('@{')
-    [void]$sb.AppendLine("    GeneratedOn  = '$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')'")
-    [void]$sb.AppendLine("    ComputerName = '$env:COMPUTERNAME'")
-    [void]$sb.AppendLine('    Settings = @(')
-
-    foreach ($key in ($script:BuildData.Keys | Sort-Object)) {
-        $entry = $script:BuildData[$key]
-        [void]$sb.AppendLine('        @{')
-        [void]$sb.AppendLine("            Path      = '$($entry.Path)'")
-        [void]$sb.AppendLine("            ValueName = '$($entry.ValueName)'")
-        [void]$sb.AppendLine("            ValueType = '$($entry.ValueType)'")
-        if ($null -eq $entry.Value) {
-            [void]$sb.AppendLine('            Value     = $null')
-        }
-        elseif ($entry.Value -is [string]) {
-            [void]$sb.AppendLine("            Value     = '$($entry.Value)'")
-        }
-        else {
-            [void]$sb.AppendLine("            Value     = $($entry.Value)")
-        }
-        [void]$sb.AppendLine("            Exists    = `$$($entry.Exists)")
-        [void]$sb.AppendLine('        }')
-    }
-
-    [void]$sb.AppendLine('    )')
-    [void]$sb.AppendLine('}')
-
-    $sb.ToString() | Out-File -FilePath $Build -Encoding ASCII -Force
+    $entries = @($script:BuildData.Keys | Sort-Object | ForEach-Object { $script:BuildData[$_] })
+    Export-ProfileFile -Entries $entries -OutputPath $Build
 }
 
 function Get-BuildSettingCurrentValue {
@@ -1566,35 +1586,7 @@ function Export-SnapshotProfile {
         }
     }
 
-    # Build PSD1 content manually for clean formatting
-    $sb = [System.Text.StringBuilder]::new()
-    [void]$sb.AppendLine('@{')
-    [void]$sb.AppendLine("    GeneratedOn  = '$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')'")
-    [void]$sb.AppendLine("    ComputerName = '$env:COMPUTERNAME'")
-    [void]$sb.AppendLine('    Settings = @(')
-
-    foreach ($entry in $entries) {
-        [void]$sb.AppendLine('        @{')
-        [void]$sb.AppendLine("            Path      = '$($entry.Path)'")
-        [void]$sb.AppendLine("            ValueName = '$($entry.ValueName)'")
-        [void]$sb.AppendLine("            ValueType = '$($entry.ValueType)'")
-        if ($null -eq $entry.Value) {
-            [void]$sb.AppendLine('            Value     = $null')
-        }
-        elseif ($entry.Value -is [string]) {
-            [void]$sb.AppendLine("            Value     = '$($entry.Value)'")
-        }
-        else {
-            [void]$sb.AppendLine("            Value     = $($entry.Value)")
-        }
-        [void]$sb.AppendLine("            Exists    = `$$($entry.Exists)")
-        [void]$sb.AppendLine('        }')
-    }
-
-    [void]$sb.AppendLine('    )')
-    [void]$sb.AppendLine('}')
-
-    $sb.ToString() | Out-File -FilePath $OutputPath -Encoding ASCII -Force
+    Export-ProfileFile -Entries $entries -OutputPath $OutputPath
     Write-Host "  Snapshot saved to: $OutputPath" -ForegroundColor Green
     Write-Log "Snapshot saved: $OutputPath"
 }
