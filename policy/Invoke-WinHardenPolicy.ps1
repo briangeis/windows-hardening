@@ -1157,8 +1157,9 @@ function Invoke-ApplyAll {
     foreach ($setting in $Settings) {
         $state = Test-SettingState -Setting $setting
         if ($state -ne 'HARDENED') {
+            $scopeLabel = if ($setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
             $toApply += $setting
-            Write-Host "    $($setting.Name)  [$state -> HARDENED]" -ForegroundColor Yellow
+            Write-Host "    $scopeLabel $($setting.Name)  [$state -> HARDENED]" -ForegroundColor Yellow
         }
     }
 
@@ -1301,6 +1302,9 @@ function Invoke-ProfileMode {
 
         if (-not $entry.Exists) {
             # Exists = $false: desired state is absent; remove the value if present
+            $before = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
+            $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(not set)' }
+
             $params = @{
                 Path      = $entry.Path
                 ValueName = $entry.ValueName
@@ -1312,7 +1316,7 @@ function Invoke-ProfileMode {
                     $applied++
                     $script:AppliedCount++
                     Write-Host "  [OK] $scopeLabel $($entry.Name) - removed" -ForegroundColor Green
-                    Write-Log "RESTORED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Removed registry value"
+                    Write-Log "RESTORED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | Removed registry value"
                 }
                 'AlreadyAbsent' {
                     $skipped++
