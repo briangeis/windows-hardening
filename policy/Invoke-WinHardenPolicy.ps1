@@ -448,6 +448,7 @@ function Export-ProfileFile {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [array]$Entries,
         [Parameter(Mandatory)]
         [string]$OutputPath
