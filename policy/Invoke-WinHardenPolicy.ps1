@@ -1086,7 +1086,8 @@ function Show-SettingDetail {
                     switch ($result) {
                         'Removed' {
                             $script:AppliedCount++
-                            Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | Removed registry value | Verified"
+                            $action = if ($script:IsBuildMode) { 'Removal entry written to profile' } else { 'Removed registry value' }
+                            Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | $action | Verified"
                             $statusMessage = 'Restored to default.'
                             $statusColor   = 'Green'
                         }
@@ -1146,6 +1147,9 @@ function Show-SettingDetail {
             }
             'U' {
                 if ($script:IsBuildMode) {
+                    $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
+                    $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(not set)' }
+
                     $params = @{
                         Path      = $Setting.Path
                         ValueName = $Setting.ValueName
@@ -1154,7 +1158,7 @@ function Show-SettingDetail {
 
                     switch ($result) {
                         'Removed' {
-                            Write-Log "EXCLUDED $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Removed from build profile"
+                            Write-Log "EXCLUDED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | Removed from build profile | Verified"
                             $statusMessage = 'Removed from profile.'
                             $statusColor   = 'Green'
                         }
@@ -1163,12 +1167,12 @@ function Show-SettingDetail {
                             $statusColor   = 'Green'
                         }
                         'VerifyFailed' {
-                            Write-Log "FAILED $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude verification failed"
+                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude verification failed"
                             $statusMessage = 'Removed from profile but verification failed.'
                             $statusColor   = 'Red'
                         }
                         'RemoveFailed' {
-                            Write-Log "FAILED $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude failed"
+                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude failed"
                             $statusMessage = 'Failed to remove from profile.'
                             $statusColor   = 'Red'
                         }
