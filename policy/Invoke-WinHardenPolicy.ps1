@@ -1069,7 +1069,7 @@ function Show-SettingDetail {
                     switch ($result) {
                         'Removed' {
                             $script:AppliedCount++
-                            Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | Removed registry value"
+                            Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | Removed registry value | Verified"
                             $statusMessage = 'Restored to default.'
                             $statusColor   = 'Green'
                         }
@@ -1316,7 +1316,7 @@ function Invoke-ProfileMode {
                     $applied++
                     $script:AppliedCount++
                     Write-Host "  [OK] $scopeLabel $($entry.Name) - removed" -ForegroundColor Green
-                    Write-Log "RESTORED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | Removed registry value"
+                    Write-Log "RESTORED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | Removed registry value | Verified"
                 }
                 'AlreadyAbsent' {
                     $skipped++
