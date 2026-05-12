@@ -534,6 +534,9 @@ function Test-SettingState {
     $current = Get-SettingCurrentValue -Path $Setting.Path -ValueName $Setting.ValueName
 
     if (-not $current.Exists) {
+        if ($current.ExplicitAbsence -and $null -eq $Setting.DefaultValue) {
+            return 'DEFAULT'
+        }
         return 'NOT SET'
     }
 
@@ -753,15 +756,21 @@ function Invoke-SettingRemove {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [string]$Name,
+        [Parameter(Mandatory)]
         [string]$Path,
         [Parameter(Mandatory)]
-        [string]$ValueName
+        [string]$ValueName,
+        [Parameter(Mandatory)]
+        [string]$ValueType
     )
 
     if ($script:IsBuildMode) {
         $params = @{
+            Name      = $Name
             Path      = $Path
             ValueName = $ValueName
+            ValueType = $ValueType
         }
         return Invoke-BuildSettingRemove @params
     }
@@ -1007,7 +1016,12 @@ function Show-SettingDetail {
 
         # Input: apply hardened value, restore default, or exit
         Write-Host ''
-        Write-Host '  [H] Apply Hardened  [D] Restore Default  [Esc] Back' -ForegroundColor DarkYellow
+        $footer = if ($script:IsBuildMode) {
+            '  [H] Apply Hardened  [D] Restore Default  [U] Unset  [Esc] Back'
+        } else {
+            '  [H] Apply Hardened  [D] Restore Default  [Esc] Back'
+        }
+        Write-Host $footer -ForegroundColor DarkYellow
 
         if ($statusMessage) {
             Write-Host ''
@@ -1061,8 +1075,10 @@ function Show-SettingDetail {
 
                 if ($null -eq $Setting.DefaultValue) {
                     $params = @{
+                        Name      = $Setting.Name
                         Path      = $Setting.Path
                         ValueName = $Setting.ValueName
+                        ValueType = $Setting.ValueType
                     }
                     $result = Invoke-SettingRemove @params
 
@@ -1122,6 +1138,37 @@ function Show-SettingDetail {
                             $script:FailedCount++
                             Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Restore failed"
                             $statusMessage = 'Failed to restore.'
+                            $statusColor   = 'Red'
+                        }
+                    }
+                }
+            }
+            'U' {
+                if ($script:IsBuildMode) {
+                    $params = @{
+                        Path      = $Setting.Path
+                        ValueName = $Setting.ValueName
+                    }
+                    $result = Invoke-BuildSettingExclude @params
+
+                    switch ($result) {
+                        'Removed' {
+                            Write-Log "EXCLUDED $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Removed from build profile"
+                            $statusMessage = 'Removed from profile.'
+                            $statusColor   = 'Green'
+                        }
+                        'AlreadyAbsent' {
+                            $statusMessage = 'Already not in profile.'
+                            $statusColor   = 'Green'
+                        }
+                        'VerifyFailed' {
+                            Write-Log "FAILED $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude verification failed"
+                            $statusMessage = 'Removed from profile but verification failed.'
+                            $statusColor   = 'Red'
+                        }
+                        'RemoveFailed' {
+                            Write-Log "FAILED $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude failed"
+                            $statusMessage = 'Failed to remove from profile.'
                             $statusColor   = 'Red'
                         }
                     }
@@ -1306,8 +1353,10 @@ function Invoke-ProfileMode {
             $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(not set)' }
 
             $params = @{
+                Name      = $entry.Name
                 Path      = $entry.Path
                 ValueName = $entry.ValueName
+                ValueType = $entry.ValueType
             }
             $result = Invoke-SettingRemove @params
 
@@ -1423,7 +1472,9 @@ function Get-BuildSettingCurrentValue {
     .SYNOPSIS
         Reads the current value of a setting from the build profile.
     .OUTPUTS
-        Returns a hashtable with Exists (bool) and Value properties.
+        Returns a hashtable with Exists (bool), Value, and ExplicitAbsence (bool)
+        properties. ExplicitAbsence is true when an Exists = $false entry is
+        present, distinguishing it from a setting not in the profile at all.
     #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -1435,10 +1486,13 @@ function Get-BuildSettingCurrentValue {
     )
 
     $key = "$Path|$ValueName"
-    if ($script:BuildData.ContainsKey($key) -and $script:BuildData[$key].Exists) {
-        return @{ Exists = $true; Value = $script:BuildData[$key].Value }
+    if ($script:BuildData.ContainsKey($key)) {
+        if ($script:BuildData[$key].Exists) {
+            return @{ Exists = $true; Value = $script:BuildData[$key].Value; ExplicitAbsence = $false }
+        }
+        return @{ Exists = $false; Value = $null; ExplicitAbsence = $true }
     }
-    return @{ Exists = $false; Value = $null }
+    return @{ Exists = $false; Value = $null; ExplicitAbsence = $false }
 }
 
 function Invoke-BuildSettingWrite {
@@ -1500,7 +1554,59 @@ function Invoke-BuildSettingWrite {
 function Invoke-BuildSettingRemove {
     <#
     .SYNOPSIS
-        Removes a setting from the build profile.
+        Records a removal instruction for a setting in the build profile
+        by writing an Exists = $false entry.
+    .OUTPUTS
+        Returns 'Removed', 'AlreadyAbsent', 'RemoveFailed', or 'VerifyFailed'.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name,
+        [Parameter(Mandatory)]
+        [string]$Path,
+        [Parameter(Mandatory)]
+        [string]$ValueName,
+        [Parameter(Mandatory)]
+        [string]$ValueType
+    )
+
+    # Pre-check: return early if a removal entry already exists
+    $key = "$Path|$ValueName"
+    if ($script:BuildData.ContainsKey($key) -and -not $script:BuildData[$key].Exists) {
+        return 'AlreadyAbsent'
+    }
+
+    # Write: store Exists = $false to instruct Profile Mode to remove this value
+    try {
+        $script:BuildData[$key] = @{
+            Name      = $Name
+            Path      = $Path
+            ValueName = $ValueName
+            ValueType = $ValueType
+            Value     = $null
+            Exists    = $false
+        }
+        Export-BuildProfile
+    }
+    catch {
+        return 'RemoveFailed'
+    }
+
+    # Verify: confirm the removal entry is recorded correctly
+    if (-not $script:BuildData.ContainsKey($key) -or $script:BuildData[$key].Exists) {
+        return 'VerifyFailed'
+    }
+
+    return 'Removed'
+}
+
+function Invoke-BuildSettingExclude {
+    <#
+    .SYNOPSIS
+        Removes a setting entry from the build profile entirely,
+        leaving Profile Mode with no instruction for this setting.
     .OUTPUTS
         Returns 'Removed', 'AlreadyAbsent', 'RemoveFailed', or 'VerifyFailed'.
     #>
@@ -1513,9 +1619,9 @@ function Invoke-BuildSettingRemove {
         [string]$ValueName
     )
 
-    # Pre-check: return early if the entry is already absent
+    # Pre-check: return early if no entry exists
     $key = "$Path|$ValueName"
-    if (-not $script:BuildData.ContainsKey($key) -or -not $script:BuildData[$key].Exists) {
+    if (-not $script:BuildData.ContainsKey($key)) {
         return 'AlreadyAbsent'
     }
 
@@ -1529,7 +1635,7 @@ function Invoke-BuildSettingRemove {
     }
 
     # Verify: confirm the entry is no longer present
-    if ($script:BuildData.ContainsKey($key) -and $script:BuildData[$key].Exists) {
+    if ($script:BuildData.ContainsKey($key)) {
         return 'VerifyFailed'
     }
 
