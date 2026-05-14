@@ -1122,7 +1122,7 @@ function Show-SettingDetail {
                     switch ($result) {
                         'Written' {
                             $script:AppliedCount++
-                            Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.DefaultValue)"
+                            Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.DefaultValue) | Verified"
                             $statusMessage = 'Restored to default.'
                             $statusColor   = 'Green'
                         }
