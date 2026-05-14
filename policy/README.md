@@ -17,7 +17,7 @@ The script supports four modes, determined by which parameters are provided.
 
 ### Interactive Mode
 
-Opens a menu of settings from a definitions file. Each setting shows its current state on the device alongside the hardened and default values from the definitions file. Settings can be applied or restored individually, or all at once within a section. A snapshot of the current system state is saved automatically on startup.
+Opens a menu of settings from a definitions file. Each setting shows its current state on the device alongside the hardened and default values from the definitions file. Settings can be applied or reset to their default values individually, or all at once within a section. A snapshot of the current system state is saved automatically on startup.
 
 Use Interactive Mode for initial configuration of a device, reviewing the current state of settings, or making targeted adjustments to settings already in place.
 
