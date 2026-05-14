@@ -107,14 +107,7 @@ param(
 
 #region SESSION STATE
 
-# Resolved log file path: generated from -LogPath or defaulted if omitted.
-$script:LogPath = if (-not $LogPath) {
-    Join-Path (Get-Location) "Policy-Log_${env:COMPUTERNAME}.log"
-} elseif (Test-Path $LogPath -PathType Container) {
-    Join-Path $LogPath "Policy-Log_${env:COMPUTERNAME}.log"
-} else {
-    $LogPath
-}
+$script:HostName = [System.Net.Dns]::GetHostName()
 
 # Session counters for the log summary
 $script:AppliedCount = 0
@@ -127,6 +120,15 @@ $script:LGPOExePath   = $null
 # Build Mode profile data: profile file contents held in memory for the session.
 $script:IsBuildMode = $false
 $script:BuildData   = @{}
+
+# Resolved log file path: generated from -LogPath or defaulted if omitted.
+$script:LogPath = if (-not $LogPath) {
+    Join-Path (Get-Location) "Policy-Log_${script:HostName}.log"
+} elseif (Test-Path $LogPath -PathType Container) {
+    Join-Path $LogPath "Policy-Log_${script:HostName}.log"
+} else {
+    $LogPath
+}
 
 #endregion
 
@@ -163,15 +165,14 @@ function Write-LogSessionStart {
 
     # Gather OS info for the session header
     $osInfo = try {
-        $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop
-        "$($os.Caption) $($os.Version)"
+        (Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop).Caption
     }
     catch {
         'Unknown OS'
     }
 
     Write-Log '============================================================'
-    Write-Log "Session started - $env:COMPUTERNAME - $osInfo - $Mode Mode"
+    Write-Log "Session started - $script:HostName - $osInfo - $Mode Mode"
     if ($DefinitionsPath) {
         Write-Log "Definitions file: $DefinitionsPath"
     }
@@ -229,8 +230,11 @@ function Test-Prerequisites {
         Write-FatalError 'PowerShell 5.1 or later is required.'
     }
 
-    # Elevation
+    # Platform and elevation
     if ($RequireElevation) {
+        if ([System.Environment]::OSVersion.Platform -ne [System.PlatformID]::Win32NT) {
+            Write-FatalError 'This mode requires Windows.'
+        }
         $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
         $principal = [Security.Principal.WindowsPrincipal]$identity
         if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -460,7 +464,7 @@ function Export-ProfileFile {
     $sb = [System.Text.StringBuilder]::new()
     [void]$sb.AppendLine('@{')
     [void]$sb.AppendLine("    GeneratedOn  = '$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')'")
-    [void]$sb.AppendLine("    ComputerName = '$env:COMPUTERNAME'")
+    [void]$sb.AppendLine("    ComputerName = '$script:HostName'")
     [void]$sb.AppendLine('    Settings = @(')
 
     foreach ($entry in $Entries) {
@@ -1666,7 +1670,7 @@ function Get-SnapshotProfilePath {
     [OutputType([string])]
     param()
     $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-    return Join-Path (Get-Location) "Policy-Snapshot_${env:COMPUTERNAME}_${timestamp}.psd1"
+    return Join-Path (Get-Location) "Policy-Snapshot_${script:HostName}_${timestamp}.psd1"
 }
 
 function Export-SnapshotProfile {
