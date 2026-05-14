@@ -1093,7 +1093,7 @@ function Show-SettingDetail {
                     switch ($result) {
                         'Removed' {
                             $script:AppliedCount++
-                            $action = if ($script:IsBuildMode) { 'Removal entry written to profile' } else { 'Removed registry value' }
+                            $action = if ($script:IsBuildMode) { 'Removal entry written to profile' } else { 'After: (absent)' }
                             Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | $action | Verified"
                             $statusMessage = 'Restored to default.'
                             $statusColor   = 'Green'
@@ -1377,7 +1377,7 @@ function Invoke-ProfileMode {
                     $applied++
                     $script:AppliedCount++
                     Write-Host "  [OK] $scopeLabel $($entry.Name) - removed" -ForegroundColor Green
-                    Write-Log "RESTORED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | Removed registry value | Verified"
+                    Write-Log "RESTORED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: (absent) | Verified"
                 }
                 'AlreadyAbsent' {
                     $skipped++
