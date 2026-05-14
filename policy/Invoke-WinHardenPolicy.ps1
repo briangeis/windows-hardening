@@ -12,9 +12,9 @@
     Interactive Mode
       Presents a menu of settings from a definitions file, showing the current
       registry state of each setting against its hardened and default values.
-      Settings can be applied or restored individually, or all at once within
-      a section. A snapshot is saved automatically on startup. Requires
-      administrator privileges.
+      Settings can be applied or reset to their default values individually,
+      or all at once within a section. A snapshot is saved automatically on
+      startup. Requires administrator privileges.
 
     Profile Mode
       Reads a profile file and applies all settings without prompting.
@@ -968,7 +968,7 @@ function Show-SettingDetail {
     <#
     .SYNOPSIS
         Shows details of a single setting and allows the user
-        to apply the hardened value or restore the default.
+        to apply the hardened value or reset to default.
     #>
     [CmdletBinding()]
     param(
@@ -1020,12 +1020,12 @@ function Show-SettingDetail {
             Write-Host '  * Per-user setting: applies to current user only' -ForegroundColor DarkYellow
         }
 
-        # Input: apply hardened value, restore default, or exit
+        # Input: apply hardened value, reset to default, or exit
         Write-Host ''
         $footer = if ($script:IsBuildMode) {
-            '  [H] Apply Hardened  [D] Restore Default  [U] Unset  [Esc] Back'
+            '  [H] Apply Hardened  [D] Reset to Default  [X] Exclude from Profile  [Esc] Back'
         } else {
-            '  [H] Apply Hardened  [D] Restore Default  [Esc] Back'
+            '  [H] Apply Hardened  [D] Reset to Default  [Esc] Back'
         }
         Write-Host $footer -ForegroundColor DarkYellow
 
@@ -1093,7 +1093,7 @@ function Show-SettingDetail {
                             $script:AppliedCount++
                             $action = if ($script:IsBuildMode) { 'Removal entry written to profile' } else { 'After: (absent)' }
                             Write-Log "RESET $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | $action | Verified"
-                            $statusMessage = 'Restored to default.'
+                            $statusMessage = 'Reset to default.'
                             $statusColor   = 'Green'
                         }
                         'AlreadyAbsent' {
@@ -1128,7 +1128,7 @@ function Show-SettingDetail {
                         'Written' {
                             $script:AppliedCount++
                             Write-Log "RESET $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.DefaultValue) | Verified"
-                            $statusMessage = 'Restored to default.'
+                            $statusMessage = 'Reset to default.'
                             $statusColor   = 'Green'
                         }
                         'AlreadyPresent' {
@@ -1137,20 +1137,20 @@ function Show-SettingDetail {
                         }
                         'VerifyFailed' {
                             $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Restore verification failed"
-                            $statusMessage = 'Restored but verification failed.'
+                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset verification failed"
+                            $statusMessage = 'Reset but verification failed.'
                             $statusColor   = 'Red'
                         }
                         'WriteFailed' {
                             $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Restore failed"
-                            $statusMessage = 'Failed to restore.'
+                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset failed"
+                            $statusMessage = 'Failed to reset.'
                             $statusColor   = 'Red'
                         }
                     }
                 }
             }
-            'U' {
+            'X' {
                 if ($script:IsBuildMode) {
                     $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
                     $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(not set)' }
@@ -1164,7 +1164,7 @@ function Show-SettingDetail {
                     switch ($result) {
                         'Removed' {
                             Write-Log "EXCLUDED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | Removed from build profile | Verified"
-                            $statusMessage = 'Removed from profile.'
+                            $statusMessage = 'Excluded from profile.'
                             $statusColor   = 'Green'
                         }
                         'AlreadyAbsent' {
@@ -1173,12 +1173,12 @@ function Show-SettingDetail {
                         }
                         'VerifyFailed' {
                             Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude verification failed"
-                            $statusMessage = 'Removed from profile but verification failed.'
+                            $statusMessage = 'Excluded from profile but verification failed.'
                             $statusColor   = 'Red'
                         }
                         'RemoveFailed' {
                             Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude failed"
-                            $statusMessage = 'Failed to remove from profile.'
+                            $statusMessage = 'Failed to exclude from profile.'
                             $statusColor   = 'Red'
                         }
                     }
