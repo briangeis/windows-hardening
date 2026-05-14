@@ -1194,7 +1194,7 @@ function Show-SettingDetail {
 function Invoke-ApplyAll {
     <#
     .SYNOPSIS
-        Applies the hardened value to all settings
+        Applies the hardened value to all unhardened settings
         in a section after user confirmation.
     #>
     [CmdletBinding()]
