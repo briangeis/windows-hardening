@@ -1777,7 +1777,7 @@ switch ($PSCmdlet.ParameterSetName) {
         exit 0
     }
     'Snapshot' {
-        Write-LogSessionStart -Mode 'Snapshot' -DefinitionsPath $DefinitionsPath -ProfilePath $Snapshot
+        Write-LogSessionStart -Mode 'Snapshot' -DefinitionsPath $DefinitionsPath
         Test-Prerequisites -RequireElevation $true
 
         $definitions = Import-DefinitionsFile -Path $DefinitionsPath
