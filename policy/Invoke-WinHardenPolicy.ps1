@@ -1055,7 +1055,7 @@ function Show-SettingDetail {
                 switch ($result) {
                     'Written' {
                         $script:AppliedCount++
-                        Write-Log "CHANGED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.HardenedValue) | Verified"
+                        Write-Log "APPLIED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.HardenedValue) | Verified"
                         $statusMessage = 'Applied and verified.'
                         $statusColor   = 'Green'
                     }
@@ -1094,7 +1094,7 @@ function Show-SettingDetail {
                         'Removed' {
                             $script:AppliedCount++
                             $action = if ($script:IsBuildMode) { 'Removal entry written to profile' } else { 'After: (absent)' }
-                            Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | $action | Verified"
+                            Write-Log "RESET $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | $action | Verified"
                             $statusMessage = 'Restored to default.'
                             $statusColor   = 'Green'
                         }
@@ -1129,7 +1129,7 @@ function Show-SettingDetail {
                     switch ($result) {
                         'Written' {
                             $script:AppliedCount++
-                            Write-Log "RESTORED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.DefaultValue) | Verified"
+                            Write-Log "RESET $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.DefaultValue) | Verified"
                             $statusMessage = 'Restored to default.'
                             $statusColor   = 'Green'
                         }
@@ -1263,7 +1263,7 @@ function Invoke-ApplyAll {
                 $applied++
                 $script:AppliedCount++
                 Write-Host "  [OK] $scopeLabel $($setting.Name)" -ForegroundColor Green
-                Write-Log "CHANGED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $($setting.HardenedValue) | Verified"
+                Write-Log "APPLIED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $($setting.HardenedValue) | Verified"
             }
             'VerifyFailed' {
                 $failed++
@@ -1377,7 +1377,7 @@ function Invoke-ProfileMode {
                     $applied++
                     $script:AppliedCount++
                     Write-Host "  [OK] $scopeLabel $($entry.Name) - removed" -ForegroundColor Green
-                    Write-Log "RESTORED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: (absent) | Verified"
+                    Write-Log "RESET $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: (absent) | Verified"
                 }
                 'AlreadyAbsent' {
                     $skipped++
@@ -1415,7 +1415,7 @@ function Invoke-ProfileMode {
                     $applied++
                     $script:AppliedCount++
                     Write-Host "  [OK] $scopeLabel $($entry.Name) - applied" -ForegroundColor Green
-                    Write-Log "CHANGED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $($entry.Value) | Verified"
+                    Write-Log "APPLIED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $($entry.Value) | Verified"
                 }
                 'AlreadyPresent' {
                     $skipped++
