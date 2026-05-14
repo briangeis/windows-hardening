@@ -171,7 +171,6 @@ function Write-LogSessionStart {
         'Unknown OS'
     }
 
-    Write-Log '============================================================'
     Write-Log "Session started - $script:HostName - $osInfo - $Mode Mode"
     if ($DefinitionsPath) {
         Write-Log "Definitions file: $DefinitionsPath"
@@ -189,7 +188,6 @@ function Write-LogSessionEnd {
     [CmdletBinding()]
     param()
     Write-Log "Session ended - $($script:AppliedCount) applied, $($script:FailedCount) failed"
-    Write-Log '============================================================'
 }
 
 function Write-FatalError {
@@ -1343,17 +1341,13 @@ function Invoke-ProfileMode {
 
     # Generate snapshot of settings about to be changed
     $snapshotPath = Get-SnapshotProfilePath
-    Write-Host ''
-    Write-Host '  Generating snapshot before applying profile...' -ForegroundColor Cyan
     Export-SnapshotProfile -Settings $ProfileData.Settings -OutputPath $snapshotPath
-    Write-Host "  Snapshot saved to: $snapshotPath" -ForegroundColor Green
+    Write-Host "  Snapshot: $snapshotPath"
 
     $applied = 0
     $failed  = 0
     $skipped = 0
 
-    Write-Host ''
-    Write-Host '  Applying profile...' -ForegroundColor Cyan
     Write-Host ''
 
     foreach ($entry in $ProfileData.Settings) {
@@ -1758,9 +1752,6 @@ switch ($PSCmdlet.ParameterSetName) {
         Initialize-EditionContext
 
         Write-Host ''
-        Write-Host '  ================================================' -ForegroundColor Cyan
-        Write-Host '  Invoke-WinHardenPolicy - Profile Mode' -ForegroundColor Cyan
-        Write-Host '  ================================================' -ForegroundColor Cyan
         Write-Host "  Profile: $ProfilePath"
 
         $success = Invoke-ProfileMode -ProfileData $profileData
@@ -1786,19 +1777,14 @@ switch ($PSCmdlet.ParameterSetName) {
 
         $definitions = Import-DefinitionsFile -Path $DefinitionsPath
 
-        Write-Host ''
-        Write-Host '  ================================================' -ForegroundColor Cyan
-        Write-Host '  Invoke-WinHardenPolicy - Snapshot Mode' -ForegroundColor Cyan
-        Write-Host '  ================================================' -ForegroundColor Cyan
-
         $outputPath = if (Test-Path $Snapshot -PathType Container) {
             $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-            Join-Path $Snapshot "Policy-Snapshot_${env:COMPUTERNAME}_${timestamp}.psd1"
+            Join-Path $Snapshot "Policy-Snapshot_${script:HostName}_${timestamp}.psd1"
         } else {
             $Snapshot
         }
-        Write-Host ''
         Export-SnapshotProfile -Definitions $definitions -OutputPath $outputPath
+        Write-Host ''
         Write-Host "  Snapshot saved to: $outputPath" -ForegroundColor Green
         Write-LogSessionEnd
         exit 0
