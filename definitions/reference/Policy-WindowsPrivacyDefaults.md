@@ -6,9 +6,9 @@
 
 **Categories**
 - [Telemetry & Reporting](#telemetry--reporting)
+- [Security Defaults](#security-defaults)
 - [Activity & History](#activity--history)
 - [Content Delivery](#content-delivery)
-- [Security Defaults](#security-defaults)
 - [Windows Update](#windows-update)
 - [Windows Applications](#windows-applications)
 
@@ -29,47 +29,50 @@ Covers data collection pipelines that operate independently of the AllowTelemetr
 
 | PSD1 Section              | HKLM | HKCU | Total |
 |---------------------------|:----:|:----:|:-----:|
-| Application Compatibility | 2    | 0    | 2     |
-| Diagnostic Data           | 2    | 0    | 2     |
-| Input Data                | 1    | 0    | 1     |
+| Diagnostic Data           | 3    | 0    | 3     |
 | Error Reporting           | 1    | 0    | 1     |
+| Application Compatibility | 2    | 0    | 2     |
+| Input Data                | 1    | 0    | 1     |
+
+## Security Defaults
+
+*Which security-affecting behaviors ship enabled by default on Home and Pro?*
+
+Covers security-affecting behaviors that are enabled by default on Home and Pro but managed centrally in enterprise environments. Removable Media requires all three of its settings applied together to fully close the AutoPlay and AutoRun attack surface. The remaining sections address DNS name resolution exposure, authentication and lock screen defaults, data written to disk, and MDM enrollment.
+
+| PSD1 Section               | HKLM | HKCU | Total |
+|----------------------------|:----:|:----:|:-----:|
+| Removable Media            | 3    | 0    | 3     |
+| Network                    | 2    | 0    | 2     |
+| Authentication & Lock Screen | 3  | 0    | 3     |
+| Data at Rest               | 3    | 0    | 3     |
+| Device Management          | 1    | 0    | 1     |
 
 ## Activity & History
 
 *What records does Windows keep locally about activity on this device?*
 
-Covers on-device tracking behaviors that accumulate without explicit user action. Sections address document and app history in the Start menu and taskbar, File Explorer search records and account-driven cloud content, and the local clipboard history store. These are distinct from the activity synchronization settings in Policy-MicrosoftPrivacyConnections, which address cloud-side behavior.
+Covers on-device tracking behaviors that accumulate without explicit user action. Sections address document and app history in the Start menu and taskbar, File Explorer and Windows Search pane search history and account-driven cloud content, and the local clipboard history store. These are distinct from the activity synchronization settings in Policy-MicrosoftPrivacyConnections, which address cloud-side behavior.
 
 | PSD1 Section           | HKLM | HKCU | Total |
 |------------------------|:----:|:----:|:-----:|
 | Document & App History | 2    | 0    | 2     |
-| File Explorer          | 1    | 1    | 2     |
+| Search & Explorer      | 1    | 2    | 3     |
 | Clipboard              | 1    | 0    | 1     |
 
 ## Content Delivery
 
 *What content or applications does Windows deliver to this device without explicit user action?*
 
-Covers content and applications Windows delivers without explicit user action. The Cloud Content section extends the coverage in Policy-MicrosoftPrivacyConnections with tips and account-tailored notifications not addressed by that file. App Delivery covers the Push To Install service, which allows apps to be installed remotely from a browser or another device.
+Covers content and applications Windows delivers without explicit user action. The Cloud Content section extends the coverage in Policy-MicrosoftPrivacyConnections with tips and account-tailored notifications not addressed by that file. Spotlight covers the Windows 11-specific Spotlight surfaces confirmed by testing to fall outside the master switch in Policy-MicrosoftPrivacyConnections. Search covers behaviors that connect Windows Search to Microsoft services. App Delivery covers the Push To Install service, which allows apps to be installed remotely from a browser or another device. Account Notifications covers Microsoft account prompts that Windows delivers to the Start menu.
 
-| PSD1 Section  | HKLM | HKCU | Total |
-|---------------|:----:|:----:|:-----:|
-| Cloud Content | 2    | 0    | 2     |
-| App Delivery  | 1    | 0    | 1     |
-
-## Security Defaults
-
-*Which security-affecting behaviors ship enabled by default on Home and Pro?*
-
-Covers security-affecting behaviors that are enabled by default on Home and Pro but managed centrally in enterprise environments. Removable Media requires all three of its settings applied together to fully close the AutoPlay and AutoRun attack surface. The remaining sections address MDM enrollment, authentication defaults, data written to disk, and DNS name resolution exposure.
-
-| PSD1 Section      | HKLM | HKCU | Total |
-|-------------------|:----:|:----:|:-----:|
-| Removable Media   | 3    | 0    | 3     |
-| Remote Management | 1    | 0    | 1     |
-| Sign-in & Session | 2    | 0    | 2     |
-| Data at Rest      | 3    | 0    | 3     |
-| Network           | 1    | 0    | 1     |
+| PSD1 Section          | HKLM | HKCU | Total |
+|-----------------------|:----:|:----:|:-----:|
+| Cloud Content         | 2    | 0    | 2     |
+| Spotlight             | 0    | 4    | 4     |
+| Search                | 2    | 0    | 2     |
+| App Delivery          | 1    | 0    | 1     |
+| Account Notifications | 0    | 1    | 1     |
 
 ## Windows Update
 
@@ -87,10 +90,13 @@ Policy-MicrosoftPrivacyConnections contains settings that block Windows Update a
 
 *What network or data collection behavior do built-in Windows applications have by default?*
 
-Covers privacy and network access settings for built-in Windows applications that have default behaviors warranting configuration. Windows Media Player is included despite its reduced role in Windows 11 because its DRM subsystem contacts Microsoft independently of other controls in this file.
+Covers privacy and network access settings for built-in Windows applications that have default behaviors warranting configuration. Windows Media Player is included despite its reduced role in Windows 11 because its DRM subsystem contacts Microsoft independently of other controls in this file. Game Recording covers the Windows game capture feature bundled with Windows Game Bar. Windows AI covers the AI-powered features introduced in Windows 11 23H2 and later. Phone Link covers the background connectivity maintained by the Phone Link app.
 
 | PSD1 Section         | HKLM | HKCU | Total |
 |----------------------|:----:|:----:|:-----:|
+| Windows AI           | 3    | 1    | 4     |
+| Phone Link           | 1    | 0    | 1     |
+| Game Recording       | 1    | 0    | 1     |
 | Windows Media Player | 1    | 2    | 3     |
 
 ---
@@ -99,13 +105,13 @@ Covers privacy and network access settings for built-in Windows applications tha
 
 | Category              | HKLM   | HKCU  | Total  |
 |-----------------------|:------:|:-----:|:------:|
-| Telemetry & Reporting | 6      | 0     | 6      |
-| Activity & History    | 4      | 1     | 5      |
-| Content Delivery      | 3      | 0     | 3      |
-| Security Defaults     | 10     | 0     | 10     |
+| Telemetry & Reporting | 7      | 0     | 7      |
+| Security Defaults     | 12     | 0     | 12     |
+| Activity & History    | 4      | 2     | 6      |
+| Content Delivery      | 5      | 5     | 10     |
 | Windows Update        | 2      | 0     | 2      |
-| Windows Applications  | 1      | 2     | 3      |
-| **Totals**            | **26** | **3** | **29** |
+| Windows Applications  | 6      | 3     | 9      |
+| **Totals**            | **36** | **10** | **46** |
 
 ## Settings Requiring Additional Steps
 
@@ -123,7 +129,7 @@ All three settings are required to fully close the AutoPlay and AutoRun attack s
 
 ## Counterintuitive GPO Behavior
 
-### Disable File Explorer Account Insights (File Explorer)
+### Disable File Explorer Account Insights (Search & Explorer)
 
 The GPO governing this setting is named "Show files based on your account and cloud provider activity." To prevent File Explorer from showing account-based content, the policy must be set to Enabled, which writes DisableGraphRecentItems=1. Setting the policy to Disabled writes DisableGraphRecentItems=0, which enables the feature. The registry value name is self-consistent: 1 disables the feature and 0 does not. The GPO name is counterintuitive because enabling a policy named "Show files" is what prevents the files from being shown.
 
@@ -136,6 +142,18 @@ WER provides crash analysis information useful for diagnosing application and sy
 ### Disable Automatic Windows Update (Update Behavior)
 
 This setting requires manual user action to check for and install updates. Users who do not check regularly will miss security patches, leaving the device exposed to known vulnerabilities. This setting is best suited to users who actively manage their own update schedule.
+
+### Disable Windows Copilot (Windows AI)
+
+The policy controlling the Copilot panel (TurnOffWindowsCopilot) is deprecated as of Windows 11 24H2. In 24H2 and later, Copilot is delivered as a standalone Windows Store app that this policy does not control. On devices running 24H2 or later, no policy-based equivalent exists for this file's scope. The setting is included because it remains effective on Windows 11 23H2 and earlier, where the Copilot panel is a shell component.
+
+### Disable Recall (Windows AI)
+
+Recall requires Copilot+ PC hardware with a dedicated NPU and is not available on standard Windows 11 devices. It is also not documented as applicable to Home edition. The setting has no effect on devices where Recall is unavailable. On supported devices, the policy prevents Recall from being enabled in Settings entirely.
+
+### Disable Click to Do and Disable Settings Agentic Search (Windows AI)
+
+Both features were introduced in Windows 11 24H2. On devices running earlier versions, both settings are inert but safe to apply. On Copilot+ PCs, Click to Do analyzes screen content to provide contextual suggestions; Settings agentic search uses an AI model for natural language queries within the Settings app.
 
 ### Disable Smart Multi-Homed Name Resolution (Network)
 
@@ -155,23 +173,44 @@ The following settings have `GPOPath` and `GPOState` set to `$null` in the defin
 ```
 Policy-WindowsPrivacyDefaults.psd1
 +-- Telemetry & Reporting
+|   +-- Diagnostic Data
+|   |   +-- Exclude Device Name from Diagnostic Data
+|   |   +-- Limit Diagnostic Log Collection
+|   |   \-- Limit Dump Collection
+|   +-- Error Reporting
+|   |   \-- Disable Windows Error Reporting
 |   +-- Application Compatibility
 |   |   +-- Disable Application Telemetry
 |   |   \-- Disable Inventory Collector
-|   +-- Diagnostic Data
-|   |   +-- Limit Diagnostic Log Collection
-|   |   \-- Limit Dump Collection
-|   +-- Input Data
-|   |   \-- Disable Inking and Typing Data Collection
-|   \-- Error Reporting
-|       \-- Disable Windows Error Reporting
+|   \-- Input Data
+|       \-- Disable Inking and Typing Data Collection
+|
++-- Security Defaults
+|   +-- Removable Media
+|   |   +-- Disallow AutoPlay for Nonvolume Devices
+|   |   +-- Disable AutoRun Command Execution
+|   |   \-- Disable AutoPlay
+|   +-- Network
+|   |   +-- Disable Multicast Name Resolution
+|   |   \-- Disable Smart Multi-Homed Name Resolution
+|   +-- Authentication & Lock Screen
+|   |   +-- Turn Off Lock Screen App Notifications
+|   |   +-- Disable Automatic Sign-In After Restart
+|   |   \-- Disable Local Account Security Questions
+|   +-- Data at Rest
+|   |   +-- Disable Hibernation
+|   |   +-- Disable Fast Startup
+|   |   \-- Disable Indexing of Encrypted Files
+|   \-- Device Management
+|       \-- Disable MDM Enrollment
 |
 +-- Activity & History
 |   +-- Document & App History
 |   |   +-- Disable Recently Opened Document History
 |   |   \-- Remove Recently Added List from Start Menu
-|   +-- File Explorer
+|   +-- Search & Explorer
 |   |   +-- Disable File Explorer Search History
+|   |   +-- Disable Search History
 |   |   \-- Disable File Explorer Account Insights
 |   \-- Clipboard
 |       \-- Disable Clipboard History
@@ -180,25 +219,18 @@ Policy-WindowsPrivacyDefaults.psd1
 |   +-- Cloud Content
 |   |   +-- Disable Windows Tips
 |   |   \-- Disable Consumer Account State Content
-|   \-- App Delivery
-|       \-- Disable Push To Install Service
-|
-+-- Security Defaults
-|   +-- Removable Media
-|   |   +-- Disallow AutoPlay for Nonvolume Devices
-|   |   +-- Disable AutoRun Command Execution
-|   |   \-- Disable AutoPlay
-|   +-- Remote Management
-|   |   \-- Disable MDM Enrollment
-|   +-- Sign-in & Session
-|   |   +-- Disable Automatic Sign-In After Restart
-|   |   \-- Disable Local Account Security Questions
-|   +-- Data at Rest
-|   |   +-- Disable Hibernation
-|   |   +-- Disable Fast Startup
-|   |   \-- Disable Indexing of Encrypted Files
-|   \-- Network
-|       \-- Disable Smart Multi-Homed Name Resolution
+|   +-- Spotlight
+|   |   +-- Disable Spotlight Collection on Desktop
+|   |   +-- Disable Windows Welcome Experience
+|   |   +-- Disable Spotlight on Action Center
+|   |   \-- Disable Spotlight on Settings
+|   +-- Search
+|   |   +-- Disable Search Highlights
+|   |   \-- Disable Cloud Search
+|   +-- App Delivery
+|   |   \-- Disable Push To Install Service
+|   \-- Account Notifications
+|       \-- Disable Account Notifications in Start
 |
 +-- Windows Update
 |   \-- Update Behavior
@@ -206,6 +238,15 @@ Policy-WindowsPrivacyDefaults.psd1
 |       \-- Exclude Driver Updates from Windows Update
 |
 \-- Windows Applications
+    +-- Windows AI
+    |   +-- Disable Windows Copilot
+    |   +-- Disable Recall
+    |   +-- Disable Click to Do
+    |   \-- Disable Settings Agentic Search
+    +-- Phone Link
+    |   \-- Disable Phone-PC Linking
+    +-- Game Recording
+    |   \-- Disable Game Recording and Broadcasting
     \-- Windows Media Player
         +-- Disable Windows Media DRM Internet Access
         +-- Disable CD and DVD Media Information Retrieval
