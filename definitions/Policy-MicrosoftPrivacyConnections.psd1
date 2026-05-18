@@ -43,7 +43,7 @@
                         }
                         @{
                             Name          = 'Disable Consumer Experiences'
-                            Description   = 'Turns off Microsoft consumer experiences (tailored suggestions and recommendations)'
+                            Description   = 'Turns off Microsoft consumer experiences and tailored suggestions'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
                             ValueName     = 'DisableWindowsConsumerFeatures'
                             ValueType     = 'DWord'
@@ -64,8 +64,8 @@
                             GPOState      = 'Enabled'
                         }
                         @{
-                            Name          = 'Set Feedback Frequency to Never (Period)'
-                            Description   = 'Sets the feedback frequency period to never'
+                            Name          = 'Set Feedback Period to Zero'
+                            Description   = 'Sets the feedback period value to zero'
                             Path          = 'HKCU:\SOFTWARE\Microsoft\Siuf\Rules'
                             ValueName     = 'PeriodInNanoSeconds'
                             ValueType     = 'DWord'
@@ -75,7 +75,7 @@
                             GPOState      = $null
                         }
                         @{
-                            Name          = 'Set Feedback Frequency to Never (Count)'
+                            Name          = 'Set Feedback Count to Zero'
                             Description   = 'Sets the number of feedback prompts per period to zero'
                             Path          = 'HKCU:\SOFTWARE\Microsoft\Siuf\Rules'
                             ValueName     = 'NumberOfSIUFInPeriod'
@@ -84,6 +84,48 @@
                             DefaultValue  = $null
                             GPOPath       = $null
                             GPOState      = $null
+                        }
+                    )
+                }
+
+                # -- Section: Advertising & Tracking --
+                @{
+                    Name        = 'Advertising & Tracking'
+                    Description = 'Controls advertising ID and language tracking for behavioral profiling'
+                    Settings    = @(
+                        @{
+                            Name          = 'Disable Advertising ID (Feature)'
+                            Description   = 'Turns off the advertising ID at the feature level'
+                            Path          = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo'
+                            ValueName     = 'Enabled'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > User Profiles > Turn off the advertising ID'
+                            GPOState      = 'Enabled'
+                        }
+                        @{
+                            Name          = 'Disable Advertising ID (Policy)'
+                            Description   = 'Enforces the advertising ID disable at the policy level'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo'
+                            ValueName     = 'DisabledByGroupPolicy'
+                            ValueType     = 'DWord'
+                            HardenedValue = 1
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > User Profiles > Turn off the advertising ID'
+                            GPOState      = 'Enabled'
+                        }
+                        @{
+                            Name          = 'Disable Language List Access'
+                            Description   = 'Prevents websites from using your language list for targeted content'
+                            Path          = 'HKCU:\Control Panel\International\User Profile'
+                            ValueName     = 'HttpAcceptLanguageOptOut'
+                            ValueType     = 'DWord'
+                            HardenedValue = 1
+                            DefaultValue  = $null
+                            GPOPath       = $null
+                            GPOState      = $null
+                            Note          = 'Affects UWP apps and WinHTTP apps but not Chromium-based browsers.'
                         }
                     )
                 }
@@ -103,6 +145,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Defender Antivirus > MAPS > Join Microsoft MAPS'
                             GPOState      = 'Enabled (Disabled)'
+                            Note          = 'Disabling reduces real-time cloud-based threat detection in Defender.'
                         }
                         @{
                             Name          = 'Disable Sample Submission'
@@ -114,6 +157,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Defender Antivirus > MAPS > Send file samples when further analysis is required'
                             GPOState      = 'Enabled (Never Send)'
+                            Note          = 'Disabling reduces Defender''s ability to analyze new or unknown threats.'
                         }
                         @{
                             Name          = 'Disable MSRT Diagnostic Data'
@@ -179,58 +223,6 @@
             Description = 'Settings controlling data flow to and from Microsoft cloud services'
             Sections    = @(
 
-                # -- Section: Cortana & Search --
-                @{
-                    Name        = 'Cortana & Search'
-                    Description = 'Controls Cortana features and web search integration'
-                    Settings    = @(
-                        @{
-                            Name          = 'Disable Cortana'
-                            Description   = 'Turns off Cortana'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
-                            ValueName     = 'AllowCortana'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Search > Allow Cortana'
-                            GPOState      = 'Disabled'
-                        }
-                        @{
-                            Name          = 'Disable Search Location'
-                            Description   = 'Prevents Cortana and Search from using location data'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
-                            ValueName     = 'AllowSearchToUseLocation'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Search > Allow search and Cortana to use location'
-                            GPOState      = 'Disabled'
-                        }
-                        @{
-                            Name          = 'Disable Web Search'
-                            Description   = 'Prevents searching the web from Windows Desktop Search'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
-                            ValueName     = 'DisableWebSearch'
-                            ValueType     = 'DWord'
-                            HardenedValue = 1
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Search > Do not allow web search'
-                            GPOState      = 'Enabled'
-                        }
-                        @{
-                            Name          = 'Disable Web Results in Search'
-                            Description   = 'Stops web queries and results from showing in Search'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
-                            ValueName     = 'ConnectedSearchUseWeb'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Search > Don''t search the web or display web results in Search'
-                            GPOState      = 'Enabled'
-                        }
-                    )
-                }
-
                 # -- Section: OneDrive --
                 @{
                     Name        = 'OneDrive'
@@ -249,7 +241,7 @@
                         }
                         @{
                             Name          = 'Disable OneDrive Network Traffic Before Sign-In'
-                            Description   = 'Prevents OneDrive from generating network traffic until the user signs in'
+                            Description   = 'Prevents OneDrive from generating network traffic until signed in'
                             Path          = 'HKLM:\SOFTWARE\Microsoft\OneDrive'
                             ValueName     = 'PreventNetworkTrafficPreUserSignIn'
                             ValueType     = 'DWord'
@@ -264,11 +256,11 @@
                 # -- Section: Microsoft Account --
                 @{
                     Name        = 'Microsoft Account'
-                    Description = 'Controls Microsoft Account cloud authentication'
+                    Description = 'Controls the Microsoft Account sign-in service'
                     Settings    = @(
                         @{
                             Name          = 'Disable Microsoft Account Sign-In Assistant'
-                            Description   = 'Disables the wlidsvc service. WARNING: Many apps and Windows Update features depend on this service.'
+                            Description   = 'Turns off the Microsoft Account Sign-In Assistant service'
                             Path          = 'HKLM:\SYSTEM\CurrentControlSet\Services\wlidsvc'
                             ValueName     = 'Start'
                             ValueType     = 'DWord'
@@ -276,18 +268,84 @@
                             DefaultValue  = 2  # 2 = Automatic
                             GPOPath       = $null
                             GPOState      = $null
+                            Warning       = 'Breaks sign-in for Store, OneDrive, Office, Xbox, and Windows Update.'
                         }
                     )
                 }
 
-                # -- Section: Cloud Sync --
+                # -- Section: Windows Search --
                 @{
-                    Name        = 'Cloud Sync'
-                    Description = 'Controls synchronization of Windows settings and clipboard across devices'
+                    Name        = 'Windows Search'
+                    Description = 'Controls Windows Search features and web integration'
                     Settings    = @(
                         @{
+                            Name          = 'Disable Web Results in Search'
+                            Description   = 'Prevents web queries and results from appearing in Search'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
+                            ValueName     = 'ConnectedSearchUseWeb'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Search > Don''t search the web or display web results in Search'
+                            GPOState      = 'Enabled'
+                        }
+                        @{
+                            Name          = 'Disable Web Search'
+                            Description   = 'Prevents searching the web from Windows Desktop Search'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
+                            ValueName     = 'DisableWebSearch'
+                            ValueType     = 'DWord'
+                            HardenedValue = 1
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Search > Do not allow web search'
+                            GPOState      = 'Enabled'
+                        }
+                        @{
+                            Name          = 'Disable Search Location'
+                            Description   = 'Prevents Cortana and Search from using location data'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
+                            ValueName     = 'AllowSearchToUseLocation'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Search > Allow search and Cortana to use location'
+                            GPOState      = 'Disabled'
+                        }
+                        @{
+                            Name          = 'Disable Cortana'
+                            Description   = 'Turns off Cortana'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
+                            ValueName     = 'AllowCortana'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Search > Allow Cortana'
+                            GPOState      = 'Disabled'
+                            Note          = 'Cortana is deprecated on Windows 11 and removed as of version 23H2.'
+                        }
+                    )
+                }
+
+                # -- Section: Cross-Device Experiences --
+                @{
+                    Name        = 'Cross-Device Experiences'
+                    Description = 'Controls the Microsoft cross-device platform and connected sync features'
+                    Settings    = @(
+                        @{
+                            Name          = 'Disable Cross-Device Experiences'
+                            Description   = 'Prevents other devices from launching or continuing apps on this device'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+                            ValueName     = 'EnableCdp'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Group Policy > Continue experiences on this device'
+                            GPOState      = 'Disabled'
+                            Caution       = 'May break Phone Link features including SMS mirroring and call handling.'
+                        }
+                        @{
                             Name          = 'Disable Settings Sync'
-                            Description   = 'Turns off settings synchronization; prevents user override'
+                            Description   = 'Turns off settings synchronization and blocks the user from re-enabling'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\SettingSync'
                             ValueName     = 'DisableSettingSync'
                             ValueType     = 'DWord'
@@ -318,17 +376,6 @@
                             GPOPath       = 'Computer Configuration > Administrative Templates > System > OS Policies > Allow Clipboard synchronization across devices'
                             GPOState      = 'Disabled'
                         }
-                        @{
-                            Name          = 'Disable Messaging Cloud Sync'
-                            Description   = 'Prevents messaging cloud synchronization'
-                            Path          = 'HKCU:\SOFTWARE\Microsoft\Messaging'
-                            ValueName     = 'CloudServiceSyncEnabled'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = $null
-                            GPOState      = $null
-                        }
                     )
                 }
 
@@ -351,25 +398,6 @@
                     )
                 }
 
-                # -- Section: Windows Mail --
-                @{
-                    Name        = 'Windows Mail'
-                    Description = 'Controls the Windows Mail app'
-                    Settings    = @(
-                        @{
-                            Name          = 'Disable Windows Mail'
-                            Description   = 'Prevents the Windows Mail app from launching'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows Mail'
-                            ValueName     = 'ManualLaunchAllowed'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = $null
-                            GPOState      = $null
-                        }
-                    )
-                }
-
             ) # End Microsoft Cloud Services Sections
         }
 
@@ -378,94 +406,6 @@
             Name        = 'App Permissions'
             Description = 'Controls app access to device capabilities and personal data'
             Categories = @(
-
-                # === Category: Personalization & Tracking ===
-                @{
-                    Name        = 'Personalization & Tracking'
-                    Description = 'General privacy settings including advertising ID, language list, and cross-device experiences'
-                    Sections    = @(
-
-                        # -- Section: Advertising ID --
-                        @{
-                            Name        = 'Advertising ID'
-                            Description = 'Controls the advertising ID used for app-targeted ads'
-                            Settings    = @(
-                                @{
-                                    Name          = 'Disable Advertising ID (Feature)'
-                                    Description   = 'Turns off the advertising ID'
-                                    Path          = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo'
-                                    ValueName     = 'Enabled'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 0
-                                    DefaultValue  = $null
-                                    GPOPath       = 'Computer Configuration > Administrative Templates > System > User Profiles > Turn off the advertising ID'
-                                    GPOState      = 'Enabled'
-                                }
-                                @{
-                                    Name          = 'Disable Advertising ID (Policy)'
-                                    Description   = 'Policy-level control to disable the advertising ID'
-                                    Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo'
-                                    ValueName     = 'DisabledByGroupPolicy'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 1
-                                    DefaultValue  = $null
-                                    GPOPath       = 'Computer Configuration > Administrative Templates > System > User Profiles > Turn off the advertising ID'
-                                    GPOState      = 'Enabled'
-                                }
-                            )
-                        }
-
-                        # -- Section: Personalization Tracking --
-                        @{
-                            Name        = 'Personalization Tracking'
-                            Description = 'Controls data collection used for personalization features'
-                            Settings    = @(
-                                @{
-                                    Name          = 'Disable Language List Access'
-                                    Description   = 'Prevents websites from accessing your language list for locally relevant content'
-                                    Path          = 'HKCU:\Control Panel\International\User Profile'
-                                    ValueName     = 'HttpAcceptLanguageOptOut'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 1
-                                    DefaultValue  = $null
-                                    GPOPath       = $null
-                                    GPOState      = $null
-                                }
-                                @{
-                                    Name          = 'Disable App Launch Tracking'
-                                    Description   = 'Prevents Windows from tracking app launches to improve Start and search results'
-                                    Path          = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
-                                    ValueName     = 'Start_TrackProgs'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 0
-                                    DefaultValue  = $null
-                                    GPOPath       = $null
-                                    GPOState      = $null
-                                }
-                            )
-                        }
-
-                        # -- Section: Cross-Device Experiences --
-                        @{
-                            Name        = 'Cross-Device Experiences'
-                            Description = 'Controls app continuity across devices'
-                            Settings    = @(
-                                @{
-                                    Name          = 'Disable Cross-Device Experiences'
-                                    Description   = 'Prevents apps on other devices from opening apps and continuing experiences on this device'
-                                    Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
-                                    ValueName     = 'EnableCdp'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 0
-                                    DefaultValue  = $null
-                                    GPOPath       = 'Computer Configuration > Administrative Templates > System > Group Policy > Continue experiences on this device'
-                                    GPOState      = 'Disabled'
-                                }
-                            )
-                        }
-
-                    ) # End Personalization & Tracking Sections
-                }
 
                 # === Category: Device Access ===
                 @{
@@ -488,6 +428,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Location and Sensors > Turn off location'
                                     GPOState      = 'Enabled'
+                                    Note          = 'Disables the system-wide location platform, affecting all apps.'
                                 }
                                 @{
                                     Name          = 'Deny App Access to Location'
@@ -499,6 +440,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access location'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -518,6 +460,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access the camera'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -537,6 +480,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access the microphone'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -556,6 +500,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps control radios'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Controls UWP app ability to toggle radios on and off, not communication.'
                                 }
                             )
                         }
@@ -575,6 +520,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access motion'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -586,7 +532,7 @@
                             Settings    = @(
                                 @{
                                     Name          = 'Deny Sync with Unpaired Devices'
-                                    Description   = 'Prevents apps from sharing and syncing with wireless devices that are not explicitly paired'
+                                    Description   = 'Prevents apps from syncing with wireless devices not explicitly paired'
                                     Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy'
                                     ValueName     = 'LetAppsSyncWithDevices'
                                     ValueType     = 'DWord'
@@ -594,10 +540,11 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps communicate with unpaired devices'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                                 @{
                                     Name          = 'Deny Access to Trusted Devices'
-                                    Description   = 'Prevents apps from using trusted devices (hardware already connected or bundled with this device)'
+                                    Description   = 'Prevents apps from accessing paired hardware and connected accessories'
                                     Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy'
                                     ValueName     = 'LetAppsAccessTrustedDevices'
                                     ValueType     = 'DWord'
@@ -605,6 +552,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access trusted devices'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -615,7 +563,7 @@
                 # === Category: Communication ===
                 @{
                     Name        = 'Communication'
-                    Description = 'Controls app access to contacts, calendar, email, messaging, calls, and account info'
+                    Description = 'Controls app access to contacts, calendar, email, messaging, and calls'
                     Sections    = @(
 
                         # -- Section: Account Info --
@@ -633,6 +581,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access account information'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -652,6 +601,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access contacts'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -671,6 +621,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access the calendar'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -690,6 +641,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access email'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -709,17 +661,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access messaging'
                                     GPOState      = 'Enabled (Force Deny)'
-                                }
-                                @{
-                                    Name          = 'Disable In-App Message Sync'
-                                    Description   = 'Prevents message synchronization via cloud'
-                                    Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Messaging'
-                                    ValueName     = 'AllowMessageSync'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 0
-                                    DefaultValue  = $null
-                                    GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Messaging > Allow Message Service Cloud Sync'
-                                    GPOState      = 'Disabled'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -739,6 +681,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps make phone calls'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -758,6 +701,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access call history'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -771,47 +715,6 @@
                     Description = 'Controls general app behavior and permissions'
                     Sections    = @(
 
-                        # -- Section: Activity History --
-                        @{
-                            Name        = 'Activity History'
-                            Description = 'Controls activity feed and history tracking'
-                            Settings    = @(
-                                @{
-                                    Name          = 'Disable Activity Feed'
-                                    Description   = 'Turns off the activity feed'
-                                    Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
-                                    ValueName     = 'EnableActivityFeed'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 0
-                                    DefaultValue  = $null
-                                    GPOPath       = 'Computer Configuration > Administrative Templates > System > OS Policies > Enables Activity Feed'
-                                    GPOState      = 'Disabled'
-                                }
-                                @{
-                                    Name          = 'Disable Publish User Activities'
-                                    Description   = 'Prevents publishing of user activities'
-                                    Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
-                                    ValueName     = 'PublishUserActivities'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 0
-                                    DefaultValue  = $null
-                                    GPOPath       = 'Computer Configuration > Administrative Templates > System > OS Policies > Allow publishing of User Activities'
-                                    GPOState      = 'Disabled'
-                                }
-                                @{
-                                    Name          = 'Disable Upload User Activities'
-                                    Description   = 'Prevents uploading of user activities'
-                                    Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
-                                    ValueName     = 'UploadUserActivities'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 0
-                                    DefaultValue  = $null
-                                    GPOPath       = 'Computer Configuration > Administrative Templates > System > OS Policies > Allow upload of User Activities'
-                                    GPOState      = 'Disabled'
-                                }
-                            )
-                        }
-
                         # -- Section: Background Apps --
                         @{
                             Name        = 'Background Apps'
@@ -819,7 +722,7 @@
                             Settings    = @(
                                 @{
                                     Name          = 'Deny Background App Execution'
-                                    Description   = 'Prevents apps from running in the background. NOTE: May affect Cortana and Search.'
+                                    Description   = 'Prevents apps from running in the background'
                                     Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy'
                                     ValueName     = 'LetAppsRunInBackground'
                                     ValueType     = 'DWord'
@@ -827,6 +730,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps run in the background'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. May affect background sync for apps like Mail.'
                                 }
                             )
                         }
@@ -846,36 +750,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access notifications'
                                     GPOState      = 'Enabled (Force Deny)'
-                                }
-                            )
-                        }
-
-                        # -- Section: Speech --
-                        @{
-                            Name        = 'Speech'
-                            Description = 'Controls online speech recognition and speech model updates'
-                            Settings    = @(
-                                @{
-                                    Name          = 'Disable Online Speech Recognition'
-                                    Description   = 'Turns off online speech recognition services'
-                                    Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization'
-                                    ValueName     = 'AllowInputPersonalization'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 0
-                                    DefaultValue  = $null
-                                    GPOPath       = 'Computer Configuration > Administrative Templates > Control Panel > Regional and Language Options > Allow users to enable online speech recognition services'
-                                    GPOState      = 'Disabled'
-                                }
-                                @{
-                                    Name          = 'Disable Speech Model Updates'
-                                    Description   = 'Prevents automatic updates to speech recognition and synthesis models'
-                                    Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Speech'
-                                    ValueName     = 'AllowSpeechModelUpdate'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 0
-                                    DefaultValue  = $null
-                                    GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Speech > Allow Automatic Update of Speech Data'
-                                    GPOState      = 'Disabled'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -895,6 +770,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps activate with voice'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                                 @{
                                     Name          = 'Deny Voice Activation Above Lock'
@@ -906,6 +782,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps activate with voice while the system is locked'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -925,25 +802,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access Tasks'
                                     GPOState      = 'Enabled (Force Deny)'
-                                }
-                            )
-                        }
-
-                        # -- Section: News and Interests --
-                        @{
-                            Name        = 'News and Interests'
-                            Description = 'Controls the Windows Feeds feature'
-                            Settings    = @(
-                                @{
-                                    Name          = 'Disable News and Interests'
-                                    Description   = 'Turns off the news and interests feed'
-                                    Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds'
-                                    ValueName     = 'EnableFeeds'
-                                    ValueType     = 'DWord'
-                                    HardenedValue = 0
-                                    DefaultValue  = $null
-                                    GPOPath       = $null
-                                    GPOState      = $null
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -963,6 +822,7 @@
                                     DefaultValue  = $null
                                     GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > App Privacy > Let Windows apps access diagnostic information about other apps'
                                     GPOState      = 'Enabled (Force Deny)'
+                                    Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                             )
                         }
@@ -986,7 +846,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable All Store Apps'
-                            Description   = 'Turns off the ability to launch apps from the Microsoft Store that were preinstalled or downloaded. Also disables the Store.'
+                            Description   = 'Turns off launching of preinstalled and downloaded Store apps'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore'
                             ValueName     = 'DisableStoreApps'
                             ValueType     = 'DWord'
@@ -994,6 +854,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Store > Disable all apps from Microsoft Store'
                             GPOState      = 'Enabled'
+                            Note          = 'Also disables the Microsoft Store application itself.'
                         }
                         @{
                             Name          = 'Disable Auto Download and Install of Updates'
@@ -1008,7 +869,7 @@
                         }
                         @{
                             Name          = 'Suppress Store App Recommendations (Policy)'
-                            Description   = 'Prevents installation of apps from outside the Microsoft Store'
+                            Description   = 'Enables the app install policy used to suppress Store recommendations'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\SmartScreen'
                             ValueName     = 'ConfigureAppInstallControlEnabled'
                             ValueType     = 'DWord'
@@ -1045,7 +906,7 @@
                 # -- Section: Windows Spotlight --
                 @{
                     Name        = 'Windows Spotlight'
-                    Description = 'Controls personalized experiences such as lock screen images, suggestions, and tips'
+                    Description = 'Controls personalized lock screen images, suggestions, and tips'
                     Settings    = @(
                         @{
                             Name          = 'Disable All Spotlight Features'
@@ -1075,7 +936,7 @@
                 # -- Section: Widgets --
                 @{
                     Name        = 'Widgets'
-                    Description = 'Controls the Widgets feature in Windows 11'
+                    Description = 'Controls the Widgets feature and news and interests feed'
                     Settings    = @(
                         @{
                             Name          = 'Disable Widgets'
@@ -1087,14 +948,27 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Widgets > Allow widgets'
                             GPOState      = 'Disabled'
+                            Note          = 'Applies to Windows 11 only. This feature does not exist on Windows 10.'
+                        }
+                        @{
+                            Name          = 'Disable News and Interests'
+                            Description   = 'Turns off the news and interests feed'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds'
+                            ValueName     = 'EnableFeeds'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = $null
+                            GPOState      = $null
+                            Note          = 'Applies to Windows 10 only. This feature was removed from Windows 11.'
                         }
                     )
                 }
 
-                # -- Section: Recommendations --
+                # -- Section: Start Menu Personalization --
                 @{
-                    Name        = 'Recommendations'
-                    Description = 'Controls personalized recommendations in the Start menu'
+                    Name        = 'Start Menu Personalization'
+                    Description = 'Controls app launch tracking and personalized content in the Start menu'
                     Settings    = @(
                         @{
                             Name          = 'Disable Recommendations'
@@ -1106,6 +980,105 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Start Menu and Taskbar > Remove Recommended section from Start Menu'
                             GPOState      = 'Enabled'
+                        }
+                        @{
+                            Name          = 'Disable App Launch Tracking'
+                            Description   = 'Turns off app launch tracking used to personalize Start and search'
+                            Path          = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+                            ValueName     = 'Start_TrackProgs'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = $null
+                            GPOState      = $null
+                        }
+                    )
+                }
+
+                # -- Section: Speech Recognition --
+                @{
+                    Name        = 'Speech Recognition'
+                    Description = 'Controls online speech recognition and automatic model updates'
+                    Settings    = @(
+                        @{
+                            Name          = 'Disable Online Speech Recognition'
+                            Description   = 'Turns off online speech recognition services'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization'
+                            ValueName     = 'AllowInputPersonalization'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Control Panel > Regional and Language Options > Allow users to enable online speech recognition services'
+                            GPOState      = 'Disabled'
+                        }
+                        @{
+                            Name          = 'Disable Speech Model Updates'
+                            Description   = 'Prevents automatic updates to speech recognition and synthesis models'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Speech'
+                            ValueName     = 'AllowSpeechModelUpdate'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Speech > Allow Automatic Update of Speech Data'
+                            GPOState      = 'Disabled'
+                        }
+                    )
+                }
+
+                # -- Section: Push Notifications --
+                @{
+                    Name        = 'Push Notifications'
+                    Description = 'Controls whether apps can use the network for push notification delivery'
+                    Settings    = @(
+                        @{
+                            Name          = 'Disable Notification Network Traffic'
+                            Description   = 'Turns off the device connection to the Windows Push Notification Service'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications'
+                            ValueName     = 'NoCloudApplicationNotification'
+                            ValueType     = 'DWord'
+                            HardenedValue = 1
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Start Menu and Taskbar > Notifications > Turn off notifications network usage'
+                            GPOState      = 'Enabled'
+                            Note          = 'App background sync is not affected.'
+                        }
+                    )
+                }
+
+                # -- Section: Online Tips --
+                @{
+                    Name        = 'Online Tips'
+                    Description = 'Controls online tips and help content in the Windows Settings app'
+                    Settings    = @(
+                        @{
+                            Name          = 'Disable Online Tips'
+                            Description   = 'Turns off retrieval of online tips and help in the Settings app'
+                            Path          = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer'
+                            ValueName     = 'AllowOnlineTips'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Control Panel > Allow Online Tips'
+                            GPOState      = 'Disabled'
+                        }
+                    )
+                }
+
+                # -- Section: Apps for Websites --
+                @{
+                    Name        = 'Apps for Websites'
+                    Description = 'Controls web-to-app linking with URI handlers'
+                    Settings    = @(
+                        @{
+                            Name          = 'Disable App URI Handlers'
+                            Description   = 'Turns off web-to-app linking for apps with registered URI handlers'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+                            ValueName     = 'EnableAppUriHandlers'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Group Policy > Configure web-to-app linking with app URI handlers'
+                            GPOState      = 'Disabled'
                         }
                     )
                 }
@@ -1140,40 +1113,46 @@
                     )
                 }
 
-                # -- Section: Live Tiles --
+                # -- Section: Activity History --
                 @{
-                    Name        = 'Live Tiles'
-                    Description = 'Controls notification network usage for Live Tiles'
+                    Name        = 'Activity History'
+                    Description = 'Controls Windows Timeline activity tracking and synchronization'
                     Settings    = @(
                         @{
-                            Name          = 'Disable Live Tile Notifications'
-                            Description   = 'Turns off notifications network usage for Live Tiles'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications'
-                            ValueName     = 'NoCloudApplicationNotification'
-                            ValueType     = 'DWord'
-                            HardenedValue = 1
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Start Menu and Taskbar > Notifications > Turn off notifications network usage'
-                            GPOState      = 'Enabled'
-                        }
-                    )
-                }
-
-                # -- Section: Apps for Websites --
-                @{
-                    Name        = 'Apps for Websites'
-                    Description = 'Controls web-to-app linking with URI handlers'
-                    Settings    = @(
-                        @{
-                            Name          = 'Disable App URI Handlers'
-                            Description   = 'Prevents apps for websites from directly launching when a registered URL is visited'
+                            Name          = 'Disable Activity Feed'
+                            Description   = 'Turns off the activity feed'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
-                            ValueName     = 'EnableAppUriHandlers'
+                            ValueName     = 'EnableActivityFeed'
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > System > Group Policy > Configure web-to-app linking with app URI handlers'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > OS Policies > Enables Activity Feed'
                             GPOState      = 'Disabled'
+                            Note          = 'Applies to Windows 10 only. This feature was removed from Windows 11.'
+                        }
+                        @{
+                            Name          = 'Disable Publish User Activities'
+                            Description   = 'Prevents publishing of user activities'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+                            ValueName     = 'PublishUserActivities'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > OS Policies > Allow publishing of User Activities'
+                            GPOState      = 'Disabled'
+                            Note          = 'Applies to Windows 10 only. This feature was removed from Windows 11.'
+                        }
+                        @{
+                            Name          = 'Disable Upload User Activities'
+                            Description   = 'Prevents uploading of user activities'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+                            ValueName     = 'UploadUserActivities'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > System > OS Policies > Allow upload of User Activities'
+                            GPOState      = 'Disabled'
+                            Note          = 'Applies to Windows 10 only. This feature was removed from Windows 11.'
                         }
                     )
                 }
@@ -1184,7 +1163,7 @@
         # ===== Category: Windows Update =====
         @{
             Name        = 'Windows Update'
-            Description = 'Settings controlling what Windows automatically downloads or updates from Microsoft'
+            Description = 'Settings controlling what Windows downloads or updates from Microsoft'
             Sections    = @(
 
                 # -- Section: Windows Update Settings --
@@ -1202,6 +1181,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > System > Internet Communication Management > Internet Communication settings > Turn off access to all Windows Update features'
                             GPOState      = 'Enabled'
+                            Warning       = 'Windows will not receive security updates while this setting is applied.'
                         }
                         @{
                             Name          = 'Disable Windows Update Internet Locations'
@@ -1216,7 +1196,7 @@
                         }
                         @{
                             Name          = 'Set WSUS Server to Blank'
-                            Description   = 'Sets the intranet update service to blank to prevent external update connections'
+                            Description   = 'Sets the intranet update service address to blank'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
                             ValueName     = 'WUServer'
                             ValueType     = 'String'
@@ -1249,7 +1229,7 @@
                         }
                         @{
                             Name          = 'Enforce Intranet Update Server'
-                            Description   = 'Directs Windows Update to use the (blank) intranet server instead of Microsoft'
+                            Description   = 'Directs Windows Update to use the configured intranet update server'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU'
                             ValueName     = 'UseWUServer'
                             ValueType     = 'DWord'
@@ -1287,7 +1267,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Peer-to-Peer Update Sharing'
-                            Description   = 'Prevents peer-to-peer traffic and Delivery Optimization Cloud Service traffic'
+                            Description   = 'Sets Delivery Optimization to Simple Mode, disabling P2P sharing'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization'
                             ValueName     = 'DODownloadMode'
                             ValueType     = 'DWord'
@@ -1321,11 +1301,11 @@
                 # -- Section: Services Configuration --
                 @{
                     Name        = 'Services Configuration'
-                    Description = 'Controls the dynamic configuration update service used by Windows components'
+                    Description = 'Controls the dynamic configuration service used by Windows components'
                     Settings    = @(
                         @{
                             Name          = 'Disable Services Configuration'
-                            Description   = 'Prevents dynamic configuration updates. WARNING: Some apps using this service may stop working.'
+                            Description   = 'Turns off dynamic configuration updates for Windows components'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection'
                             ValueName     = 'DisableOneSettingsDownloads'
                             ValueType     = 'DWord'
@@ -1333,6 +1313,7 @@
                             DefaultValue  = $null
                             GPOPath       = $null
                             GPOState      = $null
+                            Note          = 'Prevents Microsoft from pushing remote configuration changes to Windows.'
                         }
                     )
                 }
@@ -1349,7 +1330,7 @@
                 # -- Section: Microsoft Edge --
                 @{
                     Name        = 'Microsoft Edge'
-                    Description = 'Controls Microsoft Edge features'
+                    Description = 'Controls privacy and connection settings for Microsoft Edge'
                     Settings    = @(
                         @{
                             Name          = 'Disable Search Suggestions'
@@ -1372,6 +1353,7 @@
                             DefaultValue  = $null
                             GPOPath       = $null
                             GPOState      = $null
+                            Note          = 'Most websites do not honor Do Not Track headers.'
                         }
                         @{
                             Name          = 'Disable Password Manager'
@@ -1408,7 +1390,7 @@
                         }
                         @{
                             Name          = 'Disable Default Search Provider'
-                            Description   = 'Disables the default search provider'
+                            Description   = 'Turns off the default search provider'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'DefaultSearchProviderEnabled'
                             ValueType     = 'DWord'
@@ -1427,10 +1409,11 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Defender SmartScreen > Microsoft Edge > Configure Windows Defender SmartScreen'
                             GPOState      = 'Disabled'
+                            Warning       = 'Removes phishing and malware protection within Microsoft Edge.'
                         }
                         @{
                             Name          = 'Set New Tab to Blank'
-                            Description   = 'Sets the new tab page URL to about:blank'
+                            Description   = 'Sets the new tab page to about:blank'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'NewTabPageLocation'
                             ValueType     = 'String'
@@ -1441,7 +1424,7 @@
                         }
                         @{
                             Name          = 'Disable Startup Restore'
-                            Description   = 'Disables session restore on startup'
+                            Description   = 'Turns off session restore on startup'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'RestoreOnStartup'
                             ValueType     = 'DWord'
@@ -1463,7 +1446,7 @@
                         }
                         @{
                             Name          = 'Disable First Run Experience'
-                            Description   = 'Hides the First-run experience and splash screen'
+                            Description   = 'Turns off the First-run experience and splash screen'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'HideFirstRunExperience'
                             ValueType     = 'DWord'
@@ -1474,7 +1457,7 @@
                         }
                         @{
                             Name          = 'Disable Edge Auto Update'
-                            Description   = 'Disables automatic Edge updates'
+                            Description   = 'Turns off automatic Edge updates'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate'
                             ValueName     = 'UpdateDefault'
                             ValueType     = 'DWord'
@@ -1482,10 +1465,11 @@
                             DefaultValue  = $null
                             GPOPath       = $null
                             GPOState      = $null
+                            Warning       = 'Edge will not receive security patches without manual intervention.'
                         }
                         @{
                             Name          = 'Disable Auto Update Check'
-                            Description   = 'Sets the auto-update check period to 0 (disabled)'
+                            Description   = 'Turns off periodic checks for Edge updates'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate'
                             ValueName     = 'AutoUpdateCheckPeriodMinutes'
                             ValueType     = 'DWord'
@@ -1496,7 +1480,7 @@
                         }
                         @{
                             Name          = 'Disable Experimentation Service'
-                            Description   = 'Restricts the Experimentation and Configuration Service'
+                            Description   = 'Turns off the Edge Experimentation and Configuration Service'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate'
                             ValueName     = 'ExperimentationAndConfigurationServiceControl'
                             ValueType     = 'DWord'
@@ -1504,6 +1488,7 @@
                             DefaultValue  = $null
                             GPOPath       = $null
                             GPOState      = $null
+                            Note          = 'Prevents Microsoft from pushing remote configuration changes to Edge.'
                         }
                     )
                 }
@@ -1511,7 +1496,7 @@
                 # -- Section: Internet Explorer --
                 @{
                     Name        = 'Internet Explorer'
-                    Description = 'Controls IE features including suggestions, geolocation, and SmartScreen'
+                    Description = 'Controls privacy and connection settings for Internet Explorer'
                     Settings    = @(
                         @{
                             Name          = 'Disable Suggested Sites'
@@ -1526,7 +1511,7 @@
                         }
                         @{
                             Name          = 'Disable Enhanced Suggestions'
-                            Description   = 'Prevents Microsoft services from providing enhanced suggestions in the Address Bar'
+                            Description   = 'Turns off Microsoft-powered enhanced suggestions in the address bar'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer'
                             ValueName     = 'AllowServicePoweredQSA'
                             ValueType     = 'DWord'
@@ -1569,17 +1554,6 @@
                             GPOState      = 'Enabled'
                         }
                         @{
-                            Name          = 'Disable Online Tips'
-                            Description   = 'Disables retrieval of online tips and help for the Settings app'
-                            Path          = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer'
-                            ValueName     = 'AllowOnlineTips'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Control Panel > Allow Online Tips'
-                            GPOState      = 'Disabled'
-                        }
-                        @{
                             Name          = 'Disable IE SmartScreen'
                             Description   = 'Turns off Microsoft Defender SmartScreen in Internet Explorer'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\PhishingFilter'
@@ -1589,6 +1563,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Internet Explorer > Prevent managing SmartScreen Filter'
                             GPOState      = 'Enabled (Off)'
+                            Warning       = 'Removes phishing and malware protection within Internet Explorer.'
                         }
                         @{
                             Name          = 'Disable ActiveX VersionList Download'
@@ -1676,7 +1651,7 @@
         # ===== Category: Background Services =====
         @{
             Name        = 'Background Services'
-            Description = 'Background Windows services and features that connect to external networks or Microsoft'
+            Description = 'Background services that connect to Microsoft or external networks'
             Sections    = @(
 
                 # -- Section: Device Metadata Retrieval --
@@ -1717,63 +1692,6 @@
                     )
                 }
 
-                # -- Section: Wi-Fi Sense --
-                @{
-                    Name        = 'Wi-Fi Sense'
-                    Description = 'Controls automatic connection to shared networks and hotspots (Windows 10 v1709 and earlier)'
-                    Settings    = @(
-                        @{
-                            Name          = 'Disable Wi-Fi Sense'
-                            Description   = 'Prevents automatic connection to suggested hotspots and shared networks'
-                            Path          = 'HKLM:\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\config'
-                            ValueName     = 'AutoConnectAllowedOEM'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Network > WLAN Service > WLAN Settings > Allow Windows to automatically connect to suggested open hotspots, to networks shared by contacts, and to hotspots offering paid services'
-                            GPOState      = 'Disabled'
-                        }
-                    )
-                }
-
-                # -- Section: License Manager --
-                @{
-                    Name        = 'License Manager'
-                    Description = 'Controls the License Manager service'
-                    Settings    = @(
-                        @{
-                            Name          = 'Disable License Manager Service'
-                            Description   = 'Disables the LicenseManager service'
-                            Path          = 'HKLM:\SYSTEM\CurrentControlSet\Services\LicenseManager'
-                            ValueName     = 'Start'
-                            ValueType     = 'DWord'
-                            HardenedValue = 4  # 4 = Disabled
-                            DefaultValue  = 3  # 3 = Manual
-                            GPOPath       = $null
-                            GPOState      = $null
-                        }
-                    )
-                }
-
-                # -- Section: Teredo --
-                @{
-                    Name        = 'Teredo'
-                    Description = 'Controls the Teredo IPv6 transition technology'
-                    Settings    = @(
-                        @{
-                            Name          = 'Disable Teredo'
-                            Description   = 'Disables Teredo tunneling. NOTE: Disabling may affect Xbox gaming and Delivery Optimization.'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\TCPIP\v6Transition'
-                            ValueName     = 'Teredo_State'
-                            ValueType     = 'String'
-                            HardenedValue = 'Disabled'
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Network > TCPIP Settings > IPv6 Transition Technologies > Set Teredo State'
-                            GPOState      = 'Enabled (Disabled State)'
-                        }
-                    )
-                }
-
                 # -- Section: Software Protection Platform --
                 @{
                     Name        = 'Software Protection Platform'
@@ -1793,6 +1711,46 @@
                     )
                 }
 
+                # -- Section: Teredo --
+                @{
+                    Name        = 'Teredo'
+                    Description = 'Controls the Teredo IPv6 transition technology'
+                    Settings    = @(
+                        @{
+                            Name          = 'Disable Teredo'
+                            Description   = 'Turns off Teredo IPv6 tunneling'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\TCPIP\v6Transition'
+                            ValueName     = 'Teredo_State'
+                            ValueType     = 'String'
+                            HardenedValue = 'Disabled'
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Network > TCPIP Settings > IPv6 Transition Technologies > Set Teredo State'
+                            GPOState      = 'Enabled (Disabled State)'
+                            Caution       = 'May affect Xbox gaming and Delivery Optimization.'
+                        }
+                    )
+                }
+
+                # -- Section: License Manager --
+                @{
+                    Name        = 'License Manager'
+                    Description = 'Controls the LicenseManager service for Store and subscription licensing'
+                    Settings    = @(
+                        @{
+                            Name          = 'Disable License Manager Service'
+                            Description   = 'Turns off the LicenseManager service'
+                            Path          = 'HKLM:\SYSTEM\CurrentControlSet\Services\LicenseManager'
+                            ValueName     = 'Start'
+                            ValueType     = 'DWord'
+                            HardenedValue = 4  # 4 = Disabled
+                            DefaultValue  = 3  # 3 = Manual
+                            GPOPath       = $null
+                            GPOState      = $null
+                            Caution       = 'May affect Microsoft Store app licensing and Microsoft 365.'
+                        }
+                    )
+                }
+
                 # -- Section: Network Connection Status Indicator --
                 @{
                     Name        = 'Network Connection Status Indicator'
@@ -1808,6 +1766,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > System > Internet Communication Management > Internet Communication settings > Turn off Windows Network Connectivity Status Indicator active tests'
                             GPOState      = 'Enabled'
+                            Warning       = 'Connectivity status reporting to apps and system services is disabled.'
                         }
                     )
                 }
@@ -1827,10 +1786,11 @@
                             DefaultValue  = 'NTP'
                             GPOPath       = $null
                             GPOState      = $null
+                            Warning       = 'Time drift will cause TLS certificate failures and break TOTP 2FA.'
                         }
                         @{
                             Name          = 'Disable NTP Client'
-                            Description   = 'Disables the Windows NTP client time provider'
+                            Description   = 'Turns off the Windows NTP client time provider'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\W32time\TimeProviders\NtpClient'
                             ValueName     = 'Enabled'
                             ValueType     = 'DWord'
@@ -1838,6 +1798,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > System > Windows Time Service > Time Providers > Enable Windows NTP Client'
                             GPOState      = 'Disabled'
+                            Warning       = 'Time drift will cause TLS certificate failures and break TOTP 2FA.'
                         }
                     )
                 }
@@ -1857,6 +1818,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Defender SmartScreen > Explorer > Configure Windows Defender SmartScreen'
                             GPOState      = 'Disabled'
+                            Warning       = 'Removes Windows-wide malware and phishing protection for files and apps.'
                         }
                     )
                 }
@@ -1868,7 +1830,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Automatic Root Certificate Updates'
-                            Description   = 'Prevents automatic downloading of root certificates. WARNING: May prevent connections to some websites.'
+                            Description   = 'Prevents automatic root certificate updates from Windows Update'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\AuthRoot'
                             ValueName     = 'DisableRootAutoUpdate'
                             ValueType     = 'DWord'
@@ -1876,6 +1838,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > System > Internet Communication Management > Internet Communication settings > Turn off Automatic Root Certificates Update'
                             GPOState      = 'Enabled'
+                            Warning       = 'Sites using root certificates not already on this device will fail TLS.'
                         }
                     )
                 }

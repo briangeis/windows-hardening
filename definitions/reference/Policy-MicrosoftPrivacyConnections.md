@@ -14,7 +14,6 @@ The source article covers both Windows 10 and Windows 11, and some Group Policy 
 - [Telemetry & Diagnostics](#telemetry--diagnostics)
 - [Microsoft Cloud Services](#microsoft-cloud-services)
 - [App Permissions](#app-permissions)
-  - [Personalization & Tracking](#personalization--tracking)
   - [Device Access](#device-access)
   - [Communication](#communication)
   - [App Behavior](#app-behavior)
@@ -30,7 +29,7 @@ The source article covers both Windows 10 and Windows 11, and some Group Policy 
 - [Settings Sharing a Group Policy](#settings-sharing-a-group-policy)
 - [Intentional Deviations from Source Article](#intentional-deviations-from-source-article)
 - [Known Article Inconsistencies](#known-article-inconsistencies)
-- [Article Sections Not Included as Registry Settings](#article-sections-not-included-as-registry-settings)
+- [Article Content Not Included](#article-content-not-included)
 - [Settings Tree](#settings-tree)  
 
 ## Telemetry & Diagnostics
@@ -42,6 +41,7 @@ The highest-priority privacy decisions. Defender cloud reporting is grouped here
 | PSD1 Section             | Article Section | HKLM | HKCU | Total |
 |--------------------------|:---------------:|:----:|:----:|:-----:|
 | Feedback & Diagnostics   | 18.16           | 3    | 3    | 6     |
+| Advertising & Tracking   | 18.1            | 2    | 1    | 3     |
 | Defender Cloud Reporting | 24              | 4    | 0    | 4     |
 | Inking & Typing          | 18.21           | 2    | 0    | 2     |
 
@@ -51,28 +51,19 @@ The highest-priority privacy decisions. Defender cloud reporting is grouped here
 
 Settings controlling which Microsoft cloud services this device is permitted to connect to, typically decided when establishing a baseline configuration. Find My Device is included here as a Microsoft cloud location service, not a security tool.
 
-| PSD1 Section       | Article Section | HKLM | HKCU | Total |
-|--------------------|:---------------:|:----:|:----:|:-----:|
-| Cortana & Search   | 2               | 4    | 0    | 4     |
-| OneDrive           | 16              | 2    | 0    | 2     |
-| Microsoft Account  | 12              | 1    | 0    | 1     |
-| Cloud Sync         | 21, 30          | 3    | 1    | 4     |
-| Find My Device     | 5               | 1    | 0    | 1     |
-| Windows Mail       | 11              | 1    | 0    | 1     |
+| PSD1 Section             | Article Section | HKLM | HKCU | Total |
+|--------------------------|:---------------:|:----:|:----:|:-----:|
+| OneDrive                 | 16              | 2    | 0    | 2     |
+| Microsoft Account        | 12              | 1    | 0    | 1     |
+| Windows Search           | 2               | 4    | 0    | 4     |
+| Cross-Device Experiences | 18.1, 21, 30    | 4    | 0    | 4     |
+| Find My Device           | 5               | 1    | 0    | 1     |
 
 ## App Permissions
 
 *What can apps access on this device?*
 
-Mirrors the structure of the source article's Privacy & Security section (article section 18), with two exceptions: Feedback & Diagnostics and Inking & Typing move to Telemetry & Diagnostics as settings that are telemetry in function.
-
-### Personalization & Tracking
-
-| PSD1 Section             | Article Section | HKLM | HKCU | Total |
-|--------------------------|:---------------:|:----:|:----:|:-----:|
-| Advertising ID           | 18.1            | 2    | 0    | 2     |
-| Personalization Tracking | 18.1            | 0    | 2    | 2     |
-| Cross-Device Experiences | 18.1            | 1    | 0    | 1     |
+Controls app access to device capabilities and personal data. Settings in this category are UWP app capability policies, organized by the type of access they govern. The Location section additionally contains a system-wide location platform setting alongside a setting that applies only to UWP apps.
 
 ### Device Access
 
@@ -93,7 +84,7 @@ Mirrors the structure of the source article's Privacy & Security section (articl
 | Contacts     | 18.8            | 1    | 0    | 1     |
 | Calendar     | 18.9            | 1    | 0    | 1     |
 | Email        | 18.11           | 1    | 0    | 1     |
-| Messaging    | 18.12           | 2    | 0    | 2     |
+| Messaging    | 18.12           | 1    | 0    | 1     |
 | Phone Calls  | 18.13           | 1    | 0    | 1     |
 | Call History | 18.10           | 1    | 0    | 1     |
 
@@ -101,30 +92,30 @@ Mirrors the structure of the source article's Privacy & Security section (articl
 
 | PSD1 Section       | Article Section | HKLM | HKCU | Total |
 |--------------------|:---------------:|:----:|:----:|:-----:|
-| Activity History   | 18.22           | 3    | 0    | 3     |
 | Background Apps    | 18.17           | 1    | 0    | 1     |
 | Notifications      | 18.5            | 1    | 0    | 1     |
-| Speech             | 18.6            | 2    | 0    | 2     |
 | Voice Activation   | 18.23           | 2    | 0    | 2     |
 | Tasks              | 18.19           | 1    | 0    | 1     |
-| News and Interests | 18.24           | 1    | 0    | 1     |
 | App Diagnostics    | 18.20           | 1    | 0    | 1     |
 
 ## Windows Features
 
 *Which Windows features call home or use cloud content?*
 
-Contains Windows-native features with network or cloud behavior. Sections are ordered by decision priority: Microsoft Store leads as the most consequential configuration decision, Windows 11-specific features follow, and legacy sections trail. Browser-specific SmartScreen settings remain in Browsers.
+Contains Windows features with network or cloud behavior. Sections are ordered by decision priority: Microsoft Store leads as the most consequential configuration decision, Windows-specific features follow, and legacy sections trail. Browser-specific SmartScreen settings remain in Browsers.
 
-| PSD1 Section      | Article Section | HKLM | HKCU | Total |
-|-------------------|:---------------:|:----:|:----:|:-----:|
-| Microsoft Store   | 18.1, 24.1, 26  | 4    | 1    | 5     |
-| Windows Spotlight | 25              | 1    | 1    | 2     |
-| Widgets           | 32              | 1    | 0    | 1     |
-| Recommendations   | 33              | 1    | 0    | 1     |
-| Offline Maps      | 15              | 2    | 0    | 2     |
-| Live Tiles        | 10              | 1    | 0    | 1     |
-| Apps for Websites | 27              | 1    | 0    | 1     |
+| PSD1 Section               | Article Section | HKLM | HKCU | Total |
+|----------------------------|:---------------:|:----:|:----:|:-----:|
+| Microsoft Store            | 18.1, 24.1, 26  | 4    | 1    | 5     |
+| Windows Spotlight          | 25              | 1    | 1    | 2     |
+| Widgets                    | 18.24, 32       | 2    | 0    | 2     |
+| Start Menu Personalization | 18.1, 33        | 1    | 1    | 2     |
+| Speech Recognition         | 18.6            | 2    | 0    | 2     |
+| Push Notifications         | 10              | 1    | 0    | 1     |
+| Online Tips                | 8               | 1    | 0    | 1     |
+| Apps for Websites          | 27              | 1    | 0    | 1     |
+| Offline Maps               | 15              | 2    | 0    | 2     |
+| Activity History           | 18.22           | 3    | 0    | 3     |
 
 ## Windows Update
 
@@ -144,27 +135,26 @@ Groups Windows Update alongside settings that share the same core behavior: Wind
 
 *How are Microsoft browsers configured?*
 
-Each section orders settings by browser-centric decision priority: data-to-Microsoft settings lead, followed by credential storage, security features, UI and startup defaults, and update behavior.
+Each section orders settings by browser-focused decision priority: data-to-Microsoft settings lead, followed by credential storage, security features, UI and startup defaults, and update behavior.
 
 | PSD1 Section              | Article Section | HKLM | HKCU | Total |
 |---------------------------|:---------------:|:----:|:----:|:-----:|
 | Microsoft Edge            | 13.2            | 14   | 0    | 14    |
-| Internet Explorer         | 8, 8.1          | 11   | 3    | 14    |
+| Internet Explorer         | 8, 8.1          | 10   | 3    | 13    |
 
 ## Background Services
 
 *Which background Windows services connect to external networks or Microsoft?*
 
-The technical catch-all for background infrastructure settings. Sections are ordered by inverse decision priority: the safest settings appear first so sysadmins who navigate here for routine hardening encounter low-risk settings before reaching those with significant consequences.
+The technical catch-all for background infrastructure settings. Sections are ordered by inverse decision priority, with the least consequential settings first and those with significant side effects last.
 
 | PSD1 Section                        | Article Section | HKLM | HKCU | Total |
 |-------------------------------------|:---------------:|:----:|:----:|:-----:|
 | Device Metadata Retrieval           | 4               | 1    | 0    | 1     |
 | Font Streaming                      | 6               | 1    | 0    | 1     |
-| Wi-Fi Sense                         | 23              | 1    | 0    | 1     |
-| License Manager                     | 9               | 1    | 0    | 1     |
-| Teredo                              | 22              | 1    | 0    | 1     |
 | Software Protection Platform        | 19              | 1    | 0    | 1     |
+| Teredo                              | 22              | 1    | 0    | 1     |
+| License Manager                     | 9               | 1    | 0    | 1     |
 | Network Connection Status Indicator | 14              | 1    | 0    | 1     |
 | Date & Time                         | 3               | 2    | 0    | 2     |
 | Windows SmartScreen                 | 24.1            | 1    | 0    | 1     |
@@ -176,18 +166,46 @@ The technical catch-all for background infrastructure settings. Sections are ord
 
 | Category                 |  HKLM   |  HKCU  |  Total  |
 |--------------------------|:-------:|:------:|:-------:|
-| Telemetry & Diagnostics  | 9       | 3      | 12      |
-| Microsoft Cloud Services | 12      | 1      | 13      |
-| App Permissions          | 31      | 2      | 33      |
-| Windows Features         | 11      | 2      | 13      |
+| Telemetry & Diagnostics  | 11      | 4      | 15      |
+| Microsoft Cloud Services | 12      | 0      | 12      |
+| App Permissions          | 21      | 0      | 21      |
+| Windows Features         | 18      | 3      | 21      |
 | Windows Update           | 10      | 0      | 10      |
-| Browsers                 | 25      | 3      | 28      |
-| Background Services      | 11      | 0      | 11      |
-| **Totals**               | **109** | **11** | **120** |
+| Browsers                 | 24      | 3      | 27      |
+| Background Services      | 10      | 0      | 10      |
+| **Totals**               | **106** | **10** | **116** |
 
 ## Settings with Notable Side Effects
 
-The following settings in Background Services carry consequences that are not obvious from the setting name alone. Applying any of these settings without understanding their effects can introduce failures that are difficult to trace back to the registry change.
+The following settings carry consequences that are not obvious from the setting name alone. Applying any of these without understanding their effects can introduce failures that are difficult to trace back to the registry change.
+
+### Disable Microsoft Account Sign-In Assistant (Microsoft Cloud Services)
+
+Disabling the Microsoft Account Sign-In Assistant service removes the foundation for all Microsoft Account functionality on the device. Sign-in will fail for the Microsoft Store, OneDrive, Office, Xbox, and Windows Update when those services require Microsoft Account authentication.
+
+### Disable Cross-Device Experiences (Microsoft Cloud Services)
+
+Disabling the Connected Devices Platform removes the infrastructure underlying cross-device features. Phone Link features such as SMS mirroring and call handling through the Windows app will not function.
+
+### Disable Windows Update Access (Windows Update)
+
+Blocks all Windows Update features at the system level. The device will not check for, download, or install security patches, cumulative updates, or driver updates while this setting is applied.
+
+### Disable Edge SmartScreen (Browsers)
+
+Removes SmartScreen protection within Microsoft Edge. Malicious URLs, phishing pages, and downloads encountered through Edge will not be checked or blocked.
+
+### Disable Edge Auto Update (Browsers)
+
+Prevents EdgeUpdate from automatically installing security patches to Edge. Vulnerabilities in Edge will not be remediated without manually downloading and running a new Edge installer.
+
+### Disable IE SmartScreen (Browsers)
+
+Removes SmartScreen protection within Internet Explorer. Malicious URLs and phishing pages encountered through IE will not be checked or blocked.
+
+### License Manager (Background Services)
+
+Disabling the LicenseManager service can prevent Store-purchased apps from launching and may cause Microsoft 365 subscription validation failures.
 
 ### Teredo (Background Services)
 
@@ -195,7 +213,7 @@ Disabling may affect Xbox gaming features and Delivery Optimization in certain n
 
 ### Network Connection Status Indicator (Background Services)
 
-Disabling NCSI active tests removes the taskbar network connectivity indicator. Applications that check network status before attempting connections may also behave unexpectedly.
+Disabling NCSI active tests removes the taskbar network connectivity indicator. Applications that query Windows for network connectivity status may also behave unexpectedly.
 
 ### Date & Time (Background Services)
 
@@ -211,49 +229,47 @@ The most consequential setting in the file. Disabling automatic root certificate
 
 ## Settings Without a Group Policy Equivalent
 
-The following 26 settings have `GPOPath` and `GPOState` set to `$null` in the definitions file. In each case, either the article provides no GPO, or the GPO requires ADMX templates not present in a standard Windows 11 installation. On Pro/Enterprise editions, these must be configured via registry even when Group Policy is available for all other settings.
+The following 24 settings have `GPOPath` and `GPOState` set to `$null` in the definitions file. In each case, either the article provides no GPO, or the GPO requires ADMX templates not present in a standard Windows 11 installation. On Windows Pro, Enterprise, Education, and LTSC editions, these must still be configured via registry even when Group Policy is used for all other settings.
 
-| Setting Name                                | Article Section | PSD1 Section             | Reason                                                       |
-|---------------------------------------------|:---------------:|--------------------------|--------------------------------------------------------------|
-| Set Time Sync to NoSync                     | 3               | Date & Time              | Registry-only; the NTP Client GPO is a separate setting      |
-| Disable License Manager Service             | 9               | License Manager          | Article provides no GPO                                      |
-| Disable Windows Mail                        | 11              | Windows Mail             | Article provides no GPO                                      |
-| Disable Microsoft Account Sign-In Assistant | 12              | Microsoft Account        | Article provides no GPO                                      |
-| Disable Search Suggestions                  | 13.2            | Microsoft Edge | Requires Edge ADMX                                           |
-| Enable Do Not Track                         | 13.2            | Microsoft Edge | Requires Edge ADMX                                           |
-| Disable Password Manager                    | 13.2            | Microsoft Edge | Requires Edge ADMX                                           |
-| Disable Address Autofill                    | 13.2            | Microsoft Edge | Requires Edge ADMX                                           |
-| Disable Credit Card Autofill                | 13.2            | Microsoft Edge | Requires Edge ADMX                                           |
-| Disable Default Search Provider             | 13.2            | Microsoft Edge | Requires Edge ADMX                                           |
-| Set New Tab to Blank                        | 13.2            | Microsoft Edge | Requires Edge ADMX                                           |
-| Disable Startup Restore                     | 13.2            | Microsoft Edge | Requires Edge ADMX                                           |
-| Set Startup URL to Blank                    | 13.2            | Microsoft Edge | Requires Edge ADMX                                           |
-| Disable First Run Experience                | 13.2            | Microsoft Edge | Requires Edge ADMX                                           |
-| Disable Edge Auto Update                    | 13.2            | Microsoft Edge | Requires Edge Update ADMX                                         |
-| Disable Auto Update Check                   | 13.2            | Microsoft Edge | Requires Edge Update ADMX                                         |
-| Disable Experimentation Service             | 13.2            | Microsoft Edge | Requires Edge Update ADMX                                         |
-| Disable Language List Access                | 18.1            | Personalization Tracking | HKCU registry-only; article provides UI or registry only     |
-| Disable App Launch Tracking                 | 18.1            | Personalization Tracking | HKCU registry-only; article provides UI or registry only     |
-| Disable SmartScreen for Store Apps          | 18.1            | Microsoft Store          | HKCU registry-only; article provides UI or registry only     |
-| Set Feedback Frequency to Never (Period)    | 18.16           | Feedback & Diagnostics   | HKCU registry-only; article provides no GPO for these values |
-| Set Feedback Frequency to Never (Count)     | 18.16           | Feedback & Diagnostics   | HKCU registry-only; article provides no GPO for these values |
-| Disable News and Interests                  | 18.24           | News and Interests        | Article provides no GPO                                      |
-| Disable Messaging Cloud Sync                | 21              | Cloud Sync               | Article explicitly notes no GPO                              |
-| Disable MSRT Diagnostic Data                | 24              | Defender Cloud Reporting | Article explicitly notes no GPO                              |
-| Disable Services Configuration              | 31              | Services Configuration   | Article provides no GPO                                      |
+| Setting Name                                | Article Section | PSD1 Section               | Reason                                    |
+|---------------------------------------------|:---------------:|----------------------------|-------------------------------------------|
+| Set Time Sync to NoSync                     | 3               | Date & Time                | Registry-only; NTP Client GPO is separate |
+| Disable License Manager Service             | 9               | License Manager            | Article provides no GPO                   |
+| Disable Microsoft Account Sign-In Assistant | 12              | Microsoft Account          | Article provides no GPO                   |
+| Disable Search Suggestions                  | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
+| Enable Do Not Track                         | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
+| Disable Password Manager                    | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
+| Disable Address Autofill                    | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
+| Disable Credit Card Autofill                | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
+| Disable Default Search Provider             | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
+| Set New Tab to Blank                        | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
+| Disable Startup Restore                     | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
+| Set Startup URL to Blank                    | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
+| Disable First Run Experience                | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
+| Disable Edge Auto Update                    | 13.2            | Microsoft Edge             | Requires Edge Update ADMX                 |
+| Disable Auto Update Check                   | 13.2            | Microsoft Edge             | Requires Edge Update ADMX                 |
+| Disable Experimentation Service             | 13.2            | Microsoft Edge             | Requires Edge Update ADMX                 |
+| Disable Language List Access                | 18.1            | Advertising & Tracking     | HKCU only; no GPO available               |
+| Disable App Launch Tracking                 | 18.1            | Start Menu Personalization | HKCU only; no GPO available               |
+| Disable SmartScreen for Store Apps          | 18.1            | Microsoft Store            | HKCU only; no GPO available               |
+| Set Feedback Period to Zero                 | 18.16           | Feedback & Diagnostics     | HKCU only; no GPO available               |
+| Set Feedback Count to Zero                  | 18.16           | Feedback & Diagnostics     | HKCU only; no GPO available               |
+| Disable News and Interests                  | 18.24           | Widgets                    | Article provides no GPO                   |
+| Disable MSRT Diagnostic Data                | 24              | Defender Cloud Reporting   | Article explicitly notes no GPO           |
+| Disable Services Configuration              | 31              | Services Configuration     | Article provides no GPO                   |
 
 ## Settings Sharing a Group Policy
 
 The following GPOs are each controlled by more than one setting in the definitions file. A single entry appears in `gpedit.msc` for each GPO regardless of how many registry values it controls, so the total number of `gpedit.msc` entries is lower than the total number of settings in the file.
 
-| Group Policy | Setting Names | Count |
-|---|---------------|:-----:|
-| `Turn off automatic learning` | Restrict Implicit Text Collection; Restrict Implicit Ink Collection | 2 |
-| `Do not sync` | Disable Settings Sync; Disable Settings Sync User Override | 2 |
-| `Turn off the advertising ID` | Disable Advertising ID (Feature); Disable Advertising ID (Policy) | 2 |
-| `Configure app install control` | Suppress Store App Recommendations (Policy); Suppress Store App Recommendations (Source) | 2 |
-| `Specify intranet Microsoft update service location` | Set WSUS Server to Blank; Set WSUS Status Server to Blank; Set Alternate Download Server to Blank; Enforce Intranet Update Server | 4 |
-| `Disable changing home page settings` | Set IE Home Page to Blank; Lock IE Home Page Setting | 2 |
+| Group Policy                                         | Setting Names                                                                                                                     | Count |
+|------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|:-----:|
+| `Turn off automatic learning`                        | Restrict Implicit Text Collection; Restrict Implicit Ink Collection                                                               | 2     |
+| `Do not sync`                                        | Disable Settings Sync; Disable Settings Sync User Override                                                                        | 2     |
+| `Turn off the advertising ID`                        | Disable Advertising ID (Feature); Disable Advertising ID (Policy)                                                                 | 2     |
+| `Configure app install control`                      | Suppress Store App Recommendations (Policy); Suppress Store App Recommendations (Source)                                          | 2     |
+| `Specify intranet Microsoft update service location` | Set WSUS Server to Blank; Set WSUS Status Server to Blank; Set Alternate Download Server to Blank; Enforce Intranet Update Server | 4     |
+| `Disable changing home page settings`                | Set IE Home Page to Blank; Lock IE Home Page Setting                                                                              | 2     |
 
 ## Intentional Deviations from Source Article
 
@@ -275,7 +291,7 @@ The article specifies the registry path at `HKCU\SOFTWARE\Microsoft\Speech_OneCo
 
 Two settings are affected: Restrict Implicit Text Collection (`RestrictImplicitTextCollection`) and Restrict Implicit Ink Collection (`RestrictImplicitInkCollection`). The article specifies both registry values at `HKCU\Software\Microsoft\InputPersonalization`. The Computer Configuration GPO that controls both values (`Control Panel > Regional and Language Options > Handwriting personalization > Turn off automatic learning`) writes to `HKLM\SOFTWARE\Policies\Microsoft\InputPersonalization` when set to Enabled, confirmed by applying the policy on a Windows 11 Pro device. The definitions file uses the HKLM Policies path consistent with Computer Configuration policy behavior.
 
-The article assigns `RestrictImplicitTextCollection` to `Windows Components > Text Input > Improve inking and typing recognition` and `RestrictImplicitInkCollection` to a User Configuration variant of `Handwriting personalization > Turn off automatic learning`. Both attributions are incorrect. Both values are written by the Computer Configuration `Turn off automatic learning` GPO; the Text Input GPO controls a different registry value unrelated to these settings. The definitions file assigns both values to the Computer Configuration `Turn off automatic learning` GPO.
+The article assigns `RestrictImplicitTextCollection` to `Windows Components > Text Input > Improve inking and typing recognition` and `RestrictImplicitInkCollection` to a User Configuration variant of `Handwriting personalization > Turn off automatic learning`. Both attributions are incorrect. Both values are written by the Computer Configuration `Turn off automatic learning` GPO. The Text Input GPO controls a different registry value unrelated to these settings. The definitions file assigns both values to the Computer Configuration `Turn off automatic learning` GPO.
 
 ### Disable Cloud Optimized Content (Section 25)
 
@@ -293,12 +309,23 @@ The following settings have guidance in the article that is internally inconsist
 
 The article instructs to "Disable" the GPO named "Disable all apps from Microsoft Store," but the corresponding registry sets `DisableStoreApps` to `1` (disabled). Disabling a policy named "Disable..." would produce the opposite effect. The intended GPO state is likely "Enabled."
 
-## Article Sections Not Included as Registry Settings
+## Article Content Not Included
 
-| Article Section | Title             | Reason                                                                        |
-|:---------------:|-------------------|-------------------------------------------------------------------------------|
-| 13.1            | Microsoft Edge (Legacy) | Legacy Edge does not exist on Windows 11; its registry paths are not read by Microsoft Edge |
-| 17              | Preinstalled apps | Handled via PowerShell `Remove-AppxPackage` commands, not registry settings   |
+### Excluded Sections
+
+| Article Section | Title             | Reason                                                                                                                                               |
+|:---------------:|-------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 11              | Windows Mail      | The Windows Mail application was removed in Windows 8 and is not present on any Windows 10 or Windows 11 installation.                               |
+| 13.1            | Legacy Edge       | Legacy Edge does not exist on Windows 11; its registry paths are not read by Chromium Edge.                                                          |
+| 17              | Preinstalled apps | Handled via PowerShell `Remove-AppxPackage` commands, not registry settings.                                                                         |
+| 23              | Wi-Fi Sense       | The Wi-Fi Sense feature was removed in Windows 10 version 1703 (April 2017) and is not present on any current Windows 10 or Windows 11 installation. |
+
+### Excluded Settings
+
+| Article Section | Registry Value            | Reason                                                                                                       |
+|:---------------:|---------------------------|--------------------------------------------------------------------------------------------------------------|
+| 21              | `CloudServiceSyncEnabled` | The Windows Messaging app that used this registry value was removed in Windows 10 version 1703 (April 2017). |
+| 18.12           | `AllowMessageSync`        | Targets the same Windows Messaging platform cloud sync infrastructure as `CloudServiceSyncEnabled`.          |
 
 ## Settings Tree
 
@@ -310,8 +337,12 @@ Policy-MicrosoftPrivacyConnections.psd1
 |   |   +-- Disable Tailored Experiences
 |   |   +-- Disable Consumer Experiences
 |   |   +-- Disable Feedback Notifications
-|   |   +-- Set Feedback Frequency to Never (Period)
-|   |   \-- Set Feedback Frequency to Never (Count)
+|   |   +-- Set Feedback Period to Zero
+|   |   \-- Set Feedback Count to Zero
+|   +-- Advertising & Tracking
+|   |   +-- Disable Advertising ID (Feature)
+|   |   +-- Disable Advertising ID (Policy)
+|   |   \-- Disable Language List Access
 |   +-- Defender Cloud Reporting
 |   |   +-- Disable MAPS Reporting
 |   |   +-- Disable Sample Submission
@@ -322,36 +353,25 @@ Policy-MicrosoftPrivacyConnections.psd1
 |       \-- Restrict Implicit Ink Collection
 |
 +-- Microsoft Cloud Services
-|   +-- Cortana & Search
-|   |   +-- Disable Cortana
-|   |   +-- Disable Search Location
-|   |   +-- Disable Web Search
-|   |   \-- Disable Web Results in Search
 |   +-- OneDrive
 |   |   +-- Disable OneDrive File Storage
 |   |   \-- Disable OneDrive Network Traffic Before Sign-In
 |   +-- Microsoft Account
 |   |   \-- Disable Microsoft Account Sign-In Assistant
-|   +-- Cloud Sync
+|   +-- Windows Search
+|   |   +-- Disable Web Results in Search
+|   |   +-- Disable Web Search
+|   |   +-- Disable Search Location
+|   |   \-- Disable Cortana
+|   +-- Cross-Device Experiences
+|   |   +-- Disable Cross-Device Experiences
 |   |   +-- Disable Settings Sync
 |   |   +-- Disable Settings Sync User Override
-|   |   +-- Disable Cloud Clipboard
-|   |   \-- Disable Messaging Cloud Sync
-|   +-- Find My Device
-|   |   \-- Disable Find My Device
-|   \-- Windows Mail
-|       \-- Disable Windows Mail
+|   |   \-- Disable Cloud Clipboard
+|   \-- Find My Device
+|       \-- Disable Find My Device
 |
 +-- App Permissions
-|   +-- Personalization & Tracking
-|   |   +-- Advertising ID
-|   |   |   +-- Disable Advertising ID (Feature)
-|   |   |   \-- Disable Advertising ID (Policy)
-|   |   +-- Personalization Tracking
-|   |   |   +-- Disable Language List Access
-|   |   |   \-- Disable App Launch Tracking
-|   |   \-- Cross-Device Experiences
-|   |       \-- Disable Cross-Device Experiences
 |   +-- Device Access
 |   |   +-- Location
 |   |   |   +-- Disable Location Services
@@ -377,31 +397,21 @@ Policy-MicrosoftPrivacyConnections.psd1
 |   |   +-- Email
 |   |   |   \-- Deny App Access to Email
 |   |   +-- Messaging
-|   |   |   +-- Deny App Access to Messaging
-|   |   |   \-- Disable In-App Message Sync
+|   |   |   \-- Deny App Access to Messaging
 |   |   +-- Phone Calls
 |   |   |   \-- Deny App Access to Phone Calls
 |   |   \-- Call History
 |   |       \-- Deny App Access to Call History
 |   \-- App Behavior
-|       +-- Activity History
-|       |   +-- Disable Activity Feed
-|       |   +-- Disable Publish User Activities
-|       |   \-- Disable Upload User Activities
 |       +-- Background Apps
 |       |   \-- Deny Background App Execution
 |       +-- Notifications
 |       |   \-- Deny App Access to Notifications
-|       +-- Speech
-|       |   +-- Disable Online Speech Recognition
-|       |   \-- Disable Speech Model Updates
 |       +-- Voice Activation
 |       |   +-- Deny Voice Activation
 |       |   \-- Deny Voice Activation Above Lock
 |       +-- Tasks
 |       |   \-- Deny App Access to Tasks
-|       +-- News and Interests
-|       |   \-- Disable News and Interests
 |       \-- App Diagnostics
 |           \-- Deny App Access to Diagnostics
 |
@@ -416,16 +426,27 @@ Policy-MicrosoftPrivacyConnections.psd1
 |   |   +-- Disable All Spotlight Features
 |   |   \-- Disable Cloud Optimized Content
 |   +-- Widgets
-|   |   \-- Disable Widgets
-|   +-- Recommendations
-|   |   \-- Disable Recommendations
+|   |   +-- Disable Widgets
+|   |   \-- Disable News and Interests
+|   +-- Start Menu Personalization
+|   |   +-- Disable Recommendations
+|   |   \-- Disable App Launch Tracking
+|   +-- Speech Recognition
+|   |   +-- Disable Online Speech Recognition
+|   |   \-- Disable Speech Model Updates
+|   +-- Push Notifications
+|   |   \-- Disable Notification Network Traffic
+|   +-- Online Tips
+|   |   \-- Disable Online Tips
+|   +-- Apps for Websites
+|   |   \-- Disable App URI Handlers
 |   +-- Offline Maps
 |   |   +-- Disable Auto Download Map Data
 |   |   \-- Disable Unsolicited Map Network Traffic
-|   +-- Live Tiles
-|   |   \-- Disable Live Tile Notifications
-|   \-- Apps for Websites
-|       \-- Disable App URI Handlers
+|   \-- Activity History
+|       +-- Disable Activity Feed
+|       +-- Disable Publish User Activities
+|       \-- Disable Upload User Activities
 |
 +-- Windows Update
 |   +-- Windows Update Settings
@@ -466,7 +487,6 @@ Policy-MicrosoftPrivacyConnections.psd1
 |       +-- Disable Browser Geolocation
 |       +-- Disable AutoComplete for Web Addresses
 |       +-- Disable Feed Background Sync
-|       +-- Disable Online Tips
 |       +-- Disable IE SmartScreen
 |       +-- Disable ActiveX VersionList Download
 |       +-- Set IE Home Page to Blank
@@ -481,14 +501,12 @@ Policy-MicrosoftPrivacyConnections.psd1
     |   \-- Disable Device Metadata Retrieval
     +-- Font Streaming
     |   \-- Disable Font Streaming
-    +-- Wi-Fi Sense
-    |   \-- Disable Wi-Fi Sense
-    +-- License Manager
-    |   \-- Disable License Manager Service
-    +-- Teredo
-    |   \-- Disable Teredo
     +-- Software Protection Platform
     |   \-- Disable KMS Online Validation
+    +-- Teredo
+    |   \-- Disable Teredo
+    +-- License Manager
+    |   \-- Disable License Manager Service
     +-- Network Connection Status Indicator
     |   \-- Disable NCSI Active Tests
     +-- Date & Time
