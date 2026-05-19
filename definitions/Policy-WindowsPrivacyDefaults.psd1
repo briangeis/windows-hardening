@@ -11,17 +11,17 @@
         # ===== Category: Telemetry & Reporting =====
         @{
             Name        = 'Telemetry & Reporting'
-            Description = 'Settings controlling data collection pipelines that operate independently of Microsoft service connections'
+            Description = 'Settings controlling diagnostic data collection and telemetry reporting'
             Sections    = @(
 
                 # -- Section: Diagnostic Data --
                 @{
                     Name        = 'Diagnostic Data'
-                    Description = 'Controls the volume and content of diagnostic data Windows collects on this device'
+                    Description = 'Controls the volume and content of diagnostic data Windows collects'
                     Settings    = @(
                         @{
                             Name          = 'Exclude Device Name from Diagnostic Data'
-                            Description   = 'Prevents this device name from being included in Windows diagnostic data uploads'
+                            Description   = 'Prevents the device name from being included in diagnostic data uploads'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection'
                             ValueName     = 'AllowDeviceNameInTelemetry'
                             ValueType     = 'DWord'
@@ -62,7 +62,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Windows Error Reporting'
-                            Description   = 'Turns off Windows Error Reporting, preventing crash dumps and diagnostic reports from being submitted'
+                            Description   = 'Turns off Windows Error Reporting, blocking crash report submissions'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting'
                             ValueName     = 'Disabled'
                             ValueType     = 'DWord'
@@ -70,6 +70,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Error Reporting > Disable Windows Error Reporting'
                             GPOState      = 'Enabled'
+                            Note          = 'Removes crash analysis capability useful for diagnosing failures.'
                         }
                     )
                 }
@@ -77,11 +78,11 @@
                 # -- Section: Application Compatibility --
                 @{
                     Name        = 'Application Compatibility'
-                    Description = 'Controls telemetry and inventory collection for application compatibility reporting'
+                    Description = 'Controls telemetry and inventory collection for compatibility reporting'
                     Settings    = @(
                         @{
                             Name          = 'Disable Application Telemetry'
-                            Description   = 'Turns off Application Impact Telemetry, which profiles application usage independently of the main diagnostic data pipeline'
+                            Description   = 'Turns off Application Impact Telemetry, which profiles app usage'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat'
                             ValueName     = 'AITEnable'
                             ValueType     = 'DWord'
@@ -92,7 +93,7 @@
                         }
                         @{
                             Name          = 'Disable Inventory Collector'
-                            Description   = 'Turns off the compatibility inventory collector, which enumerates installed programs and files and reports the results'
+                            Description   = 'Turns off the compatibility inventory collector for installed programs'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat'
                             ValueName     = 'DisableInventory'
                             ValueType     = 'DWord'
@@ -107,11 +108,11 @@
                 # -- Section: Input Data --
                 @{
                     Name        = 'Input Data'
-                    Description = 'Controls transmission of inking and typing data for recognition model improvement'
+                    Description = 'Controls inking and typing data transmission for recognition improvement'
                     Settings    = @(
                         @{
                             Name          = 'Disable Inking and Typing Data Collection'
-                            Description   = 'Prevents sending inking and typing samples to Microsoft to improve recognition models'
+                            Description   = 'Prevents inking and typing samples from being sent to Microsoft'
                             Path          = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\TextInput'
                             ValueName     = 'AllowLinguisticDataCollection'
                             ValueType     = 'DWord'
@@ -129,7 +130,7 @@
         # ===== Category: Security Defaults =====
         @{
             Name        = 'Security Defaults'
-            Description = 'Security-affecting behaviors that ship enabled by default on Home and Pro and require explicit configuration on standalone devices'
+            Description = 'Security behaviors that ship enabled by default on Home and Pro editions'
             Sections    = @(
 
                 # -- Section: Removable Media --
@@ -139,7 +140,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disallow AutoPlay for Nonvolume Devices'
-                            Description   = 'Prevents AutoPlay from running for cameras, phones, and other non-volume devices'
+                            Description   = 'Prevents AutoPlay from running for non-volume devices such as phones'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer'
                             ValueName     = 'NoAutoplayfornonVolume'
                             ValueType     = 'DWord'
@@ -150,7 +151,7 @@
                         }
                         @{
                             Name          = 'Disable AutoRun Command Execution'
-                            Description   = 'Prevents AutoRun commands from executing automatically when media is inserted'
+                            Description   = 'Prevents AutoRun commands from executing when media is inserted'
                             Path          = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer'
                             ValueName     = 'NoAutorun'
                             ValueType     = 'DWord'
@@ -180,7 +181,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Multicast Name Resolution'
-                            Description   = 'Prevents Windows from using LLMNR for address lookups, which broadcasts queries on the local network segment and can be exploited on untrusted networks'
+                            Description   = 'Prevents Windows from broadcasting LLMNR queries for name resolution'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient'
                             ValueName     = 'EnableMulticast'
                             ValueType     = 'DWord'
@@ -188,10 +189,11 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Network > DNS Client > Turn off multicast name resolution'
                             GPOState      = 'Enabled'
+                            Note          = 'Relevant for devices that use a VPN or connect to untrusted networks.'
                         }
                         @{
                             Name          = 'Disable Smart Multi-Homed Name Resolution'
-                            Description   = 'Prevents Windows from sending DNS queries to multiple network interfaces simultaneously, which can expose queries across interfaces'
+                            Description   = 'Prevents Windows from querying all active interfaces for name resolution'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient'
                             ValueName     = 'DisableSmartNameResolution'
                             ValueType     = 'DWord'
@@ -199,6 +201,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Network > DNS Client > Turn off smart multi-homed name resolution'
                             GPOState      = 'Enabled'
+                            Note          = 'Relevant for devices using a VPN or with multiple active interfaces.'
                         }
                     )
                 }
@@ -206,11 +209,11 @@
                 # -- Section: Authentication & Lock Screen --
                 @{
                     Name        = 'Authentication & Lock Screen'
-                    Description = 'Controls sign-in behavior, local account authentication defaults, and lock screen privacy'
+                    Description = 'Controls sign-in, local account authentication defaults, and lock screen'
                     Settings    = @(
                         @{
                             Name          = 'Turn Off Lock Screen App Notifications'
-                            Description   = 'Prevents Windows from displaying app notification content on the lock screen'
+                            Description   = 'Prevents app notification content from appearing on the lock screen'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
                             ValueName     = 'DisableLockScreenAppNotifications'
                             ValueType     = 'DWord'
@@ -221,7 +224,7 @@
                         }
                         @{
                             Name          = 'Disable Automatic Sign-In After Restart'
-                            Description   = 'Prevents Windows from automatically signing in the last user after a reboot triggered by Windows Update or other system events'
+                            Description   = 'Prevents automatic sign-in of the last user after a restart'
                             Path          = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
                             ValueName     = 'DisableAutomaticRestartSignOn'
                             ValueType     = 'DWord'
@@ -232,7 +235,7 @@
                         }
                         @{
                             Name          = 'Disable Local Account Security Questions'
-                            Description   = 'Prevents Windows from offering security questions as a password reset method for local accounts'
+                            Description   = 'Prevents security questions as a local account password reset method'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
                             ValueName     = 'NoLocalPasswordResetQuestions'
                             ValueType     = 'DWord'
@@ -251,7 +254,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Hibernation'
-                            Description   = 'Disables hibernation, preventing RAM contents from being written to hiberfile.sys. NOTE: Run powercfg /H off separately to remove the existing hiberfile.sys.'
+                            Description   = 'Disables hibernation, which writes RAM contents to disk on shutdown'
                             Path          = 'HKLM:\SYSTEM\CurrentControlSet\Control\Power'
                             ValueName     = 'HibernateEnabled'
                             ValueType     = 'DWord'
@@ -259,10 +262,11 @@
                             DefaultValue  = 1
                             GPOPath       = $null
                             GPOState      = $null
+                            Note          = 'Run powercfg /H off separately to remove the existing hiberfile.sys.'
                         }
                         @{
                             Name          = 'Disable Fast Startup'
-                            Description   = 'Disables Fast Startup, which saves a partial hibernate of the kernel session on shutdown to speed up subsequent boots'
+                            Description   = 'Disables Fast Startup, which saves a partial kernel session on shutdown'
                             Path          = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power'
                             ValueName     = 'HiberbootEnabled'
                             ValueType     = 'DWord'
@@ -270,10 +274,11 @@
                             DefaultValue  = 1
                             GPOPath       = $null
                             GPOState      = $null
+                            Caution       = 'Applying without Disable Hibernation may let Fast Startup re-activate.'
                         }
                         @{
                             Name          = 'Disable Indexing of Encrypted Files'
-                            Description   = 'Prevents the search indexer from storing decrypted content from encrypted files in the search index'
+                            Description   = 'Prevents the indexer from caching decrypted content of encrypted files'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
                             ValueName     = 'AllowIndexingEncryptedStoresOrItems'
                             ValueType     = 'DWord'
@@ -310,17 +315,17 @@
         # ===== Category: Activity & History =====
         @{
             Name        = 'Activity & History'
-            Description = 'Settings controlling the records Windows maintains about files opened, searches run, and clipboard activity on this device'
+            Description = 'Settings controlling activity records Windows maintains on this device'
             Sections    = @(
 
                 # -- Section: Document & App History --
                 @{
                     Name        = 'Document & App History'
-                    Description = 'Controls tracking of recently opened documents and recently installed applications'
+                    Description = 'Controls tracking of recently opened documents and installed apps'
                     Settings    = @(
                         @{
                             Name          = 'Disable Recently Opened Document History'
-                            Description   = 'Prevents Windows from tracking recently opened documents in the Start menu and taskbar jump lists'
+                            Description   = 'Prevents Windows from tracking recently opened documents in jump lists'
                             Path          = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer'
                             ValueName     = 'NoRecentDocsHistory'
                             ValueType     = 'DWord'
@@ -346,11 +351,11 @@
                 # -- Section: Search & Explorer --
                 @{
                     Name        = 'Search & Explorer'
-                    Description = 'Controls search history and account-driven content in File Explorer and the Windows Search pane'
+                    Description = 'Controls search history and account-driven content in File Explorer'
                     Settings    = @(
                         @{
                             Name          = 'Disable File Explorer Search History'
-                            Description   = 'Prevents the File Explorer search box from displaying recent search entries'
+                            Description   = 'Prevents the File Explorer search box from displaying recent searches'
                             Path          = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer'
                             ValueName     = 'DisableSearchBoxSuggestions'
                             ValueType     = 'DWord'
@@ -361,7 +366,7 @@
                         }
                         @{
                             Name          = 'Disable Search History'
-                            Description   = 'Prevents Windows from storing and displaying previous search queries as suggestions in the Start and taskbar search pane'
+                            Description   = 'Prevents past queries from being stored and shown as search suggestions'
                             Path          = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer'
                             ValueName     = 'DisableSearchHistory'
                             ValueType     = 'DWord'
@@ -372,7 +377,7 @@
                         }
                         @{
                             Name          = 'Disable File Explorer Account Insights'
-                            Description   = 'Prevents File Explorer from surfacing recent, favorite, and recommended files based on account and cloud provider activity'
+                            Description   = 'Turns off account and cloud-based file recommendations in File Explorer'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer'
                             ValueName     = 'DisableGraphRecentItems'
                             ValueType     = 'DWord'
@@ -391,7 +396,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Clipboard History'
-                            Description   = 'Turns off clipboard history, which stores a local record of recently copied items accessible via Win+V'
+                            Description   = 'Turns off clipboard history, a local store of recently copied items'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
                             ValueName     = 'AllowClipboardHistory'
                             ValueType     = 'DWord'
@@ -409,7 +414,7 @@
         # ===== Category: Content Delivery =====
         @{
             Name        = 'Content Delivery'
-            Description = 'Settings controlling content and applications that Windows delivers to this device without explicit user action'
+            Description = 'Settings controlling what Windows delivers to this device automatically'
             Sections    = @(
 
                 # -- Section: Cloud Content --
@@ -430,7 +435,7 @@
                         }
                         @{
                             Name          = 'Disable Consumer Account State Content'
-                            Description   = 'Prevents Windows from delivering cloud-tailored content based on account sign-in state'
+                            Description   = 'Prevents Windows from delivering account-tailored cloud content'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
                             ValueName     = 'DisableConsumerAccountStateContent'
                             ValueType     = 'DWord'
@@ -445,11 +450,11 @@
                 # -- Section: Spotlight --
                 @{
                     Name        = 'Spotlight'
-                    Description = 'Controls Windows 11 Spotlight surfaces not covered by the master switch in Policy-MicrosoftPrivacyConnections'
+                    Description = 'Controls Windows 11 Spotlight surfaces not covered by the global disable'
                     Settings    = @(
                         @{
                             Name          = 'Disable Spotlight Collection on Desktop'
-                            Description   = 'Turns off the rotating Windows Spotlight image collection on the desktop background'
+                            Description   = 'Turns off the Spotlight rotating image collection on the desktop'
                             Path          = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
                             ValueName     = 'DisableSpotlightCollectionOnDesktop'
                             ValueType     = 'DWord'
@@ -460,7 +465,7 @@
                         }
                         @{
                             Name          = 'Disable Windows Welcome Experience'
-                            Description   = 'Turns off the fullscreen Windows Welcome Experience shown after updates and occasionally at sign-in'
+                            Description   = 'Turns off the fullscreen Windows Welcome Experience shown after updates'
                             Path          = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
                             ValueName     = 'DisableWindowsSpotlightWindowsWelcomeExperience'
                             ValueType     = 'DWord'
@@ -471,7 +476,7 @@
                         }
                         @{
                             Name          = 'Disable Spotlight on Action Center'
-                            Description   = 'Turns off Windows Spotlight suggestions surfaced in the Action Center notification panel'
+                            Description   = 'Turns off Windows Spotlight suggestions in the Action Center'
                             Path          = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
                             ValueName     = 'DisableWindowsSpotlightOnActionCenter'
                             ValueType     = 'DWord'
@@ -501,7 +506,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Search Highlights'
-                            Description   = 'Prevents Windows Search from displaying Microsoft-curated content and trending suggestions in the Search panel'
+                            Description   = 'Prevents curated content and trending suggestions in the Search panel'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
                             ValueName     = 'EnableDynamicContentInWSB'
                             ValueType     = 'DWord'
@@ -512,7 +517,7 @@
                         }
                         @{
                             Name          = 'Disable Cloud Search'
-                            Description   = 'Prevents Windows Search from querying cloud sources such as OneDrive and SharePoint when returning search results'
+                            Description   = 'Prevents Windows Search from querying cloud sources such as OneDrive'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
                             ValueName     = 'AllowCloudSearch'
                             ValueType     = 'DWord'
@@ -531,7 +536,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Push To Install Service'
-                            Description   = 'Turns off the service that allows apps to be pushed remotely to this device from a web browser or another signed-in device'
+                            Description   = 'Turns off the service allowing apps to be pushed remotely to this device'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\PushToInstall'
                             ValueName     = 'DisablePushToInstall'
                             ValueType     = 'DWord'
@@ -550,7 +555,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Account Notifications in Start'
-                            Description   = 'Prevents Windows from displaying Microsoft account notifications and prompts in the Start menu'
+                            Description   = 'Prevents Microsoft account notifications and prompts in the Start menu'
                             Path          = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\AccountNotifications'
                             ValueName     = 'DisableAccountNotifications'
                             ValueType     = 'DWord'
@@ -568,17 +573,17 @@
         # ===== Category: Windows Update =====
         @{
             Name        = 'Windows Update'
-            Description = 'Settings controlling how Windows Update behaves and what it delivers on this device'
+            Description = 'Settings controlling Windows Update behavior and delivery on this device'
             Sections    = @(
 
                 # -- Section: Update Behavior --
                 @{
                     Name        = 'Update Behavior'
-                    Description = 'Controls the timing and content of Windows Update downloads and installations'
+                    Description = 'Controls timing and content of Windows Update downloads and installs'
                     Settings    = @(
                         @{
                             Name          = 'Disable Automatic Windows Update'
-                            Description   = 'Sets Windows Update to manual mode, requiring the user to check for and install updates explicitly'
+                            Description   = 'Sets Windows Update to manual mode, requiring explicit checks for updates'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU'
                             ValueName     = 'NoAutoUpdate'
                             ValueType     = 'DWord'
@@ -586,10 +591,11 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Update > Manage end user experience > Configure Automatic Updates'
                             GPOState      = 'Disabled'
+                            Caution       = 'Users who do not check for updates regularly will miss security patches.'
                         }
                         @{
                             Name          = 'Exclude Driver Updates from Windows Update'
-                            Description   = 'Prevents Windows Update from downloading and installing driver updates alongside quality and feature updates'
+                            Description   = 'Prevents Windows Update from including driver updates in regular updates'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
                             ValueName     = 'ExcludeWUDriversInQualityUpdate'
                             ValueType     = 'DWord'
@@ -625,6 +631,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'User Configuration > Administrative Templates > Windows Components > Windows Copilot > Turn off Windows Copilot'
                             GPOState      = 'Enabled'
+                            Note          = 'Deprecated in 24H2 where Copilot was moved to a standalone Store app.'
                         }
                         @{
                             Name          = 'Disable Recall'
@@ -636,10 +643,11 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows AI > Allow Recall to be enabled'
                             GPOState      = 'Disabled'
+                            Note          = 'Recall requires Copilot+ PC hardware and has no effect on other devices.'
                         }
                         @{
                             Name          = 'Disable Click to Do'
-                            Description   = 'Turns off the Click to Do feature that analyzes screen content to provide contextual AI suggestions'
+                            Description   = 'Turns off Click to Do, which analyzes screen content for AI actions'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI'
                             ValueName     = 'DisableClickToDo'
                             ValueType     = 'DWord'
@@ -650,7 +658,7 @@
                         }
                         @{
                             Name          = 'Disable Settings Agentic Search'
-                            Description   = 'Turns off the AI-powered natural language search experience within the Settings app'
+                            Description   = 'Turns off the AI-powered natural language search in the Settings app'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI'
                             ValueName     = 'DisableSettingsAgent'
                             ValueType     = 'DWord'
@@ -665,11 +673,11 @@
                 # -- Section: Phone Link --
                 @{
                     Name        = 'Phone Link'
-                    Description = 'Controls the Phone Link connection between this device and a paired phone'
+                    Description = 'Controls the Phone Link connection between this device and a phone'
                     Settings    = @(
                         @{
                             Name          = 'Disable Phone-PC Linking'
-                            Description   = 'Prevents Windows from establishing a Phone Link connection between this device and a paired phone'
+                            Description   = 'Prevents Phone Link from connecting this device to a paired phone'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
                             ValueName     = 'EnableMmx'
                             ValueType     = 'DWord'
@@ -688,7 +696,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Game Recording and Broadcasting'
-                            Description   = 'Turns off the Game DVR capture and broadcasting feature bundled with Windows Game Bar'
+                            Description   = 'Turns off Game DVR capture and broadcasting within Windows Game Bar'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR'
                             ValueName     = 'AllowGameDVR'
                             ValueType     = 'DWord'
@@ -703,11 +711,11 @@
                 # -- Section: Windows Media Player --
                 @{
                     Name        = 'Windows Media Player'
-                    Description = 'Controls network access by Windows Media Player for media information and DRM licenses'
+                    Description = 'Controls network access by Windows Media Player for metadata and DRM'
                     Settings    = @(
                         @{
                             Name          = 'Disable Windows Media DRM Internet Access'
-                            Description   = 'Prevents Windows Media Player and other DRM clients from accessing the internet to acquire or renew media licenses'
+                            Description   = 'Prevents Windows Media DRM clients from going online to acquire licenses'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\WMDRM'
                             ValueName     = 'DisableOnline'
                             ValueType     = 'DWord'
@@ -715,10 +723,11 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Media Digital Rights Management > Prevent Windows Media DRM Internet Access'
                             GPOState      = 'Enabled'
+                            Note          = 'Protected content requiring a new DRM license will not play.'
                         }
                         @{
                             Name          = 'Disable CD and DVD Media Information Retrieval'
-                            Description   = 'Prevents Windows Media Player from retrieving media information for CDs and DVDs from the internet'
+                            Description   = 'Prevents Windows Media Player from retrieving CD and DVD metadata online'
                             Path          = 'HKCU:\SOFTWARE\Policies\Microsoft\WindowsMediaPlayer'
                             ValueName     = 'PreventCDDVDMetadataRetrieval'
                             ValueType     = 'DWord'
@@ -729,7 +738,7 @@
                         }
                         @{
                             Name          = 'Disable Music File Media Information Retrieval'
-                            Description   = 'Prevents Windows Media Player from retrieving media information for music files from the internet'
+                            Description   = 'Prevents Windows Media Player from retrieving music file metadata online'
                             Path          = 'HKCU:\SOFTWARE\Policies\Microsoft\WindowsMediaPlayer'
                             ValueName     = 'PreventMusicFileMetadataRetrieval'
                             ValueType     = 'DWord'
