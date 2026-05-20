@@ -13,9 +13,10 @@ The toolkit is intended for standalone Windows 11 devices. Scripts are broadly c
 
 - PowerShell 5.1 or later
 - Administrator privileges
-- `LGPO.exe` from the [Microsoft Security Compliance Toolkit](https://www.microsoft.com/en-us/download/details.aspx?id=55319) (required except on Windows Home)
+- `LGPO.exe` from the [Microsoft Security Compliance Toolkit](https://www.microsoft.com/en-us/download/details.aspx?id=55319)  
+  (required on Pro, Enterprise, Education, and LTSC editions)
 
-## Components
+## Component Scripts
 
 Each component script supports four modes of operation, consistent across the toolkit:
 
@@ -26,18 +27,20 @@ Each component script supports four modes of operation, consistent across the to
 
 A snapshot of the current system state is saved automatically before any changes are applied in Interactive or Profile Mode. `Get-Help` is available on every script for full parameter and usage documentation.
 
-| Script | Component | Description | Status |
-|---|---|---|---|
-| `Invoke-WinHardenPolicy` | [Policy](policy/README.md) | Registry and Local Group Policy settings | In progress |
-| `Invoke-WinHardenServices` | Services | Windows service startup configuration | Planned |
-| `Invoke-WinHardenPackages` | Packages | Preinstalled appx package removal | Planned |
-| `Invoke-WinHardenSuite` | Orchestrator | Coordinates execution of all components | Planned |
+| Script                     | Component                  | Description                              | Status      |
+|----------------------------|----------------------------|------------------------------------------|-------------|
+| `Invoke-WinHardenPolicy`   | [Policy](policy/README.md) | Registry and Local Group Policy settings | In progress |
+| `Invoke-WinHardenServices` | Services                   | Windows service startup configuration    | Planned     |
+| `Invoke-WinHardenPackages` | Packages                   | Preinstalled appx package removal        | Planned     |
+| `Invoke-WinHardenSuite`    | Orchestrator               | Coordinates execution of all components  | Planned     |
 
-## Definitions
+## Definitions Files
 
-Definitions files describe the settings each component script can configure, curated from authoritative sources rather than exhaustive configuration checklists. Each definitions file is specific to one component, and each component may have multiple definitions files.
+Each definitions file describes the settings each component script can configure, curated from authoritative sources and independent research rather than exhaustive configuration checklists. Each definitions file is specific to one component, and each component may have multiple definitions files.
 
-The Policy component's definitions file, `Policy-MicrosoftPrivacyConnections.psd1`, covers Microsoft privacy and connection settings across 120 registry values. The [Policy-MicrosoftPrivacyConnections reference](definitions/reference/Policy-MicrosoftPrivacyConnections.md) maps every setting to its corresponding section in the Microsoft source article, documenting where the article's own registry guidance is incorrect, identifying inconsistencies in the article's documentation, and flagging settings with significant side effects.
+`Policy-MicrosoftPrivacyConnections.psd1` covers 116 registry settings governing connections and data sharing between Windows and Microsoft services, drawn from the Microsoft article "Manage connections from Windows 10 and Windows 11 operating system components to Microsoft services." The [Policy-MicrosoftPrivacyConnections reference](definitions/reference/Policy-MicrosoftPrivacyConnections.md) maps every setting to its corresponding section in the source article, documenting where the article's registry guidance is incorrect, identifying inconsistencies, and flagging settings with significant side effects.
+
+`Policy-WindowsPrivacyDefaults.psd1` covers 46 registry settings addressing Windows 11 privacy and security defaults not covered by Policy-MicrosoftPrivacyConnections, drawn from independent research and direct system analysis. Together the two files form a complete privacy and hardening baseline. The [Policy-WindowsPrivacyDefaults reference](definitions/reference/Policy-WindowsPrivacyDefaults.md) records the research and editorial decisions behind each setting, covering notable side effects, applicability conditions, and settings requiring special handling.
 
 The full list of available definitions files is maintained in [definitions/](definitions/).
 
@@ -45,33 +48,33 @@ The full list of available definitions files is maintained in [definitions/](def
 
 Run PowerShell as Administrator, then enter the following commands in order.
 
-**Navigate to the directory where you want the toolkit stored:**
+**Navigate to the directory where the toolkit will be stored:**
 
 ```powershell
-cd <directory>
+cd C:\Tools
 ```
 
-**Clone the repository:**
+**Clone the repository from GitHub:**
 
 ```powershell
 git clone https://github.com/briangeis/windows-hardening
 ```
 
-**Allow your device to run PowerShell scripts:**
+**Enable local script execution, which Windows restricts by default:**
 
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
 ```
 
-**Unblock the toolkit scripts:**
+**Remove the download restriction Windows applies to the toolkit files:**
 
 ```powershell
 Get-ChildItem -Path .\windows-hardening -Recurse -Filter *.ps1 | Unblock-File
 ```
 
-**Download LGPO.exe:**
+**Download LGPO.exe, required on Pro, Enterprise, Education, and LTSC editions:**
 
-Windows Pro, Enterprise, Education, and LTSC editions require `LGPO.exe`. Download it from the [Microsoft Security Compliance Toolkit](https://www.microsoft.com/en-us/download/details.aspx?id=55319) and place it in the `policy` directory. Windows Home editions do not require `LGPO.exe`.
+Extract `LGPO.exe` from the [Microsoft Security Compliance Toolkit](https://www.microsoft.com/en-us/download/details.aspx?id=55319) and place it in the `policy` directory.
 
 ## License
 
