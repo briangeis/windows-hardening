@@ -3,15 +3,15 @@
     Applies registry and Local Group Policy hardening settings.
 
 .DESCRIPTION
-    A data-driven hardening script for standalone Windows devices.
+    A PowerShell script for hardening Windows on standalone devices.
     Home editions write settings directly to the registry.
     Other editions apply settings through Local Group Policy using LGPO.exe.
 
-    Supports four execution modes:
+    Supports four modes of operation:
 
     Interactive Mode
       Presents a menu of settings from a definitions file, showing the current
-      registry state of each setting against its hardened and default values.
+      registry state of each setting alongside its hardened and default values.
       Settings can be applied or reset to their default values individually,
       or all at once within a section. A snapshot is saved automatically on
       startup. Requires administrator privileges.
@@ -23,18 +23,18 @@
 
     Build Mode
       Presents the same menu as Interactive Mode but saves selections to a
-      profile file instead of applying them to the device. Does not require
+      profile file instead of applying them to the device. Settings already
+      added to the profile can also be removed from it. Does not require
       administrator privileges. Can be run on Windows or Linux to prepare
       a profile before applying it to a Windows device.
 
     Snapshot Mode
       Reads the current registry state of every setting in a definitions
-      file and saves it as a profile. Useful for capturing a device state
+      file and saves it as a profile. Captures the current device state
       before replication or reimaging. Requires administrator privileges.
 
 .PARAMETER DefinitionsPath
-    Path to a PSD1 definitions file. Required for Interactive Mode,
-    Build Mode, and Snapshot Mode.
+    Path to a PSD1 definitions file. Required for all modes except Profile Mode.
 
 .PARAMETER ProfilePath
     Path to a PSD1 profile file to apply. Triggers Profile Mode: all settings
@@ -43,23 +43,23 @@
 .PARAMETER Build
     Path to the profile file to build. Triggers Build Mode: presents the same
     settings menu as Interactive Mode, saving selections to the profile file
-    instead of the device. An existing file loads as the starting state.
-    A new file is created on the first save. No elevation required.
+    instead of the device. An existing file is loaded as the starting state
+    and updated in place. Administrator privileges are not required.
 
 .PARAMETER Snapshot
     File or directory path for the snapshot profile. Triggers Snapshot Mode:
     reads the current registry state for every setting in the definitions file
-    and saves a profile to the specified path. If a directory is given, a
-    generated filename is used. Requires administrator privileges.
+    and saves a profile to the specified path. If a directory is given,
+    a generated filename is used. Requires administrator privileges.
 
 .PARAMETER LogPath
     File or directory path for the log file. If a directory is given,
     a generated filename is used. Defaults to the current working directory
-    with a generated filename if not specified. Sessions are appended to
+    with a generated filename if not provided. Sessions are appended to
     the log file rather than overwriting it.
 
 .PARAMETER LGPOPath
-    Explicit path to LGPO.exe. If not specified, the script searches the
+    Explicit path to LGPO.exe. If not provided, the script searches the
     script directory and then the system PATH. Required for Pro, Enterprise,
     Education, and LTSC editions when applying changes.
 
@@ -73,13 +73,11 @@
 
 .EXAMPLE
     .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Build .\my-profile.psd1
-    Build Mode: opens the profile builder for my-profile.psd1.
-    Does not require elevation and can be run on Windows or Linux.
+    Build Mode: saves selections to my-profile.psd1 for later application.
 
 .EXAMPLE
     .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Snapshot .\my-snapshot.psd1
-    Snapshot Mode: captures current registry state to the specified file.
-    Requires administrator privileges.
+    Snapshot Mode: captures the current registry state for each defined setting.
 #>
 
 [CmdletBinding(DefaultParameterSetName = 'Interactive')]
@@ -314,7 +312,7 @@ function Import-DefinitionsFile {
     <#
     .SYNOPSIS
         Loads and validates a definitions file, stopping with a fatal error
-        if the file is missing, unparseable, or structurally invalid.
+        if the file is missing, unparsable, or structurally invalid.
     .OUTPUTS
         Returns the loaded definitions hashtable.
     #>
@@ -395,7 +393,7 @@ function Import-ProfileFile {
     <#
     .SYNOPSIS
         Loads and validates a profile file, stopping with a fatal error
-        if the file is missing, unparseable, or structurally invalid.
+        if the file is missing, unparsable, or structurally invalid.
     .OUTPUTS
         Returns the loaded profile hashtable.
     #>
@@ -497,9 +495,10 @@ function Export-ProfileFile {
 function Get-SettingCurrentValue {
     <#
     .SYNOPSIS
-        Reads the current value of a setting from the registry or the build profile.
+        Reads a setting's current value from the registry or build profile.
     .OUTPUTS
         Returns a hashtable with Exists (bool) and Value properties.
+        In Build Mode, also includes ExplicitAbsence (bool).
     #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -526,7 +525,8 @@ function Get-SettingCurrentValue {
 function Test-SettingState {
     <#
     .SYNOPSIS
-        Compares the current value against the hardened value.
+        Determines the current state of a setting
+        relative to its hardened and default values.
     .OUTPUTS
         Returns a string: 'HARDENED', 'DEFAULT', 'CUSTOM', or 'NOT SET'
     #>
@@ -1326,8 +1326,8 @@ function Get-SectionCounts {
 function Invoke-ProfileMode {
     <#
     .SYNOPSIS
-        Applies all settings in a loaded profile without prompting,
-        after generating a pre-change snapshot.
+        Applies all settings in the profile without prompting.
+        A pre-change snapshot is saved automatically.
     .OUTPUTS
         Returns $true if all settings were applied successfully,
         $false if any setting failed to apply or validate.
@@ -1478,9 +1478,10 @@ function Get-BuildSettingCurrentValue {
     .SYNOPSIS
         Reads the current value of a setting from the build profile.
     .OUTPUTS
-        Returns a hashtable with Exists (bool), Value, and ExplicitAbsence (bool)
-        properties. ExplicitAbsence is true when an Exists = $false entry is
-        present, distinguishing it from a setting not in the profile at all.
+        Returns a hashtable with Exists (bool), Value, and
+        ExplicitAbsence (bool) properties. ExplicitAbsence is true
+        when an Exists = $false entry is present, distinguishing it
+        from a setting not in the profile at all.
     #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -1611,8 +1612,7 @@ function Invoke-BuildSettingRemove {
 function Invoke-BuildSettingExclude {
     <#
     .SYNOPSIS
-        Removes a setting entry from the build profile entirely,
-        leaving Profile Mode with no instruction for this setting.
+        Removes a setting entry from the build profile entirely.
     .OUTPUTS
         Returns 'Removed', 'AlreadyAbsent', 'RemoveFailed', or 'VerifyFailed'.
     #>
@@ -1670,7 +1670,7 @@ function Get-SnapshotProfilePath {
 function Export-SnapshotProfile {
     <#
     .SYNOPSIS
-        Captures the current state of the provided settings as a PSD1 profile file.
+        Captures the current state of the provided settings as a profile file.
     #>
     [CmdletBinding()]
     param(
