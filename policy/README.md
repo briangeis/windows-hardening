@@ -1,4 +1,4 @@
-# Policy
+# Policy Script
 
 Applies registry and Local Group Policy hardening settings to a standalone Windows device.
 
@@ -6,10 +6,10 @@ Applies registry and Local Group Policy hardening settings to a standalone Windo
 
 - PowerShell 5.1 or later
 - Administrator privileges (all modes except Build Mode)
-- `LGPO.exe` from the [Microsoft Security Compliance Toolkit](https://www.microsoft.com/en-us/download/details.aspx?id=55319)
-  is required on Pro, Enterprise, Education, and LTSC editions in Interactive and Profile modes
+- `LGPO.exe` from the [Microsoft Security Compliance Toolkit](https://www.microsoft.com/en-us/download/details.aspx?id=55319)  
+  (required for Interactive and Profile modes on Pro, Enterprise, Education, and LTSC editions)
 
-Place `LGPO.exe` in the `policy` directory alongside the script, or ensure it is available on the system `PATH`. Windows Home editions do not require `LGPO.exe`.
+Place `LGPO.exe` in the `policy` directory alongside the script, or ensure it is available on the system `PATH`.
 
 ## Modes of Operation
 
@@ -19,7 +19,7 @@ The script supports four modes, determined by which parameters are provided.
 
 Opens a menu of settings from a definitions file. Each setting shows its current state on the device alongside the hardened and default values from the definitions file. Settings can be applied or reset to their default values individually, or all at once within a section. A snapshot of the current system state is saved automatically on startup.
 
-Use Interactive Mode for initial configuration of a device, reviewing the current state of settings, or making targeted adjustments to settings already in place.
+Use Interactive Mode for initial configuration of a device, reviewing the current state of settings, or making targeted adjustments to existing settings.
 
 ```powershell
 .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1
@@ -37,7 +37,7 @@ Use Profile Mode to apply a pre-built profile to a device, or as part of an auto
 
 ### Build Mode
 
-Opens the same settings menu as Interactive Mode, but saves selections to a profile file instead of applying them to the device. Does not read or write system state, so administrator privileges are not required. Can be run on Windows or Linux.
+Opens the same settings menu as Interactive Mode, but saves selections to a profile file instead of applying them to the device. Settings already added to the profile can also be removed from it. Does not read or write system state, so administrator privileges are not required. Can be run on Windows or Linux.
 
 Use Build Mode to prepare a configuration profile for later application to a Windows device. Build Mode can be run multiple times, each time with a different definitions file and the same profile file path, to accumulate settings from each source into a single profile.
 
@@ -63,7 +63,7 @@ Every session appends to a log file in the current working directory. The file i
 
 ### Snapshots
 
-Interactive Mode and Profile Mode each save a snapshot of the current registry state before any changes are made. Snapshots are written to the current working directory using a generated filename: `Policy-Snapshot_ComputerName_yyyyMMdd_HHmmss.psd1`. Snapshot Mode writes to the path provided via `-Snapshot`; passing a directory causes the same generated filename to be used in that directory.
+Interactive Mode saves a snapshot at startup. Profile Mode saves a snapshot before any changes are applied. Snapshots are written to the current working directory using a generated filename: `Policy-Snapshot_ComputerName_yyyyMMdd_HHmmss.psd1`. Snapshot Mode writes to the path provided via `-Snapshot`. If a directory is provided, the same generated filename is used.
 
 ### Build Profiles
 
@@ -71,13 +71,11 @@ Build Mode writes selections to the profile file path provided with `-Build`. If
 
 ## Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `-DefinitionsPath` | String | Path to a definitions file. Required for Interactive, Build, and Snapshot modes. |
-| `-ProfilePath` | String | Path to a profile file to apply. Triggers Profile Mode. |
-| `-Build` | String | Path to the profile file to build. Triggers Build Mode. |
-| `-Snapshot` | String | File or directory path for the snapshot profile. Triggers Snapshot Mode. |
-| `-LogPath` | String | Output path for the log file. Accepts a full file path or a directory. |
-| `-LGPOPath` | String | Explicit path to `LGPO.exe`. If not provided, the script searches the `policy` directory and then the system `PATH`. |
+- **`-DefinitionsPath`**: Path to a definitions file. Required for Interactive, Build, and Snapshot modes.
+- **`-ProfilePath`**: Path to a profile file to apply. Triggers Profile Mode.
+- **`-Build`**: Path to the profile file to build. Triggers Build Mode.
+- **`-Snapshot`**: File or directory path for the snapshot profile. Triggers Snapshot Mode.
+- **`-LogPath`**: Output path for the log file. Accepts a full file path or a directory.
+- **`-LGPOPath`**: Explicit path to `LGPO.exe`. If not provided, the script searches the `policy` directory and then the system `PATH`.
 
 Run `Get-Help .\policy\Invoke-WinHardenPolicy.ps1 -Detailed` for the full parameter reference.
