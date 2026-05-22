@@ -28,7 +28,7 @@ The source article covers both Windows 10 and Windows 11, and some Group Policy 
 - [Settings Without a Group Policy Equivalent](#settings-without-a-group-policy-equivalent)
 - [Settings Sharing a Group Policy](#settings-sharing-a-group-policy)
 - [Intentional Deviations from Source Article](#intentional-deviations-from-source-article)
-- [Known Article Inconsistencies](#known-article-inconsistencies)
+- [Counterintuitive GPO Behavior](#counterintuitive-gpo-behavior)
 - [Article Content Not Included](#article-content-not-included)
 - [Settings Tree](#settings-tree)  
 
@@ -229,7 +229,7 @@ The most consequential setting in the file. Disabling automatic root certificate
 
 ## Settings Without a Group Policy Equivalent
 
-The following 24 settings have `GPOPath` and `GPOState` set to `$null` in the definitions file. In each case, either the article provides no GPO, or the GPO requires ADMX templates not present in a standard Windows 11 installation. On Windows Pro, Enterprise, Education, and LTSC editions, these must still be configured via registry even when Group Policy is used for all other settings.
+The following 23 settings have `GPOPath` and `GPOState` set to `$null` in the definitions file. In each case, either the article provides no GPO, or the GPO requires ADMX templates not present in a standard Windows 11 installation. On Windows Pro, Enterprise, Education, and LTSC editions, these must still be configured via registry even when Group Policy is used for all other settings.
 
 | Setting Name                                | Article Section | PSD1 Section               | Reason                                    |
 |---------------------------------------------|:---------------:|----------------------------|-------------------------------------------|
@@ -256,7 +256,6 @@ The following 24 settings have `GPOPath` and `GPOState` set to `$null` in the de
 | Set Feedback Count to Zero                  | 18.16           | Feedback & Diagnostics     | HKCU only; no GPO available               |
 | Disable News and Interests                  | 18.24           | Widgets                    | Article provides no GPO                   |
 | Disable MSRT Diagnostic Data                | 24              | Defender Cloud Reporting   | Article explicitly notes no GPO           |
-| Disable Services Configuration              | 31              | Services Configuration     | Article provides no GPO                   |
 
 ## Settings Sharing a Group Policy
 
@@ -301,13 +300,11 @@ The article specifies the registry path at `HKCU\...\Policies\Microsoft\Windows\
 
 The article specifies `HKCU\...\Explorer\Advanced\Start_TrackDocs` set to `0`, which disables document tracking that feeds the Recommendations section. The definitions file instead uses `HKLM\...\Policies\Microsoft\Windows\Explorer\HideRecommendedSection` set to `1`, which is the registry key corresponding to the article's own GPO recommendation ("Remove Recommended from Start Menu"). This approach is machine-wide (HKLM, consistent with the majority of settings in the file), directly hides the Recommendations UI element rather than indirectly reducing its content, and aligns with the article's GPO guidance rather than its registry guidance.
 
-## Known Article Inconsistencies
+## Counterintuitive GPO Behavior
 
-The following settings have guidance in the article that is internally inconsistent. The registry values for these settings are correct and produce the intended hardened state. Only the article's documentation is affected.
+### Disable All Store Apps (Microsoft Store)
 
-### Disable All Store Apps (Section 26)
-
-The article instructs to "Disable" the GPO named "Disable all apps from Microsoft Store," but the corresponding registry sets `DisableStoreApps` to `1` (disabled). Disabling a policy named "Disable..." would produce the opposite effect. The intended GPO state is likely "Enabled."
+The GPO governing this setting is named `Disable all apps from Microsoft Store`. To disable all apps from the Store, the policy must be set to Disabled, which writes `DisableStoreApps` to `1`. Setting the policy to Enabled writes `DisableStoreApps` to `0`, enabling Store apps. The registry value name is self-consistent: `1` disables Store apps and `0` does not. The GPO name is counterintuitive because disabling a policy named "Disable all apps from Microsoft Store" is what disables Store apps.
 
 ## Article Content Not Included
 

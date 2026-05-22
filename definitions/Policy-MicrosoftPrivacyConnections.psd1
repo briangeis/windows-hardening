@@ -27,7 +27,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Data Collection and Preview Builds > Allow Telemetry'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Data Collection and Preview Builds > Allow Diagnostic Data'
                             GPOState      = 'Enabled (0)'
                         }
                         @{
@@ -853,7 +853,7 @@
                             HardenedValue = 1
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Store > Disable all apps from Microsoft Store'
-                            GPOState      = 'Enabled'
+                            GPOState      = 'Disabled'
                             Note          = 'Also disables the Microsoft Store application itself.'
                         }
                         @{
@@ -1255,7 +1255,7 @@
                             HardenedValue = 0
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Data Collection and Preview Builds > Toggle user control over Insider builds'
-                            GPOState      = 'Enabled'
+                            GPOState      = 'Disabled'
                         }
                     )
                 }
@@ -1311,8 +1311,8 @@
                             ValueType     = 'DWord'
                             HardenedValue = 1
                             DefaultValue  = $null
-                            GPOPath       = $null
-                            GPOState      = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Data Collection and Preview Builds > Disable OneSettings Downloads'
+                            GPOState      = 'Enabled'
                             Note          = 'Prevents Microsoft from pushing remote configuration changes to Windows.'
                         }
                     )
