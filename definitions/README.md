@@ -6,11 +6,11 @@ Definitions files describe the settings each component script can configure, cur
 
 ### Policy
 
-- [Policy-MicrosoftPrivacyConnections.psd1](Policy-MicrosoftPrivacyConnections.psd1) ([reference doc](reference/Policy-MicrosoftPrivacyConnections.md))
-  Covers 116 registry settings controlling connections and data sharing between Windows and Microsoft services, drawn from the Microsoft article "Manage connections from Windows 10 and Windows 11 operating system components to Microsoft services."
+- [Policy-MicrosoftPrivacyConnections.psd1](Policy-MicrosoftPrivacyConnections.psd1) ([reference doc](reference/Policy-MicrosoftPrivacyConnections.md)) covers 116 registry settings controlling connections and data sharing between Windows and Microsoft services, drawn from the Microsoft article "Manage connections from Windows 10 and Windows 11 operating system components to Microsoft services."
 
-- [Policy-WindowsPrivacyDefaults.psd1](Policy-WindowsPrivacyDefaults.psd1) ([reference doc](reference/Policy-WindowsPrivacyDefaults.md))
-  Covers 46 registry settings targeting Windows 11 privacy and security defaults not addressed by Policy-MicrosoftPrivacyConnections, drawn from independent research and direct system analysis.
+- [Policy-WindowsPrivacyDefaults.psd1](Policy-WindowsPrivacyDefaults.psd1) ([reference doc](reference/Policy-WindowsPrivacyDefaults.md)) covers 46 registry settings targeting Windows 11 privacy and security defaults not addressed by Policy-MicrosoftPrivacyConnections, drawn from independent research and direct system analysis.
+
+- [Policy-Edge.psd1](Policy-Edge.psd1) ([reference doc](reference/Policy-Edge.md)) covers 126 registry settings hardening Microsoft Edge for privacy and security on standalone Windows 11 devices, drawn from the Microsoft Edge ADMX policy templates and independent research.
 
 ## Naming Convention
 
@@ -111,6 +111,4 @@ Every setting entry is a hashtable. Core fields are required. Advisory fields ar
 
 ## Reference Documents
 
-Every definitions file is accompanied by a reference document in [`definitions/reference/`](reference/) with the same base name and a `.md` extension. [Policy-MicrosoftPrivacyConnections.psd1](Policy-MicrosoftPrivacyConnections.psd1) is accompanied by [Policy-MicrosoftPrivacyConnections.md](reference/Policy-MicrosoftPrivacyConnections.md), and [Policy-WindowsPrivacyDefaults.psd1](Policy-WindowsPrivacyDefaults.psd1) by [Policy-WindowsPrivacyDefaults.md](reference/Policy-WindowsPrivacyDefaults.md).
-
-A reference document records the editorial decisions behind the definitions file, covering the distribution of settings across registry hives, settings with notable side effects or applicability conditions, and settings without a Group Policy equivalent. For files derived from a source article, it additionally maps every setting to its corresponding section in the source and documents intentional deviations, known inconsistencies, and excluded source content.
+Every definitions file is accompanied by a reference document in [`definitions/reference/`](reference/) with the same base name and a `.md` extension. A reference document records the editorial decisions behind the definitions file, covering the distribution of settings across registry hives, settings with notable side effects or applicability conditions, and settings without a Group Policy equivalent. For files derived from a source article, it additionally maps every setting to its corresponding section in the source and documents intentional deviations, known inconsistencies, and excluded source content.
