@@ -210,7 +210,7 @@ Disabling the LicenseManager service can prevent Store-purchased apps from launc
 
 ### Teredo (Background Services)
 
-Disabling may affect Xbox gaming features and Delivery Optimization in certain network configurations.
+Disabling Teredo may affect Xbox gaming features and Delivery Optimization in certain network configurations.
 
 ### Network Connection Status Indicator (Background Services)
 
@@ -222,7 +222,7 @@ The two settings together prevent Windows from synchronizing time automatically.
 
 ### Windows SmartScreen (Background Services)
 
-Disabling removes system-wide malware and phishing protection in Explorer and for file downloads. Unlike the browser-specific SmartScreen settings in Browsers, this setting affects the entire operating system.
+Disabling Windows SmartScreen removes system-wide malware and phishing protection in Explorer and for file downloads. Unlike the browser-specific SmartScreen settings in Browsers, this setting affects the entire operating system.
 
 ### Root Certificates (Background Services)
 
@@ -299,13 +299,13 @@ The article specifies the registry path at `HKCU\...\Policies\Microsoft\Windows\
 
 ### Disable Recommendations (Section 33)
 
-The article specifies `HKCU\...\Explorer\Advanced\Start_TrackDocs` set to `0`, which disables document tracking that feeds the Recommendations section. The definitions file instead uses `HKLM\...\Policies\Microsoft\Windows\Explorer\HideRecommendedSection` set to `1`, which is the registry key corresponding to the article's own GPO recommendation ("Remove Recommended from Start Menu"). This approach is machine-wide (HKLM, consistent with the majority of settings in the file), directly hides the Recommendations UI element rather than indirectly reducing its content, and aligns with the article's GPO guidance rather than its registry guidance.
+The article specifies `HKCU\...\Explorer\Advanced\Start_TrackDocs` set to `0`, which disables document tracking that feeds the Recommendations section. The definitions file instead uses `HKLM\...\Policies\Microsoft\Windows\Explorer\HideRecommendedSection` set to `1`, which is the registry key corresponding to the article's own GPO recommendation (`Remove Recommended from Start Menu`). This approach is machine-wide (HKLM, consistent with the majority of settings in the file), directly hides the Recommendations UI element rather than indirectly reducing its content, and aligns with the article's GPO guidance rather than its registry guidance.
 
 ## Counterintuitive GPO Behavior
 
 ### Disable All Store Apps (Microsoft Store)
 
-The GPO governing this setting is named `Disable all apps from Microsoft Store`. To disable all apps from the Store, the policy must be set to Disabled, which writes `DisableStoreApps` to `1`. Setting the policy to Enabled writes `DisableStoreApps` to `0`, enabling Store apps. The registry value name is self-consistent: `1` disables Store apps and `0` does not. The GPO name is counterintuitive because disabling a policy named "Disable all apps from Microsoft Store" is what disables Store apps.
+The GPO governing this setting is named `Disable all apps from Microsoft Store`. To disable all apps from the Store, the policy must be set to Disabled, which writes `DisableStoreApps` to `1`. Setting the policy to Enabled writes `DisableStoreApps` to `0`, enabling Store apps. The registry value name is self-consistent: `1` disables Store apps and `0` does not. The GPO name is counterintuitive because disabling a policy named `Disable all apps from Microsoft Store` is what disables Store apps.
 
 ## Article Content Not Included
 

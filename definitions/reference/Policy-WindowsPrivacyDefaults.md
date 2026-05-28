@@ -115,7 +115,7 @@ Contains privacy and network access settings for native Windows applications wit
 
 ## Settings with Notable Side Effects
 
-The following settings carry effects or applicability conditions that are not apparent from the setting name alone.
+The following settings have effects or applicability conditions that are not apparent from the setting name alone.
 
 ### Disable Windows Error Reporting (Error Reporting)
 
@@ -145,7 +145,7 @@ Blocking DRM internet access prevents Windows Media DRM clients from acquiring o
 
 ### Disable Hibernation and Disable Fast Startup (Data at Rest)
 
-Setting `HibernateEnabled` to `0` prevents new hibernation writes but does not remove the existing `hiberfile.sys`. The file may contain a RAM snapshot from the most recent shutdown, including browser sessions and application data. Run `powercfg /H off` separately to disable hibernation and remove the file. Fast Startup depends on the same hibernation infrastructure and should be disabled alongside it. Applying Disable Fast Startup without first disabling hibernation may allow it to re-activate.
+Setting `HibernateEnabled` to `0` prevents new hibernation writes but does not remove the existing `hiberfile.sys`. The file may contain a RAM snapshot from the most recent shutdown, including browser sessions and application data. Run `powercfg /H off` separately to disable hibernation and remove the file. Fast Startup depends on the same hibernation infrastructure and should be disabled alongside it. Applying Disable Fast Startup without first disabling hibernation may allow Fast Startup to re-activate.
 
 ## Interdependent Settings
 
@@ -157,7 +157,7 @@ All three settings are required to fully close the AutoPlay and AutoRun attack s
 
 ### Disable File Explorer Account Insights (Search & Explorer)
 
-The GPO governing this setting is named `Show files based on your account and cloud provider activity`. To prevent File Explorer from showing account-based content, the policy must be set to Enabled, which writes `DisableGraphRecentItems` to `1`. Setting the policy to Disabled writes `DisableGraphRecentItems` to `0`, which enables the feature. The registry value name is self-consistent: `1` disables the feature and `0` does not. The GPO name is counterintuitive because enabling a policy named "Show files" is what prevents the files from being shown.
+The GPO governing this setting is named `Show files based on your account and cloud provider activity`. To prevent File Explorer from showing account-based content, the policy must be set to Enabled, which writes `DisableGraphRecentItems` to `1`. Setting the policy to Disabled writes `DisableGraphRecentItems` to `0`, which enables the feature. The registry value name is self-consistent: `1` disables the feature and `0` does not. The GPO name is counterintuitive because enabling a policy named `Show files based on your account and cloud provider activity` is what prevents the files from being shown.
 
 ## Settings Without a Group Policy Equivalent
 

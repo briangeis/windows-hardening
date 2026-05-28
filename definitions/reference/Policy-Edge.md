@@ -121,29 +121,29 @@ Contains settings that produce a clean, stock browser experience. These settings
 
 ## Settings with Notable Side Effects
 
-The following settings carry consequences or interactions that are not apparent from the setting name or advisory fields alone.
+The following settings carry consequences not apparent from the setting name or advisory fields alone, or have non-obvious interactions with other settings in the file.
 
 ### Enable Ephemeral Profiles (Ephemeral Profiles)
 
-Ephemeral profiles are fundamentally different from clearing browsing data on exit. When ephemeral profiles are active, the entire user profile directory is stored in a temporary location and deleted when Edge closes. This includes all installed extensions, bookmarks and favorites, Edge settings, themes, passwords saved during the session, and all customizations, not just browsing history and cookies. All five settings in the Browsing Data section are superseded by this setting when both are applied; those settings operate on a persistent profile that does not exist when ephemeral mode is active.
+Ephemeral profiles are fundamentally different from clearing browsing data on exit. When ephemeral profiles are active, the entire user profile directory is stored in a temporary location and deleted when Edge closes. This includes all installed extensions, bookmarks and favorites, Edge settings, themes, passwords saved during the session, and all customizations, not just browsing history and cookies. All five settings in the Browsing Data section are superseded by this setting when both are applied. Those settings operate on a persistent profile that does not exist when ephemeral mode is active.
 
 ### Block JavaScript JIT and Enhanced Security Mode Strict (Security)
 
-Both settings independently disable JIT compilation in the browser. Enhanced Security Mode Strict disables JIT as part of its broader mitigation stack. Block JavaScript JIT (`DefaultJavaScriptJitSetting`) controls this separately at the content settings level. When both settings are applied together, the effective behavior is the same as either setting alone; applying both does not compound the protection. Users who want to preserve JIT for performance reasons should not apply either setting.
+Both settings independently disable JIT compilation in the browser. Enhanced Security Mode Strict disables JIT as part of its broader mitigation stack. Block JavaScript JIT (`DefaultJavaScriptJitSetting`) controls this separately at the content settings level. When both settings are applied together, the effective behavior is the same as either setting alone. Applying both does not compound the protection. Users who want to preserve JIT for performance reasons should not apply either setting.
 
 ### Disable Address Bar Search (Address Bar Search)
 
-Setting `DefaultSearchProviderEnabled = 0` is more restrictive than disabling search suggestions. With this setting applied, typing a query in the address bar and pressing Enter does not navigate to a search engine; the browser attempts to resolve the input as a URL and produces a navigation error if it fails. Users who want to suppress keystrokes being sent to the search engine as they type but still want to perform searches should apply only Disable Search Suggestions and leave Disable Address Bar Search unapplied.
+Setting `DefaultSearchProviderEnabled = 0` is more restrictive than disabling search suggestions. With this setting applied, typing a query in the address bar and pressing Enter does not navigate to a search engine. The browser attempts to resolve the input as a URL and produces a navigation error if it fails. Users who want to suppress keystrokes being sent to the search engine as they type but still want to perform searches should apply only Disable Search Suggestions and leave Disable Address Bar Search unapplied.
 
 ### SmartScreen Section Design
 
-The SmartScreen section contains five settings with Warning advisories, all with disabled as the hardened value. `SmartScreenEnabled` is the primary control: setting it to `0` fully disables SmartScreen and renders the remaining four settings irrelevant. All five are included so that each can be applied independently. A user who applies only `SmartScreenDnsRequestsEnabled = 0` retains hash-based URL and download checking while disabling DNS-based lookups. A user who applies only `SmartScreenForTrustedDownloadsEnabled = 0` retains SmartScreen protection for all downloads except those from sources in a trusted zone. The SmartScreen section is designed to be skipped entirely by users who prefer to keep SmartScreen's protections active.
+The SmartScreen section contains five settings with Warning advisories, all with Disabled as the hardened value. `SmartScreenEnabled` is the primary control: setting it to `0` fully disables SmartScreen and renders the remaining four settings irrelevant. All five are included so that each can be applied independently. A user who applies only `SmartScreenDnsRequestsEnabled = 0` retains hash-based URL and download checking while disabling DNS-based lookups. A user who applies only `SmartScreenForTrustedDownloadsEnabled = 0` retains SmartScreen protection for all downloads except those from sources in a trusted zone. The SmartScreen section is designed to be skipped entirely by users who prefer to keep SmartScreen's protections active.
 
 ## Counterintuitive GPO Behavior
 
 ### Disable New Tab App Launcher (Startup & New Tab Page)
 
-The policy governing this setting is named "Hide App Launcher on Microsoft Edge new tab page." The registry value is `NewTabPageAppLauncherEnabled`. Setting the policy to Disabled (registry value = 0) hides the Microsoft 365 App Launcher from the new tab page. Setting it to Enabled shows the App Launcher. The hardened value is 0 and the GPO state is Disabled, which means "not enabling the App Launcher" results in it being absent from the new tab page.
+The GPO governing this setting is named `Hide App Launcher on Microsoft Edge new tab page`. To hide the App Launcher, the policy must be set to Disabled, which writes `NewTabPageAppLauncherEnabled` to `0`. Setting the policy to Enabled writes `NewTabPageAppLauncherEnabled` to `1`, showing the App Launcher. The registry value name is self-consistent: `0` hides the App Launcher and `1` does not. The GPO name is counterintuitive because disabling a policy named `Hide App Launcher on Microsoft Edge new tab page` is what hides the App Launcher.
 
 ## Settings Not Included
 
