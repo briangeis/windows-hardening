@@ -2,8 +2,6 @@
 
 [Policy-Edge.psd1](../Policy-Edge.psd1) is a standalone Edge hardening baseline covering privacy, security, identity management, content permissions, and browser interface configuration for standalone Windows 11 devices. Settings are drawn from the Microsoft Edge ADMX policy templates and verified through direct registry mapping on a Windows 11 Pro device with the latest Edge ADMX templates installed. This file does not derive from a single source article; each setting reflects independent research and deliberate editorial choices aimed at three goals: minimizing the data Edge sends to Microsoft, applying available browser security hardening, and producing a clean browser experience free of Microsoft-promoted features and background resource use. 124 of the 126 settings write to `HKLM:\SOFTWARE\Policies\Microsoft\Edge`; one setting in the Experimentation section writes to `HKLM:\SOFTWARE\Policies\Microsoft\Edge\WebView2` and one writes to `HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate` to cover the WebView2 and Edge Update experimentation pipelines. The Microsoft Edge ADMX templates provide Computer Configuration policies for 124 of the 126 settings; the WebView2 Experimentation setting is governed by the Microsoft Edge WebView2 ADMX policy, and the EdgeUpdate setting is governed by the Microsoft Edge Update ADMX policy. This document covers settings with notable side effects and non-obvious interactions, counterintuitive Group Policy behavior, and the distribution of settings by category.
 
-Ten settings in this file overlap with the Microsoft Edge section of [Policy-MicrosoftPrivacyConnections.psd1](Policy-MicrosoftPrivacyConnections.md): `SearchSuggestEnabled`, `ConfigureDoNotTrack`, `PasswordManagerEnabled`, `AutofillAddressEnabled`, `AutofillCreditCardEnabled`, `DefaultSearchProviderEnabled`, `SmartScreenEnabled`, `NewTabPageLocation`, `RestoreOnStartup`, and `HideFirstRunExperience`. This file is designed to stand alone; the overlapping settings are included so that a device using only this file receives a complete baseline. Applying both files to the same device produces no conflict and no adverse effect; the second application writes the same values.
-
 The categories are organized navigation-first: each category answers a specific question. Privacy & Telemetry, Security, and Identity & Data cover the highest-priority decisions. Content Permissions and Microsoft Features address site-level access control and Microsoft service integrations. Browser UI & Performance produces the clean browser experience.
 
 Settings whose hardened GPO state is documented as equivalent to Not Configured are excluded. When the GPO description states that the policy's enabled or disabled state produces the same browser behavior as leaving the policy unconfigured, applying the setting writes a registry value without changing how Edge behaves. In an enterprise environment managed by Active Directory, locking the default via local policy provides meaningful protection against domain-applied GPO overrides. On a standalone device, no such competing policy exists. Including settings that enforce an existing default would misrepresent both the browser's built-in behavior and the editorial goals of this file.
@@ -22,6 +20,7 @@ Settings whose hardened GPO state is documented as equivalent to Not Configured 
 - [Settings Distribution by Category](#settings-distribution-by-category)
 - [Settings with Notable Side Effects](#settings-with-notable-side-effects)
 - [Counterintuitive GPO Behavior](#counterintuitive-gpo-behavior)
+- [Settings Not Included](#settings-not-included)
 - [Settings Tree](#settings-tree)
 
 ## Privacy & Telemetry
@@ -145,6 +144,15 @@ The SmartScreen section contains five settings with Warning advisories, all with
 ### Disable New Tab App Launcher (Startup & New Tab Page)
 
 The policy governing this setting is named "Hide App Launcher on Microsoft Edge new tab page." The registry value is `NewTabPageAppLauncherEnabled`. Setting the policy to Disabled (registry value = 0) hides the Microsoft 365 App Launcher from the new tab page. Setting it to Enabled shows the App Launcher. The hardened value is 0 and the GPO state is Disabled, which means "not enabling the App Launcher" results in it being absent from the new tab page.
+
+## Settings Not Included
+
+The following two settings are present in the Microsoft Edge Update ADMX template and are covered in [Policy-MicrosoftPrivacyConnections](Policy-MicrosoftPrivacyConnections.md) under the Microsoft Edge Update section. Both are not included here because disabling automatic Edge updates introduces security risk that runs counter to this file's hardening goals.
+
+| Registry Value | Reason |
+|---|---|
+| `UpdateDefault` | Controls the overall update policy for Edge; disabling it prevents all automatic updates from being installed |
+| `AutoUpdateCheckPeriodMinutes` | Controls how frequently Edge checks for available updates; setting it to `0` produces the same security outcome as `UpdateDefault` |
 
 ## Settings Tree
 

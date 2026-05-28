@@ -1456,6 +1456,26 @@
                             GPOState      = $null
                         }
                         @{
+                            Name          = 'Disable Experimentation Service'
+                            Description   = 'Turns off the Edge Experimentation and Configuration Service'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate'
+                            ValueName     = 'ExperimentationAndConfigurationServiceControl'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = $null
+                            GPOState      = $null
+                            Note          = 'Prevents Microsoft from pushing remote configuration changes to Edge.'
+                        }
+                    )
+                }
+
+                # -- Section: Microsoft Edge Update --
+                @{
+                    Name        = 'Microsoft Edge Update'
+                    Description = 'Controls automatic update behavior for Microsoft Edge'
+                    Settings    = @(
+                        @{
                             Name          = 'Disable Edge Auto Update'
                             Description   = 'Turns off automatic Edge updates'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate'
@@ -1477,18 +1497,6 @@
                             DefaultValue  = $null
                             GPOPath       = $null
                             GPOState      = $null
-                        }
-                        @{
-                            Name          = 'Disable Experimentation Service'
-                            Description   = 'Turns off the Edge Experimentation and Configuration Service'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate'
-                            ValueName     = 'ExperimentationAndConfigurationServiceControl'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = $null
-                            GPOState      = $null
-                            Note          = 'Prevents Microsoft from pushing remote configuration changes to Edge.'
                         }
                     )
                 }

@@ -135,11 +135,12 @@ Groups Windows Update alongside settings that share the same core behavior: Wind
 
 *How are Microsoft browsers configured?*
 
-Each section orders settings by browser-focused decision priority: data-to-Microsoft settings lead, followed by credential storage, security features, UI and startup defaults, and update behavior.
+Each section orders settings by browser-focused decision priority: data-to-Microsoft settings lead, followed by credential storage, security features, and UI and startup defaults. Microsoft Edge Update is a standalone section for update control, separated from Microsoft Edge because disabling updates is a security concern rather than a privacy decision.
 
 | PSD1 Section              | Article Section | HKLM | HKCU | Total |
 |---------------------------|:---------------:|:----:|:----:|:-----:|
-| Microsoft Edge            | 13.2            | 14   | 0    | 14    |
+| Microsoft Edge            | 13.2            | 12   | 0    | 12    |
+| Microsoft Edge Update     | 13.2            | 2    | 0    | 2     |
 | Internet Explorer         | 8, 8.1          | 10   | 3    | 13    |
 
 ## Background Services
@@ -246,8 +247,8 @@ The following 23 settings have `GPOPath` and `GPOState` set to `$null` in the de
 | Disable Startup Restore                     | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
 | Set Startup URL to Blank                    | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
 | Disable First Run Experience                | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
-| Disable Edge Auto Update                    | 13.2            | Microsoft Edge             | Requires Edge Update ADMX                 |
-| Disable Auto Update Check                   | 13.2            | Microsoft Edge             | Requires Edge Update ADMX                 |
+| Disable Edge Auto Update                    | 13.2            | Microsoft Edge Update      | Requires Edge Update ADMX                 |
+| Disable Auto Update Check                   | 13.2            | Microsoft Edge Update      | Requires Edge Update ADMX                 |
 | Disable Experimentation Service             | 13.2            | Microsoft Edge             | Requires Edge Update ADMX                 |
 | Disable Language List Access                | 18.1            | Advertising & Tracking     | HKCU only; no GPO available               |
 | Disable App Launch Tracking                 | 18.1            | Start Menu Personalization | HKCU only; no GPO available               |
@@ -475,9 +476,10 @@ Policy-MicrosoftPrivacyConnections.psd1
 |   |   +-- Disable Startup Restore
 |   |   +-- Set Startup URL to Blank
 |   |   +-- Disable First Run Experience
-|   |   +-- Disable Edge Auto Update
-|   |   +-- Disable Auto Update Check
 |   |   \-- Disable Experimentation Service
+|   +-- Microsoft Edge Update
+|   |   +-- Disable Edge Auto Update
+|   |   \-- Disable Auto Update Check
 |   \-- Internet Explorer
 |       +-- Disable Suggested Sites
 |       +-- Disable Enhanced Suggestions
