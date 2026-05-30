@@ -917,7 +917,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 2  # 2 = Do Not Allow
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Default geolocation setting'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Content settings > Default geolocation setting'
                             GPOState      = 'Enabled (Do not allow)'
                         }
                         @{
@@ -1513,7 +1513,7 @@
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Enable the Copilot new tab page'
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Startup, home page and new tab page > Disable Bing chat entry-points on Microsoft Edge Enterprise new tab page'
                             GPOState      = 'Disabled'
                         }
                         @{
