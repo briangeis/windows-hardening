@@ -32,7 +32,7 @@ Contains every data flow from the browser to Microsoft, from the diagnostic data
 | Diagnostic Data             | 5    | 0    | 5     |
 | Personalization & Profiling | 3    | 0    | 3     |
 | Tracking Prevention         | 3    | 0    | 3     |
-| Copilot & AI Data Access    | 5    | 0    | 5     |
+| Copilot & AI Data Access    | 6    | 0    | 6     |
 | Experimentation             | 4    | 0    | 4     |
 
 ## Identity & Data
@@ -60,7 +60,7 @@ Contains browser-level security hardening. Most sections strengthen the browser 
 | SmartScreen                 | 5    | 0    | 5     |
 | Process & Memory Protection | 6    | 0    | 6     |
 | Content Security            | 3    | 0    | 3     |
-| Connection Security         | 3    | 0    | 3     |
+| Connection Security         | 4    | 0    | 4     |
 
 ## Content Permissions
 
@@ -109,13 +109,13 @@ Contains the settings that produce a clean, stock browser experience. Unlike the
 
 | Category                 |  HKLM   |  HKCU  |  Total  |
 |--------------------------|:-------:|:------:|:-------:|
-| Privacy & Telemetry      | 20      | 0      | 20      |
+| Privacy & Telemetry      | 21      | 0      | 21      |
 | Identity & Data          | 26      | 0      | 26      |
-| Security                 | 17      | 0      | 17      |
+| Security                 | 18      | 0      | 18      |
 | Content Permissions      | 13      | 0      | 13      |
 | Microsoft Features       | 30      | 0      | 30      |
 | Browser UI & Performance | 20      | 0      | 20      |
-| **Totals**               | **126** | **0**  | **126** |
+| **Totals**               | **128** | **0**  | **128** |
 
 ## Settings with Notable Side Effects
 
@@ -173,6 +173,7 @@ Policy-Edge.psd1
 |   |   \-- Enable Do Not Track
 |   +-- Copilot & AI Data Access
 |   |   +-- Disable Browsing with Copilot
+|   |   +-- Disable Copilot Toolbar Button
 |   |   +-- Disable Copilot Page Context Access
 |   |   +-- Disable Built-In AI APIs for Pages
 |   |   +-- Disable Browsing History Sharing with Copilot Search
@@ -237,7 +238,8 @@ Policy-Edge.psd1
 |   \-- Connection Security
 |       +-- Require OCSP/CRL Checks for Local Trust Anchors
 |       +-- Enable Encrypted Client Hello
-|       \-- Disable Basic Authentication over HTTP
+|       +-- Disable Basic Authentication over HTTP
+|       \-- Disable Network Prediction
 |
 +-- Content Permissions
 |   +-- Media Capture

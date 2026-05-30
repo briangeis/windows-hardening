@@ -10,7 +10,7 @@ Definitions files describe the settings each component script can configure, cur
 
 - [Policy-WindowsPrivacyDefaults.psd1](Policy-WindowsPrivacyDefaults.psd1) ([reference doc](reference/Policy-WindowsPrivacyDefaults.md)) covers 46 registry settings targeting Windows 11 privacy and security defaults not addressed by Policy-MicrosoftPrivacyConnections, drawn from independent research and direct system analysis.
 
-- [Policy-Edge.psd1](Policy-Edge.psd1) ([reference doc](reference/Policy-Edge.md)) covers 126 registry settings hardening Microsoft Edge for privacy and security on standalone Windows 11 devices, drawn from the Microsoft Edge ADMX policy templates and independent research.
+- [Policy-Edge.psd1](Policy-Edge.psd1) ([reference doc](reference/Policy-Edge.md)) covers 128 registry settings hardening Microsoft Edge for privacy and security on standalone Windows 11 devices, drawn from the Microsoft Edge ADMX policy templates and independent research.
 
 ## Naming Convention
 

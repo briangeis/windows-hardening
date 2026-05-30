@@ -179,6 +179,17 @@
                             GPOState      = 'Disabled'
                         }
                         @{
+                            Name          = 'Disable Copilot Toolbar Button'
+                            Description   = 'Removes the Microsoft 365 Copilot Chat button from the toolbar'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'Microsoft365CopilotChatIconEnabled'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Control whether Microsoft 365 Copilot Chat shows in the Microsoft Edge for Business toolbar'
+                            GPOState      = 'Disabled'
+                        }
+                        @{
                             Name          = 'Disable Copilot Page Context Access'
                             Description   = 'Prevents Copilot from reading page content for Entra ID profiles'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
@@ -815,7 +826,7 @@
                 # -- Section: Connection Security --
                 @{
                     Name        = 'Connection Security'
-                    Description = 'Controls certificate validation, encrypted TLS, and HTTP authentication'
+                    Description = 'Controls how Edge establishes and secures network connections'
                     Settings    = @(
                         @{
                             Name          = 'Require OCSP/CRL Checks for Local Trust Anchors'
@@ -850,6 +861,18 @@
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > HTTP authentication > Allow Basic authentication for HTTP'
                             GPOState      = 'Disabled'
                             Note          = 'Basic authentication transmits credentials in plain text.'
+                        }
+                        @{
+                            Name          = 'Disable Network Prediction'
+                            Description   = 'Prevents speculative DNS, connection, and page prerender requests'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'NetworkPredictionOptions'
+                            ValueType     = 'DWord'
+                            HardenedValue = 2  # 2 = Do not predict network actions
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Enable network prediction'
+                            GPOState      = 'Enabled (Do not predict network actions)'
+                            Caution       = 'May slightly slow page loads by disabling preconnect and prerender.'
                         }
                     )
                 }
