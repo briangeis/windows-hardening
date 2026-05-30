@@ -1456,16 +1456,16 @@
                             GPOState      = $null
                         }
                         @{
-                            Name          = 'Disable Experimentation Service'
-                            Description   = 'Turns off the Edge Experimentation and Configuration Service'
+                            Name          = 'Disable Edge Update Experimentation Service'
+                            Description   = 'Turns off the Edge Update Experimentation and Configuration Service'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\EdgeUpdate'
-                            ValueName     = 'ExperimentationAndConfigurationServiceControl'
+                            ValueName     = 'UpdaterExperimentationAndConfigurationServiceControl'
                             ValueType     = 'DWord'
                             HardenedValue = 0
                             DefaultValue  = $null
                             GPOPath       = $null
                             GPOState      = $null
-                            Note          = 'Prevents Microsoft from pushing remote configuration changes to Edge.'
+                            Note          = 'Prevents Microsoft from pushing remote configuration to Edge Update.'
                         }
                     )
                 }

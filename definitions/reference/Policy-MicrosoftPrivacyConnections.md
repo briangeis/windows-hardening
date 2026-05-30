@@ -249,7 +249,7 @@ The following 23 settings have `GPOPath` and `GPOState` set to `$null` in the de
 | Disable First Run Experience                | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
 | Disable Edge Auto Update                    | 13.2            | Microsoft Edge Update      | Requires Edge Update ADMX                 |
 | Disable Auto Update Check                   | 13.2            | Microsoft Edge Update      | Requires Edge Update ADMX                 |
-| Disable Experimentation Service             | 13.2            | Microsoft Edge             | Requires Edge Update ADMX                 |
+| Disable Edge Update Experimentation Service | 13.2            | Microsoft Edge             | Requires Edge Update ADMX                 |
 | Disable Language List Access                | 18.1            | Advertising & Tracking     | HKCU only; no GPO available               |
 | Disable App Launch Tracking                 | 18.1            | Start Menu Personalization | HKCU only; no GPO available               |
 | Disable SmartScreen for Store Apps          | 18.1            | Microsoft Store            | HKCU only; no GPO available               |
@@ -281,7 +281,7 @@ Two settings are affected: **Disable IE First Run Wizard** (`DisableFirstRunCust
 
 ### Edge Update Settings (Section 13.2)
 
-Three settings are affected: **Disable Edge Auto Update** (`UpdateDefault`), **Disable Auto Update Check** (`AutoUpdateCheckPeriodMinutes`), and **Disable Experimentation Service** (`ExperimentationAndConfigurationServiceControl`). The article specifies these at `HKLM\...\Policies\Microsoft\Edge\EdgeUpdate`, but the definitions file uses `HKLM\...\Policies\Microsoft\EdgeUpdate`. The article's path conflates Edge browser policies (`\Microsoft\Edge`) with Edge Update policies (`\Microsoft\EdgeUpdate`). The definitions file uses the path that Windows actually checks for update configuration.
+Three settings are affected: **Disable Edge Auto Update**, **Disable Auto Update Check**, and **Disable Edge Update Experimentation Service**. The article specifies all three at `HKLM\...\Policies\Microsoft\Edge\EdgeUpdate`. The definitions file corrects the path to `HKLM\...\Policies\Microsoft\EdgeUpdate` and the experimentation setting's value name from `ExperimentationAndConfigurationServiceControl` to `UpdaterExperimentationAndConfigurationServiceControl`.
 
 ### Disable Online Speech Recognition (Section 18.6)
 
@@ -476,7 +476,7 @@ Policy-MicrosoftPrivacyConnections.psd1
 |   |   +-- Disable Startup Restore
 |   |   +-- Set Startup URL to Blank
 |   |   +-- Disable First Run Experience
-|   |   \-- Disable Experimentation Service
+|   |   \-- Disable Edge Update Experimentation Service
 |   +-- Microsoft Edge Update
 |   |   +-- Disable Edge Auto Update
 |   |   \-- Disable Auto Update Check
