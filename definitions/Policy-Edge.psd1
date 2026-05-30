@@ -281,244 +281,6 @@
             ) # End Privacy & Telemetry Sections
         }
 
-        # ===== Category: Security =====
-        @{
-            Name        = 'Security'
-            Description = 'Settings hardening browser security and web content access controls'
-            Sections    = @(
-
-                # -- Section: SmartScreen --
-                @{
-                    Name        = 'SmartScreen'
-                    Description = 'Controls Microsoft Defender SmartScreen and scareware protection'
-                    Settings    = @(
-                        @{
-                            Name          = 'Disable Microsoft Defender SmartScreen'
-                            Description   = 'Turns off Microsoft Defender SmartScreen URL and download checking'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'SmartScreenEnabled'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Configure Microsoft Defender SmartScreen'
-                            GPOState      = 'Disabled'
-                            Warning       = 'Removes phishing and malware protection from Microsoft Edge.'
-                        }
-                        @{
-                            Name          = 'Disable SmartScreen Checks for Trusted Downloads'
-                            Description   = 'Turns off SmartScreen reputation checks on trusted source downloads'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'SmartScreenForTrustedDownloadsEnabled'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Force Microsoft Defender SmartScreen checks on downloads from trusted sources'
-                            GPOState      = 'Disabled'
-                            Warning       = 'Removes SmartScreen reputation checks on downloads from trusted sources.'
-                        }
-                        @{
-                            Name          = 'Disable SmartScreen PUA Protection'
-                            Description   = 'Turns off SmartScreen protection against potentially unwanted apps'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'SmartScreenPuaEnabled'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Configure Microsoft Defender SmartScreen to block potentially unwanted apps'
-                            GPOState      = 'Disabled'
-                            Warning       = 'Removes PUA protection from SmartScreen download checks.'
-                        }
-                        @{
-                            Name          = 'Disable SmartScreen DNS Requests'
-                            Description   = 'Turns off DNS-based URL lookups performed by SmartScreen'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'SmartScreenDnsRequestsEnabled'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Enable Microsoft Defender SmartScreen DNS requests'
-                            GPOState      = 'Disabled'
-                            Warning       = 'Removes DNS-based threat detection from SmartScreen URL checks.'
-                        }
-                        @{
-                            Name          = 'Disable Scareware Blocker'
-                            Description   = 'Turns off the on-device tech support scam page detection feature'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'ScarewareBlockerProtectionEnabled'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Scareware Blocker settings > Configure Microsoft Edge Scareware blocker protection'
-                            GPOState      = 'Disabled'
-                            Warning       = 'Removes protection against tech support scam and browser-lock pages.'
-                        }
-                    )
-                }
-
-                # -- Section: Process & Memory Protection --
-                @{
-                    Name        = 'Process & Memory Protection'
-                    Description = 'Controls browser security mode, process isolation, and memory protection'
-                    Settings    = @(
-                        @{
-                            Name          = 'Enable Strict Enhanced Security Mode'
-                            Description   = 'Enables Enhanced Security Mode at Strict level for maximum hardening'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'EnhanceSecurityMode'
-                            ValueType     = 'DWord'
-                            HardenedValue = 2  # 2 = Strict Mode
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Enhance the security state in Microsoft Edge'
-                            GPOState      = 'Enabled (Strict Mode)'
-                            Note          = 'Strict mode may affect site compatibility due to enhanced mitigations.'
-                        }
-                        @{
-                            Name          = 'Enable Site Isolation'
-                            Description   = 'Isolates each site in a dedicated process to prevent cross-site leaks'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'SitePerProcess'
-                            ValueType     = 'DWord'
-                            HardenedValue = 1
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Enable site isolation for every site'
-                            GPOState      = 'Enabled'
-                        }
-                        @{
-                            Name          = 'Enable Browser Code Integrity'
-                            Description   = 'Enforces code integrity guard in the browser process'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'BrowserCodeIntegritySetting'
-                            ValueType     = 'DWord'
-                            HardenedValue = 2  # 2 = Enforcement Mode
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Configure browser process code integrity guard setting'
-                            GPOState      = 'Enabled (Enforcement)'
-                        }
-                        @{
-                            Name          = 'Enable Dynamic Code Protection'
-                            Description   = 'Prevents the browser process from creating dynamic code'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'DynamicCodeSettings'
-                            ValueType     = 'DWord'
-                            HardenedValue = 1  # 1 = Enabled for Browser Process
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Dynamic Code Settings'
-                            GPOState      = 'Enabled (Enabled for Browser)'
-                        }
-                        @{
-                            Name          = 'Block External Extensions'
-                            Description   = 'Blocks installation of extensions via sideloading mechanisms'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'BlockExternalExtensions'
-                            ValueType     = 'DWord'
-                            HardenedValue = 1
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Extensions > Blocks external extensions from being installed'
-                            GPOState      = 'Enabled'
-                            Note          = 'Does not prevent extensions installed from the Edge Add-ons store.'
-                        }
-                        @{
-                            Name          = 'Enable Network Service Sandbox'
-                            Description   = 'Sandboxes the network service to limit browser process system access'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'NetworkServiceSandboxEnabled'
-                            ValueType     = 'DWord'
-                            HardenedValue = 1
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Enable the network service sandbox'
-                            GPOState      = 'Enabled'
-                        }
-                    )
-                }
-
-                # -- Section: Content Security --
-                @{
-                    Name        = 'Content Security'
-                    Description = 'Controls security restrictions on content execution and rendering'
-                    Settings    = @(
-                        @{
-                            Name          = 'Block JavaScript JIT'
-                            Description   = 'Disables JavaScript JIT compilation to reduce memory attack risk'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'DefaultJavaScriptJitSetting'
-                            ValueType     = 'DWord'
-                            HardenedValue = 2  # 2 = Block JIT
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Content settings > Control use of JavaScript JIT'
-                            GPOState      = 'Enabled (Do not allow)'
-                            Caution       = 'Disabling JIT may reduce performance on JavaScript-heavy sites.'
-                        }
-                        @{
-                            Name          = 'Block Insecure Content Exceptions'
-                            Description   = 'Prevents exceptions that would allow mixed content on HTTPS pages'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'DefaultInsecureContentSetting'
-                            ValueType     = 'DWord'
-                            HardenedValue = 2  # 2 = Do Not Allow
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Content settings > Control use of insecure content exceptions'
-                            GPOState      = 'Enabled (Do not allow)'
-                            Note          = 'May block HTTP resources on HTTPS admin pages for local network devices.'
-                        }
-                        @{
-                            Name          = 'Disable Internet Explorer Mode'
-                            Description   = 'Turns off IE mode, preventing the Trident rendering engine from loading'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'InternetExplorerIntegrationLevel'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0  # 0 = None
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Configure Internet Explorer integration'
-                            GPOState      = 'Enabled (None)'
-                        }
-                    )
-                }
-
-                # -- Section: Connection Security --
-                @{
-                    Name        = 'Connection Security'
-                    Description = 'Controls certificate validation, encrypted TLS, and HTTP authentication'
-                    Settings    = @(
-                        @{
-                            Name          = 'Require OCSP/CRL Checks for Local Trust Anchors'
-                            Description   = 'Enforces online OCSP and CRL checks for locally trusted certificates'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'RequireOnlineRevocationChecksForLocalAnchors'
-                            ValueType     = 'DWord'
-                            HardenedValue = 1
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Specify if online OCSP/CRL checks are required for local trust anchors'
-                            GPOState      = 'Enabled'
-                        }
-                        @{
-                            Name          = 'Enable Encrypted Client Hello'
-                            Description   = 'Encrypts the TLS ClientHello SNI field to reduce network-level tracking'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'EncryptedClientHelloEnabled'
-                            ValueType     = 'DWord'
-                            HardenedValue = 1
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > TLS Encrypted ClientHello Enabled'
-                            GPOState      = 'Enabled'
-                        }
-                        @{
-                            Name          = 'Disable Basic Authentication over HTTP'
-                            Description   = 'Prevents Basic authentication over plain HTTP connections'
-                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
-                            ValueName     = 'BasicAuthOverHttpEnabled'
-                            ValueType     = 'DWord'
-                            HardenedValue = 0
-                            DefaultValue  = $null
-                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > HTTP authentication > Allow Basic authentication for HTTP'
-                            GPOState      = 'Disabled'
-                            Note          = 'Basic authentication transmits credentials in plain text.'
-                        }
-                    )
-                }
-
-            ) # End Security Sections
-        }
-
         # ===== Category: Identity & Data =====
         @{
             Name        = 'Identity & Data'
@@ -855,6 +617,244 @@
                 }
 
             ) # End Identity & Data Sections
+        }
+
+        # ===== Category: Security =====
+        @{
+            Name        = 'Security'
+            Description = 'Settings hardening browser security and web content access controls'
+            Sections    = @(
+
+                # -- Section: SmartScreen --
+                @{
+                    Name        = 'SmartScreen'
+                    Description = 'Controls Microsoft Defender SmartScreen and scareware protection'
+                    Settings    = @(
+                        @{
+                            Name          = 'Disable Microsoft Defender SmartScreen'
+                            Description   = 'Turns off Microsoft Defender SmartScreen URL and download checking'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'SmartScreenEnabled'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Configure Microsoft Defender SmartScreen'
+                            GPOState      = 'Disabled'
+                            Warning       = 'Removes phishing and malware protection from Microsoft Edge.'
+                        }
+                        @{
+                            Name          = 'Disable SmartScreen Checks for Trusted Downloads'
+                            Description   = 'Turns off SmartScreen reputation checks on trusted source downloads'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'SmartScreenForTrustedDownloadsEnabled'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Force Microsoft Defender SmartScreen checks on downloads from trusted sources'
+                            GPOState      = 'Disabled'
+                            Warning       = 'Removes SmartScreen reputation checks on downloads from trusted sources.'
+                        }
+                        @{
+                            Name          = 'Disable SmartScreen PUA Protection'
+                            Description   = 'Turns off SmartScreen protection against potentially unwanted apps'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'SmartScreenPuaEnabled'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Configure Microsoft Defender SmartScreen to block potentially unwanted apps'
+                            GPOState      = 'Disabled'
+                            Warning       = 'Removes PUA protection from SmartScreen download checks.'
+                        }
+                        @{
+                            Name          = 'Disable SmartScreen DNS Requests'
+                            Description   = 'Turns off DNS-based URL lookups performed by SmartScreen'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'SmartScreenDnsRequestsEnabled'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Enable Microsoft Defender SmartScreen DNS requests'
+                            GPOState      = 'Disabled'
+                            Warning       = 'Removes DNS-based threat detection from SmartScreen URL checks.'
+                        }
+                        @{
+                            Name          = 'Disable Scareware Blocker'
+                            Description   = 'Turns off the on-device tech support scam page detection feature'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'ScarewareBlockerProtectionEnabled'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Scareware Blocker settings > Configure Microsoft Edge Scareware blocker protection'
+                            GPOState      = 'Disabled'
+                            Warning       = 'Removes protection against tech support scam and browser-lock pages.'
+                        }
+                    )
+                }
+
+                # -- Section: Process & Memory Protection --
+                @{
+                    Name        = 'Process & Memory Protection'
+                    Description = 'Controls browser security mode, process isolation, and memory protection'
+                    Settings    = @(
+                        @{
+                            Name          = 'Enable Strict Enhanced Security Mode'
+                            Description   = 'Enables Enhanced Security Mode at Strict level for maximum hardening'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'EnhanceSecurityMode'
+                            ValueType     = 'DWord'
+                            HardenedValue = 2  # 2 = Strict Mode
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Enhance the security state in Microsoft Edge'
+                            GPOState      = 'Enabled (Strict Mode)'
+                            Note          = 'Strict mode may affect site compatibility due to enhanced mitigations.'
+                        }
+                        @{
+                            Name          = 'Enable Site Isolation'
+                            Description   = 'Isolates each site in a dedicated process to prevent cross-site leaks'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'SitePerProcess'
+                            ValueType     = 'DWord'
+                            HardenedValue = 1
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Enable site isolation for every site'
+                            GPOState      = 'Enabled'
+                        }
+                        @{
+                            Name          = 'Enable Browser Code Integrity'
+                            Description   = 'Enforces code integrity guard in the browser process'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'BrowserCodeIntegritySetting'
+                            ValueType     = 'DWord'
+                            HardenedValue = 2  # 2 = Enforcement Mode
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Configure browser process code integrity guard setting'
+                            GPOState      = 'Enabled (Enforcement)'
+                        }
+                        @{
+                            Name          = 'Enable Dynamic Code Protection'
+                            Description   = 'Prevents the browser process from creating dynamic code'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'DynamicCodeSettings'
+                            ValueType     = 'DWord'
+                            HardenedValue = 1  # 1 = Enabled for Browser Process
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Dynamic Code Settings'
+                            GPOState      = 'Enabled (Enabled for Browser)'
+                        }
+                        @{
+                            Name          = 'Block External Extensions'
+                            Description   = 'Blocks installation of extensions via sideloading mechanisms'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'BlockExternalExtensions'
+                            ValueType     = 'DWord'
+                            HardenedValue = 1
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Extensions > Blocks external extensions from being installed'
+                            GPOState      = 'Enabled'
+                            Note          = 'Does not prevent extensions installed from the Edge Add-ons store.'
+                        }
+                        @{
+                            Name          = 'Enable Network Service Sandbox'
+                            Description   = 'Sandboxes the network service to limit browser process system access'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'NetworkServiceSandboxEnabled'
+                            ValueType     = 'DWord'
+                            HardenedValue = 1
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Enable the network service sandbox'
+                            GPOState      = 'Enabled'
+                        }
+                    )
+                }
+
+                # -- Section: Content Security --
+                @{
+                    Name        = 'Content Security'
+                    Description = 'Controls security restrictions on content execution and rendering'
+                    Settings    = @(
+                        @{
+                            Name          = 'Block JavaScript JIT'
+                            Description   = 'Disables JavaScript JIT compilation to reduce memory attack risk'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'DefaultJavaScriptJitSetting'
+                            ValueType     = 'DWord'
+                            HardenedValue = 2  # 2 = Block JIT
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Content settings > Control use of JavaScript JIT'
+                            GPOState      = 'Enabled (Do not allow)'
+                            Caution       = 'Disabling JIT may reduce performance on JavaScript-heavy sites.'
+                        }
+                        @{
+                            Name          = 'Block Insecure Content Exceptions'
+                            Description   = 'Prevents exceptions that would allow mixed content on HTTPS pages'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'DefaultInsecureContentSetting'
+                            ValueType     = 'DWord'
+                            HardenedValue = 2  # 2 = Do Not Allow
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Content settings > Control use of insecure content exceptions'
+                            GPOState      = 'Enabled (Do not allow)'
+                            Note          = 'May block HTTP resources on HTTPS admin pages for local network devices.'
+                        }
+                        @{
+                            Name          = 'Disable Internet Explorer Mode'
+                            Description   = 'Turns off IE mode, preventing the Trident rendering engine from loading'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'InternetExplorerIntegrationLevel'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0  # 0 = None
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Configure Internet Explorer integration'
+                            GPOState      = 'Enabled (None)'
+                        }
+                    )
+                }
+
+                # -- Section: Connection Security --
+                @{
+                    Name        = 'Connection Security'
+                    Description = 'Controls certificate validation, encrypted TLS, and HTTP authentication'
+                    Settings    = @(
+                        @{
+                            Name          = 'Require OCSP/CRL Checks for Local Trust Anchors'
+                            Description   = 'Enforces online OCSP and CRL checks for locally trusted certificates'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'RequireOnlineRevocationChecksForLocalAnchors'
+                            ValueType     = 'DWord'
+                            HardenedValue = 1
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Specify if online OCSP/CRL checks are required for local trust anchors'
+                            GPOState      = 'Enabled'
+                        }
+                        @{
+                            Name          = 'Enable Encrypted Client Hello'
+                            Description   = 'Encrypts the TLS ClientHello SNI field to reduce network-level tracking'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'EncryptedClientHelloEnabled'
+                            ValueType     = 'DWord'
+                            HardenedValue = 1
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > TLS Encrypted ClientHello Enabled'
+                            GPOState      = 'Enabled'
+                        }
+                        @{
+                            Name          = 'Disable Basic Authentication over HTTP'
+                            Description   = 'Prevents Basic authentication over plain HTTP connections'
+                            Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+                            ValueName     = 'BasicAuthOverHttpEnabled'
+                            ValueType     = 'DWord'
+                            HardenedValue = 0
+                            DefaultValue  = $null
+                            GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > HTTP authentication > Allow Basic authentication for HTTP'
+                            GPOState      = 'Disabled'
+                            Note          = 'Basic authentication transmits credentials in plain text.'
+                        }
+                    )
+                }
+
+            ) # End Security Sections
         }
 
         # ===== Category: Content Permissions =====
