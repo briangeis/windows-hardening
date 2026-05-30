@@ -145,13 +145,13 @@ Blocking DRM internet access prevents Windows Media DRM clients from acquiring o
 
 ### Disable Hibernation and Disable Fast Startup (Data at Rest)
 
-Setting `HibernateEnabled` to `0` prevents new hibernation writes but does not remove the existing `hiberfile.sys`. The file may contain a RAM snapshot from the most recent shutdown, including browser sessions and application data. Run `powercfg /H off` separately to disable hibernation and remove the file. Fast Startup depends on the same hibernation infrastructure and should be disabled alongside it. Applying Disable Fast Startup without first disabling hibernation may allow Fast Startup to re-activate.
+Setting `HibernateEnabled` to `0` prevents new hibernation writes but does not remove the existing `hiberfile.sys`. The file may contain a RAM snapshot from the most recent shutdown, including browser sessions and application data. Run `powercfg /H off` separately to disable hibernation and remove the file. Fast Startup depends on the same hibernation infrastructure and should be disabled alongside it. Applying **Disable Fast Startup** without first disabling hibernation may allow Fast Startup to re-activate.
 
 ## Interdependent Settings
 
 ### Disable AutoPlay and AutoRun (Removable Media)
 
-All three settings are required to fully close the AutoPlay and AutoRun attack surface. Disable AutoPlay prevents the AutoPlay dialog from launching for drive-type devices. Disallow AutoPlay for Nonvolume Devices extends AutoPlay control to cameras, phones, and other non-drive devices. Disable AutoRun Command Execution prevents `AutoRun.inf` command execution independently of whether AutoPlay is active. Any subset of the three leaves a gap.
+All three settings are required to fully close the AutoPlay and AutoRun attack surface. **Disable AutoPlay** prevents the AutoPlay dialog from launching for drive-type devices. **Disallow AutoPlay for Nonvolume Devices** extends AutoPlay control to cameras, phones, and other non-drive devices. **Disable AutoRun Command Execution** prevents `AutoRun.inf` command execution independently of whether AutoPlay is active. Any subset of the three leaves a gap.
 
 ## Counterintuitive GPO Behavior
 
