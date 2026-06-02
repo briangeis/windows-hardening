@@ -1,11 +1,27 @@
 #
-# Policy Definitions: Microsoft Privacy Connections
+# windows-hardening
+# https://github.com/briangeis/windows-hardening
 #
-# Source: Manage connections from Windows 10 and Windows 11 operating system components to Microsoft services
-# URL:    https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services
+# Policy Definitions: Microsoft Privacy Connections
+# Hardens Windows connections to Microsoft services.
+#
+# Source:    Manage connections from Windows 10 and Windows 11 operating system components to Microsoft services
+# URL:       https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services
+# Reference: definitions/reference/Policy-MicrosoftPrivacyConnections.md
+#
+# Author:  Brian Geis
+# License: GPL-3.0-or-later
 #
 
 @{
+    Meta = @{
+        Component   = 'Policy'
+        Name        = 'Microsoft Privacy Connections'
+        Description = 'Hardens Windows connections to Microsoft services.'
+        Target      = 'Windows 11 25H2'
+        Reviewed    = '2026-06-01'
+    }
+
     Categories = @(
 
         # ===== Category: Telemetry & Diagnostics =====

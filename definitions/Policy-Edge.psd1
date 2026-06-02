@@ -1,11 +1,27 @@
 #
-# Policy Definitions: Edge
+# windows-hardening
+# https://github.com/briangeis/windows-hardening
 #
-# Source: Microsoft Edge browser policy reference
-# URL:    https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies
+# Policy Definitions: Edge
+# Hardens the Microsoft Edge browser.
+#
+# Source:    Microsoft Edge policy reference
+# URL:       https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies
+# Reference: definitions/reference/Policy-Edge.md
+#
+# Author:  Brian Geis
+# License: GPL-3.0-or-later
 #
 
 @{
+    Meta = @{
+        Component   = 'Policy'
+        Name        = 'Edge'
+        Description = 'Hardens the Microsoft Edge browser.'
+        Target      = 'Microsoft Edge 148'
+        Reviewed    = '2026-06-01'
+    }
+
     Categories = @(
 
         # ===== Category: Privacy & Telemetry =====

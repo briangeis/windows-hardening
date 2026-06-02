@@ -1,11 +1,27 @@
 #
-# Policy Definitions: Windows Privacy Defaults
+# windows-hardening
+# https://github.com/briangeis/windows-hardening
 #
-# Source: Various; see reference document for per-setting source information
-# URL:    N/A
+# Policy Definitions: Windows Privacy Defaults
+# Hardens Windows privacy and security defaults.
+#
+# Source:    Windows Policy CSP reference
+# URL:       https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-configuration-service-provider
+# Reference: definitions/reference/Policy-WindowsPrivacyDefaults.md
+#
+# Author:  Brian Geis
+# License: GPL-3.0-or-later
 #
 
 @{
+    Meta = @{
+        Component   = 'Policy'
+        Name        = 'Windows Privacy Defaults'
+        Description = 'Hardens Windows privacy and security defaults.'
+        Target      = 'Windows 11 25H2'
+        Reviewed    = '2026-06-01'
+    }
+
     Categories = @(
 
         # ===== Category: Telemetry & Reporting =====
