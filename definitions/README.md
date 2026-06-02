@@ -22,18 +22,45 @@ Example: `Policy-MicrosoftPrivacyConnections.psd1`
 
 ### Header
 
-Every definitions file opens with a standard header block:
+Every definitions file opens with a comment header, then a machine-readable `Meta` block as the first key inside the file.
+
+The comment header carries the project signature, the file's identity and one-line purpose, its provenance, and authorship:
 
 ```powershell
 #
-# Component Definitions: Human-Readable Name
+# windows-hardening
+# https://github.com/briangeis/windows-hardening
 #
-# Source: Formal title of the reference material
-# URL:    https://link-to-source
+# Policy Definitions: Edge
+# Hardens the Microsoft Edge browser.
+#
+# Source:    Microsoft Edge policy reference
+# URL:       https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies
+# Reference: definitions/reference/Policy-Edge.md
+#
+# Author:  Brian Geis
+# License: GPL-3.0-or-later
 #
 ```
 
-The title follows the pattern `Component Definitions: Human-Readable Name`, mirroring the filename. `Source` is the formal title of the reference material. `URL` is the direct link to the source. A single blank line separates the header from the file content.
+The title follows the pattern `Component Definitions: Human-Readable Name`, mirroring the filename. `Source` and `URL` point to the authoritative policy documentation for the settings, and `Reference` links the companion reference document.
+
+The `Meta` block carries the same identity in a form a script can read, along with the review baseline:
+
+```powershell
+@{
+    Meta = @{
+        Component   = 'Policy'
+        Name        = 'Edge'
+        Description = 'Hardens the Microsoft Edge browser.'
+        Target      = 'Microsoft Edge 148'
+        Reviewed    = '2026-06-01'
+    }
+    Categories = @( ... )
+}
+```
+
+`Component` is the component the file belongs to, `Name` and `Description` are its human-readable identity, `Target` is the upstream version the file was last reviewed against, and `Reviewed` is the date of that review.
 
 ### Hierarchy
 
