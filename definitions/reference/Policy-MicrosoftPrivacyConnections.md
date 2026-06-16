@@ -234,7 +234,7 @@ The following 23 settings have `GPOPath` and `GPOState` set to `$null` in the de
 
 | Setting Name                                | Article Section | PSD1 Section               | Reason                                    |
 |---------------------------------------------|:---------------:|----------------------------|-------------------------------------------|
-| Set Time Sync to NoSync                     | 3               | Date & Time                | Registry-only; NTP Client GPO is separate |
+| Set Time Sync to NoSync                     | 3               | Date & Time                | Registry-only, NTP Client GPO is separate |
 | Disable License Manager Service             | 9               | License Manager            | Article provides no GPO                   |
 | Disable Microsoft Account Sign-In Assistant | 12              | Microsoft Account          | Article provides no GPO                   |
 | Disable Search Suggestions                  | 13.2            | Microsoft Edge             | Requires Edge ADMX                        |
@@ -250,11 +250,11 @@ The following 23 settings have `GPOPath` and `GPOState` set to `$null` in the de
 | Disable Edge Auto Update                    | 13.2            | Microsoft Edge Update      | Requires Edge Update ADMX                 |
 | Disable Auto Update Check                   | 13.2            | Microsoft Edge Update      | Requires Edge Update ADMX                 |
 | Disable Edge Update Experimentation Service | 13.2            | Microsoft Edge             | Requires Edge Update ADMX                 |
-| Disable Language List Access                | 18.1            | Advertising & Tracking     | HKCU only; no GPO available               |
-| Disable App Launch Tracking                 | 18.1            | Start Menu Personalization | HKCU only; no GPO available               |
-| Disable SmartScreen for Store Apps          | 18.1            | Microsoft Store            | HKCU only; no GPO available               |
-| Set Feedback Period to Zero                 | 18.16           | Feedback & Diagnostics     | HKCU only; no GPO available               |
-| Set Feedback Count to Zero                  | 18.16           | Feedback & Diagnostics     | HKCU only; no GPO available               |
+| Disable Language List Access                | 18.1            | Advertising & Tracking     | HKCU only, no GPO available               |
+| Disable App Launch Tracking                 | 18.1            | Start Menu Personalization | HKCU only, no GPO available               |
+| Disable SmartScreen for Store Apps          | 18.1            | Microsoft Store            | HKCU only, no GPO available               |
+| Set Feedback Period to Zero                 | 18.16           | Feedback & Diagnostics     | HKCU only, no GPO available               |
+| Set Feedback Count to Zero                  | 18.16           | Feedback & Diagnostics     | HKCU only, no GPO available               |
 | Disable News and Interests                  | 18.24           | Widgets                    | Article provides no GPO                   |
 | Disable MSRT Diagnostic Data                | 24              | Defender Cloud Reporting   | Article explicitly notes no GPO           |
 
@@ -264,12 +264,12 @@ The following GPOs are each controlled by more than one setting in the definitio
 
 | Group Policy                                         | Setting Names                                                                                                                     | Count |
 |------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|:-----:|
-| `Turn off automatic learning`                        | Restrict Implicit Text Collection; Restrict Implicit Ink Collection                                                               | 2     |
-| `Do not sync`                                        | Disable Settings Sync; Disable Settings Sync User Override                                                                        | 2     |
-| `Turn off the advertising ID`                        | Disable Advertising ID (Feature); Disable Advertising ID (Policy)                                                                 | 2     |
-| `Configure app install control`                      | Suppress Store App Recommendations (Policy); Suppress Store App Recommendations (Source)                                          | 2     |
-| `Specify intranet Microsoft update service location` | Set WSUS Server to Blank; Set WSUS Status Server to Blank; Set Alternate Download Server to Blank; Enforce Intranet Update Server | 4     |
-| `Disable changing home page settings`                | Set IE Home Page to Blank; Lock IE Home Page Setting                                                                              | 2     |
+| `Turn off automatic learning`                        | Restrict Implicit Text Collection, Restrict Implicit Ink Collection                                                               | 2     |
+| `Do not sync`                                        | Disable Settings Sync, Disable Settings Sync User Override                                                                        | 2     |
+| `Turn off the advertising ID`                        | Disable Advertising ID (Feature), Disable Advertising ID (Policy)                                                                 | 2     |
+| `Configure app install control`                      | Suppress Store App Recommendations (Policy), Suppress Store App Recommendations (Source)                                          | 2     |
+| `Specify intranet Microsoft update service location` | Set WSUS Server to Blank, Set WSUS Status Server to Blank, Set Alternate Download Server to Blank, Enforce Intranet Update Server | 4     |
+| `Disable changing home page settings`                | Set IE Home Page to Blank, Lock IE Home Page Setting                                                                              | 2     |
 
 ## Intentional Deviations from Source Article
 
@@ -314,7 +314,7 @@ The GPO governing this setting is named `Disable all apps from Microsoft Store`.
 | Article Section | Title             | Reason                                                                                                                                               |
 |:---------------:|-------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 11              | Windows Mail      | The Windows Mail application was removed in Windows 8 and is not present on any Windows 10 or Windows 11 installation.                               |
-| 13.1            | Legacy Edge       | Legacy Edge does not exist on Windows 11; its registry paths are not read by Chromium Edge.                                                          |
+| 13.1            | Legacy Edge       | Legacy Edge does not exist on Windows 11. Chromium Edge does not read these registry paths.                                                          |
 | 17              | Preinstalled apps | Handled via PowerShell `Remove-AppxPackage` commands, not registry settings.                                                                         |
 | 23              | Wi-Fi Sense       | The Wi-Fi Sense feature was removed in Windows 10 version 1703 (April 2017) and is not present on any current Windows 10 or Windows 11 installation. |
 
