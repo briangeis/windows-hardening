@@ -918,33 +918,12 @@ function Invoke-Menu {
         [switch]$IsChild
     )
 
-    $selectedIndex   = 0
-    $refresh         = $true
-    $exitReason      = $null
-    $isRoot          = -not $IsChild
-
-    $children        = @()
-    $isSettingsLevel = $false
-    $items           = @()
-    $icons           = @()
-    $stateNames      = @()
-    $stateIcons      = @()
-    $markers         = @()
-    $markerColors    = @()
-    $location        = ''
-    $title           = ''
-    $titleName       = ''
-    $titleCount      = ''
-    $description     = ''
-    $hints           = ''
-    $modeWord        = ''
-    $statusRest      = ''
-
-    function Pad([string]$Text) {
-        $w = [Console]::WindowWidth
-        if ($Text.Length -ge $w) { return $Text.Substring(0, $w - 1) }
-        return $Text + (' ' * ($w - $Text.Length))
-    }
+    $selectedIndex = 0
+    $refresh       = $true
+    $exitReason    = $null
+    $isRoot        = -not $IsChild
+    $lastWidth     = [Console]::WindowWidth
+    $lastHeight    = [Console]::WindowHeight
 
     function StateColor([string]$State) {
         switch ($State) {
@@ -962,10 +941,52 @@ function Invoke-Menu {
         return @{ Glyph = ''; Color = $null }
     }
 
+    # Fit a breadcrumb to one line by dropping its leading segments.
+    function FitBreadcrumb([string]$Text) {
+        $max = [Console]::WindowWidth - 3
+        if ($Text.Length -le $max) { return $Text }
+        $parts = $Text -split ' > '
+        for ($drop = 1; $drop -lt $parts.Count; $drop++) {
+            $candidate = '... > ' + ($parts[$drop..($parts.Count - 1)] -join ' > ')
+            if ($candidate.Length -le $max) { return $candidate }
+        }
+        if ($max -ge 4) { return '...' + $Text.Substring($Text.Length - ($max - 3)) }
+        return $Text.Substring(0, [Math]::Max($max, 0))
+    }
+
+    # Render a menu row; truncate an overlong name to keep the tokens visible.
+    function Write-MenuItem([string]$Name, [string[]]$Trailing, [switch]$Selected) {
+        $w      = [Console]::WindowWidth
+        $prefix = if ($Selected) { '  > ' } else { '    ' }
+
+        $pinnedWidth = 0
+        for ($k = 0; $k -lt $Trailing.Count; $k += 2) { $pinnedWidth += $Trailing[$k].Length }
+
+        $nameBudget  = $w - $prefix.Length - $pinnedWidth
+        $displayName = $Name
+        if ($displayName.Length -gt $nameBudget) {
+            $displayName = if ($nameBudget -ge 4) { $displayName.Substring(0, $nameBudget - 3) + '...' }
+                           else                   { $displayName.Substring(0, [Math]::Max($nameBudget, 0)) }
+        }
+
+        $used     = $prefix.Length + $displayName.Length + $pinnedWidth
+        $pad      = [Math]::Max($w - $used, 0)
+        $segments = @("$prefix$displayName", '') + $Trailing + @((' ' * $pad), '')
+
+        for ($k = 0; $k -lt $segments.Count; $k += 2) {
+            $params = @{ Object = $segments[$k]; NoNewline = $true }
+            if ($Selected)             { $params.ForegroundColor = 'Black'; $params.BackgroundColor = 'White' }
+            elseif ($segments[$k + 1]) { $params.ForegroundColor = $segments[$k + 1] }
+            Write-Host @params
+        }
+        Write-Host ''
+    }
+
+    # At the root, hide the cursor; the finally restores it on any root exit.
     if ($isRoot) { [Console]::CursorVisible = $false }
     try {
         while (-not $exitReason) {
-            # Refresh: recompute display data for the current context
+            # Refresh: recompute the view's data when the context changes
             if ($refresh) {
                 $children = @(
                     if     ($Context.Categories) { $Context.Categories }
@@ -982,27 +1003,22 @@ function Invoke-Menu {
                     $Breadcrumb
                 }
 
-                $nodeName    = if ($isRoot) { $Context.Meta.Name }        else { $Context.Name }
+                $titleName   = if ($isRoot) { $Context.Meta.Name }        else { $Context.Name }
                 $description = if ($isRoot) { $Context.Meta.Description } else { $Context.Description }
 
+                # Item rows: each is a name plus its pinned trailing token(s)
                 $items         = @()
-                $icons         = @()
-                $stateNames    = @()
-                $stateIcons    = @()
-                $markers       = @()
-                $markerColors  = @()
                 $selectedCount = 0
                 $totalCount    = 0
 
                 if ($isSettingsLevel) {
                     foreach ($setting in $children) {
-                        $state         = Test-SettingState -Setting $setting
-                        $items        += $setting.Name
-                        $stateNames   += $state
-                        $stateIcons   += "[$state]"
-                        $adv           = AdvisoryMarker $setting
-                        $markers      += $adv.Glyph
-                        $markerColors += $adv.Color
+                        $state    = Test-SettingState -Setting $setting
+                        $adv      = AdvisoryMarker $setting
+                        $trailing = @("  [$state]", (StateColor $state))
+                        if ($adv.Glyph) { $trailing += @("  $($adv.Glyph)", $adv.Color) }
+                        $items += @{ Name = $setting.Name; Trailing = $trailing }
+
                         if ($script:IsBuildMode) {
                             if ($state -eq 'HARDENED' -or $state -eq 'DEFAULT') { $selectedCount++ }
                         } elseif ($state -eq 'HARDENED') {
@@ -1015,85 +1031,59 @@ function Invoke-Menu {
                 }
                 else {
                     foreach ($child in $children) {
-                        $items         += $child.Name
-                        $counts         = Get-SettingCounts -Node $child
-                        $icons         += "($($counts.Selected)/$($counts.Total))"
+                        $counts = Get-SettingCounts -Node $child
+                        $items += @{
+                            Name     = $child.Name
+                            Trailing = @("  ($($counts.Selected)/$($counts.Total))", 'DarkGray')
+                        }
                         $selectedCount += $counts.Selected
                         $totalCount    += $counts.Total
                     }
                     $hints = if ($isRoot) { '[Enter] Select  [Q] Quit' }
-                             else        { '[Enter] Select  [Esc] Back  [Q] Quit' }
+                             else         { '[Enter] Select  [Esc] Back  [Q] Quit' }
                 }
 
-                $titleName  = $nodeName
                 $titleCount = "($selectedCount/$totalCount)"
                 $title      = "$titleName  $titleCount"
 
                 # Status line: mode plus the device (Interactive) or profile (Build)
                 $modeWord     = if ($script:IsBuildMode) { 'build' } else { 'interactive' }
                 $statusTarget = if ($script:IsBuildMode) { [System.IO.Path]::GetFileName($Build) } else { $script:HostName }
-                $statusRest   = "  -  $statusTarget"
+                $statusLine   = "$modeWord  -  $statusTarget"
 
                 Clear-Host
                 $refresh = $false
             }
 
-            # Render: overwrite the current view in place
-            [Console]::SetCursorPosition(0, 0)
-
-            Write-Host (Pad "  $location") -ForegroundColor DarkGray
-            Write-Host (Pad '')
-            Write-Host "  $titleName  " -NoNewline -ForegroundColor Cyan
-            Write-Host $titleCount -NoNewline -ForegroundColor DarkGray
-            $titlePad = [Console]::WindowWidth - "  $title".Length
-            if ($titlePad -gt 0) { Write-Host (' ' * $titlePad) } else { Write-Host '' }
-            Write-Host (Pad ('  ' + ('-' * $title.Length))) -ForegroundColor DarkCyan
-            Write-Host (Pad "  $description") -ForegroundColor Gray
-            Write-Host (Pad '')
-
-            for ($i = 0; $i -lt $items.Count; $i++) {
-                $isSel     = ($i -eq $selectedIndex)
-                $indicator = if ($isSel) { '>' } else { ' ' }
-
-                if ($isSettingsLevel) {
-                    $marker = if ($markers[$i]) { "  $($markers[$i])" } else { '' }
-                    $plain  = "  $indicator $($items[$i])  $($stateIcons[$i])$marker"
-                    if ($isSel) {
-                        Write-Host (Pad $plain) -ForegroundColor Black -BackgroundColor White
-                    }
-                    else {
-                        Write-Host "  $indicator $($items[$i])  " -NoNewline
-                        Write-Host $stateIcons[$i] -NoNewline -ForegroundColor (StateColor $stateNames[$i])
-                        if ($markers[$i]) {
-                            Write-Host "  $($markers[$i])" -NoNewline -ForegroundColor $markerColors[$i]
-                        }
-                        $padLen = [Console]::WindowWidth - $plain.Length
-                        if ($padLen -gt 0) { Write-Host (' ' * $padLen) } else { Write-Host '' }
-                    }
-                }
-                else {
-                    $count = if ($icons[$i]) { "  $($icons[$i])" } else { '' }
-                    $plain = "  $indicator $($items[$i])$count"
-                    if ($isSel) {
-                        Write-Host (Pad $plain) -ForegroundColor Black -BackgroundColor White
-                    }
-                    else {
-                        Write-Host "  $indicator $($items[$i])" -NoNewline
-                        if ($count) {
-                            Write-Host $count -NoNewline -ForegroundColor DarkGray
-                        }
-                        $padLen = [Console]::WindowWidth - $plain.Length
-                        if ($padLen -gt 0) { Write-Host (' ' * $padLen) } else { Write-Host '' }
-                    }
-                }
+            # Resize: clear the screen, since the in-place redraw assumes a fixed size
+            if ([Console]::WindowWidth -ne $lastWidth -or [Console]::WindowHeight -ne $lastHeight) {
+                $lastWidth  = [Console]::WindowWidth
+                $lastHeight = [Console]::WindowHeight
+                Clear-Host
             }
 
-            Write-Host (Pad '')
-            Write-Host (Pad "  $hints") -ForegroundColor DarkYellow
-            Write-Host (Pad '')
+            # Render: redraw the view in place over the previous frame
+            [Console]::SetCursorPosition(0, 0)
 
-            # Status line: mode plus target, uniformly dim, padded to width
-            Write-Host (Pad "  $modeWord$statusRest") -ForegroundColor DarkGray
+            # Header: location line, title with count, underline, description
+            Write-Host "  $(FitBreadcrumb $location)" -ForegroundColor DarkGray
+            Write-Host ''
+            Write-Host "  $titleName  " -NoNewline -ForegroundColor Cyan
+            Write-Host $titleCount -ForegroundColor DarkGray
+            Write-Host "  $('-' * $title.Length)" -ForegroundColor DarkCyan
+            Write-Host "  $description" -ForegroundColor Gray
+            Write-Host ''
+
+            # Items: the selectable rows, with the current row highlighted
+            for ($i = 0; $i -lt $items.Count; $i++) {
+                Write-MenuItem -Name $items[$i].Name -Trailing $items[$i].Trailing -Selected:($i -eq $selectedIndex)
+            }
+
+            # Footer: action hints, then the status line
+            Write-Host ''
+            Write-Host "  $hints" -ForegroundColor DarkYellow
+            Write-Host ''
+            Write-Host "  $statusLine" -ForegroundColor DarkGray
 
             # Input: read one key and update navigation state
             $key = [Console]::ReadKey($true).Key
@@ -1108,7 +1098,7 @@ function Invoke-Menu {
                     $currentName = if ($isRoot) { $Context.Meta.Name } else { $Context.Name }
                     $childCrumb  = if ($Breadcrumb) { "$Breadcrumb > $currentName" } else { $currentName }
                     if ($isSettingsLevel) {
-                        Show-SettingDetail -Setting $selected -Breadcrumb $childCrumb
+                        Show-SettingDetail -Setting $selected -Breadcrumb (FitBreadcrumb $childCrumb)
                         $refresh = $true
                     }
                     else {
@@ -1146,7 +1136,8 @@ function Show-SettingDetail {
     param(
         [Parameter(Mandatory)]
         [hashtable]$Setting,
-        [string]$Breadcrumb = ''
+        [Parameter(Mandatory)]
+        [string]$Breadcrumb
     )
 
     $done          = $false
@@ -1154,6 +1145,15 @@ function Show-SettingDetail {
     $statusColor   = 'White'
 
     $isHKCU = $Setting.Path -like 'HKCU:*'
+
+    function StateColor([string]$State) {
+        switch ($State) {
+            'HARDENED' { 'Green'    }
+            'DEFAULT'  { 'Yellow'   }
+            'CUSTOM'   { 'Magenta'  }
+            'NOT SET'  { 'DarkGray' }
+        }
+    }
 
     while (-not $done) {
         # Render: read current state and display setting detail
@@ -1195,14 +1195,7 @@ function Show-SettingDetail {
         Write-Host "    Hardened Value: $hardenedDisplay"
         Write-Host "    Default Value : $defaultDisplay"
         Write-Host "    State         : " -NoNewline
-        Write-Host $state -ForegroundColor $(
-            switch ($state) {
-                'HARDENED' { 'Green'    }
-                'DEFAULT'  { 'Yellow'   }
-                'CUSTOM'   { 'Magenta'  }
-                'NOT SET'  { 'DarkGray' }
-            }
-        )
+        Write-Host $state -ForegroundColor (StateColor $state)
 
         # Advisory block: prose at the margin; only the tier label is colored
         $advisories = @()
