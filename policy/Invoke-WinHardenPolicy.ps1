@@ -393,7 +393,7 @@ function Import-DefinitionsFile {
         }
         Write-FatalError @params
     }
-    foreach ($key in 'Component', 'Name') {
+    foreach ($key in 'Component', 'Name', 'Target') {
         if (-not $definitions.Meta.ContainsKey($key)) {
             Write-FatalError "Definitions file 'Meta' block is missing key '$key'."
         }
@@ -609,10 +609,11 @@ function Get-SettingCurrentValue {
 function Test-SettingState {
     <#
     .SYNOPSIS
-        Determines the current state of a setting
-        relative to its hardened and default values.
+        Determines a setting's state by comparing its value, or its absence,
+        to the hardened and default values from the definitions file.
     .OUTPUTS
-        Returns a string: 'HARDENED', 'DEFAULT', 'CUSTOM', or 'NOT SET'
+        Returns a string: 'HARDENED', 'DEFAULT', 'CUSTOM', or 'NOT SET'.
+        'NOT SET' is Build Mode only; it means the profile has no entry.
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -623,21 +624,21 @@ function Test-SettingState {
 
     $current = Get-SettingCurrentValue -Path $Setting.Path -ValueName $Setting.ValueName
 
-    if (-not $current.Exists) {
-        if ($current.ExplicitAbsence -and $null -eq $Setting.DefaultValue) {
-            return 'DEFAULT'
-        }
+    # Build Mode: a setting with no profile entry is not configured at all
+    if ($script:IsBuildMode -and -not $current.Exists -and -not $current.ExplicitAbsence) {
         return 'NOT SET'
     }
 
-    if ($current.Value -eq $Setting.HardenedValue) {
-        return 'HARDENED'
+    # Compare the value-state to each anchor; an absent value matches an anchor
+    # whose value is $null (absence)
+    if ($current.Exists) {
+        if ($current.Value -eq $Setting.HardenedValue) { return 'HARDENED' }
+        if ($null -ne $Setting.DefaultValue -and $current.Value -eq $Setting.DefaultValue) { return 'DEFAULT' }
+        return 'CUSTOM'
     }
 
-    if ($null -ne $Setting.DefaultValue -and $current.Value -eq $Setting.DefaultValue) {
-        return 'DEFAULT'
-    }
-
+    if ($null -eq $Setting.HardenedValue) { return 'HARDENED' }
+    if ($null -eq $Setting.DefaultValue)  { return 'DEFAULT' }
     return 'CUSTOM'
 }
 
@@ -920,13 +921,24 @@ function Invoke-Menu {
     $selectedIndex   = 0
     $refresh         = $true
     $exitReason      = $null
+    $isRoot          = -not $IsChild
 
     $children        = @()
     $isSettingsLevel = $false
     $items           = @()
     $icons           = @()
+    $stateNames      = @()
+    $stateIcons      = @()
+    $markers         = @()
+    $markerColors    = @()
+    $location        = ''
     $title           = ''
-    $footer          = ''
+    $titleName       = ''
+    $titleCount      = ''
+    $description     = ''
+    $hints           = ''
+    $modeWord        = ''
+    $statusRest      = ''
 
     function Pad([string]$Text) {
         $w = [Console]::WindowWidth
@@ -934,7 +946,23 @@ function Invoke-Menu {
         return $Text + (' ' * ($w - $Text.Length))
     }
 
-    if (-not $IsChild) { [Console]::CursorVisible = $false }
+    function StateColor([string]$State) {
+        switch ($State) {
+            'HARDENED' { 'Green'    }
+            'DEFAULT'  { 'Yellow'   }
+            'CUSTOM'   { 'Magenta'  }
+            'NOT SET'  { 'DarkGray' }
+        }
+    }
+
+    function AdvisoryMarker([hashtable]$Setting) {
+        if ($Setting.ContainsKey('Warning')) { return @{ Glyph = '(!)'; Color = 'Red' } }
+        if ($Setting.ContainsKey('Caution')) { return @{ Glyph = '(!)'; Color = 'Yellow' } }
+        if ($Setting.ContainsKey('Note'))    { return @{ Glyph = '(i)'; Color = 'DarkCyan' } }
+        return @{ Glyph = ''; Color = $null }
+    }
+
+    if ($isRoot) { [Console]::CursorVisible = $false }
     try {
         while (-not $exitReason) {
             # Refresh: recompute display data for the current context
@@ -947,36 +975,64 @@ function Invoke-Menu {
 
                 $isSettingsLevel = $Context.ContainsKey('Settings')
 
-                $items = @()
-                $icons = @()
+                # Location line: identity label at the root, breadcrumb below it
+                $location = if ($isRoot) {
+                    "windows-hardening - $($Context.Meta.Component): $($Context.Meta.Name)"
+                } else {
+                    $Breadcrumb
+                }
+
+                $nodeName    = if ($isRoot) { $Context.Meta.Name }        else { $Context.Name }
+                $description = if ($isRoot) { $Context.Meta.Description } else { $Context.Description }
+
+                $items         = @()
+                $icons         = @()
+                $stateNames    = @()
+                $stateIcons    = @()
+                $markers       = @()
+                $markerColors  = @()
+                $selectedCount = 0
+                $totalCount    = 0
 
                 if ($isSettingsLevel) {
-                    $hardenedCount = 0
                     foreach ($setting in $children) {
-                        $state  = Test-SettingState -Setting $setting
-                        $items += $setting.Name
-                        if ($state -eq 'HARDENED') { $hardenedCount++ }
-                        $icon  = "[$state]"
-                        if ($setting.Path -like 'HKCU:*') { $icon += ' [USER]' }
-                        $icons += $icon
+                        $state         = Test-SettingState -Setting $setting
+                        $items        += $setting.Name
+                        $stateNames   += $state
+                        $stateIcons   += "[$state]"
+                        $adv           = AdvisoryMarker $setting
+                        $markers      += $adv.Glyph
+                        $markerColors += $adv.Color
+                        if ($script:IsBuildMode) {
+                            if ($state -eq 'HARDENED' -or $state -eq 'DEFAULT') { $selectedCount++ }
+                        } elseif ($state -eq 'HARDENED') {
+                            $selectedCount++
+                        }
                     }
-                    $title  = "$($Context.Name) ($hardenedCount of $($children.Count) hardened)"
-                    $footer = '[Enter] View Detail  [A] Apply All  [Esc] Back  [Q] Quit'
+                    $totalCount = $children.Count
+                    $applyLabel = if ($script:IsBuildMode) { 'Set All' } else { 'Apply All' }
+                    $hints = "[Enter] View Detail  [A] $applyLabel  [Esc] Back  [Q] Quit"
                 }
                 else {
                     foreach ($child in $children) {
-                        $items  += $child.Name
-                        $counts  = Get-SectionCounts -Node $child
-                        $icons  += if ($counts.Total -gt 0) {
-                            "($($counts.Hardened)/$($counts.Total))"
-                        }
-                        else { '' }
+                        $items         += $child.Name
+                        $counts         = Get-SettingCounts -Node $child
+                        $icons         += "($($counts.Selected)/$($counts.Total))"
+                        $selectedCount += $counts.Selected
+                        $totalCount    += $counts.Total
                     }
-                    $title  = if ($IsChild) { $Context.Name }
-                              else          { 'Windows Hardening - Select a Category' }
-                    $footer = if ($IsChild) { '[Enter] Select  [Esc] Back  [Q] Quit' }
-                              else          { '[Enter] Select  [Q] Quit' }
+                    $hints = if ($isRoot) { '[Enter] Select  [Q] Quit' }
+                             else        { '[Enter] Select  [Esc] Back  [Q] Quit' }
                 }
+
+                $titleName  = $nodeName
+                $titleCount = "($selectedCount/$totalCount)"
+                $title      = "$titleName  $titleCount"
+
+                # Status line: mode plus the device (Interactive) or profile (Build)
+                $modeWord     = if ($script:IsBuildMode) { 'build' } else { 'interactive' }
+                $statusTarget = if ($script:IsBuildMode) { [System.IO.Path]::GetFileName($Build) } else { $script:HostName }
+                $statusRest   = "  -  $statusTarget"
 
                 Clear-Host
                 $refresh = $false
@@ -985,27 +1041,59 @@ function Invoke-Menu {
             # Render: overwrite the current view in place
             [Console]::SetCursorPosition(0, 0)
 
-            Write-Host (Pad "  $Breadcrumb") -ForegroundColor DarkGray
-
+            Write-Host (Pad "  $location") -ForegroundColor DarkGray
             Write-Host (Pad '')
-            Write-Host (Pad "  $title") -ForegroundColor Cyan
+            Write-Host "  $titleName  " -NoNewline -ForegroundColor Cyan
+            Write-Host $titleCount -NoNewline -ForegroundColor DarkGray
+            $titlePad = [Console]::WindowWidth - "  $title".Length
+            if ($titlePad -gt 0) { Write-Host (' ' * $titlePad) } else { Write-Host '' }
             Write-Host (Pad ('  ' + ('-' * $title.Length))) -ForegroundColor DarkCyan
+            Write-Host (Pad "  $description") -ForegroundColor Gray
             Write-Host (Pad '')
 
             for ($i = 0; $i -lt $items.Count; $i++) {
-                $indicator = if ($i -eq $selectedIndex) { '>' } else { ' ' }
-                $status    = if ($icons[$i]) { "  $($icons[$i])" } else { '' }
-                $line      = "  $indicator $($items[$i])$status"
-                if ($i -eq $selectedIndex) {
-                    Write-Host (Pad $line) -ForegroundColor Black -BackgroundColor White
+                $isSel     = ($i -eq $selectedIndex)
+                $indicator = if ($isSel) { '>' } else { ' ' }
+
+                if ($isSettingsLevel) {
+                    $marker = if ($markers[$i]) { "  $($markers[$i])" } else { '' }
+                    $plain  = "  $indicator $($items[$i])  $($stateIcons[$i])$marker"
+                    if ($isSel) {
+                        Write-Host (Pad $plain) -ForegroundColor Black -BackgroundColor White
+                    }
+                    else {
+                        Write-Host "  $indicator $($items[$i])  " -NoNewline
+                        Write-Host $stateIcons[$i] -NoNewline -ForegroundColor (StateColor $stateNames[$i])
+                        if ($markers[$i]) {
+                            Write-Host "  $($markers[$i])" -NoNewline -ForegroundColor $markerColors[$i]
+                        }
+                        $padLen = [Console]::WindowWidth - $plain.Length
+                        if ($padLen -gt 0) { Write-Host (' ' * $padLen) } else { Write-Host '' }
+                    }
                 }
                 else {
-                    Write-Host (Pad $line)
+                    $count = if ($icons[$i]) { "  $($icons[$i])" } else { '' }
+                    $plain = "  $indicator $($items[$i])$count"
+                    if ($isSel) {
+                        Write-Host (Pad $plain) -ForegroundColor Black -BackgroundColor White
+                    }
+                    else {
+                        Write-Host "  $indicator $($items[$i])" -NoNewline
+                        if ($count) {
+                            Write-Host $count -NoNewline -ForegroundColor DarkGray
+                        }
+                        $padLen = [Console]::WindowWidth - $plain.Length
+                        if ($padLen -gt 0) { Write-Host (' ' * $padLen) } else { Write-Host '' }
+                    }
                 }
             }
 
             Write-Host (Pad '')
-            Write-Host (Pad "  $footer") -ForegroundColor DarkYellow
+            Write-Host (Pad "  $hints") -ForegroundColor DarkYellow
+            Write-Host (Pad '')
+
+            # Status line: mode plus target, uniformly dim, padded to width
+            Write-Host (Pad "  $modeWord$statusRest") -ForegroundColor DarkGray
 
             # Input: read one key and update navigation state
             $key = [Console]::ReadKey($true).Key
@@ -1016,15 +1104,15 @@ function Invoke-Menu {
                 'Escape'    { if ($IsChild) { $exitReason = 'Back' } }
                 'Q'         { $exitReason = 'Quit' }
                 'Enter'     {
-                    $selected = $children[$selectedIndex]
+                    $selected    = $children[$selectedIndex]
+                    $currentName = if ($isRoot) { $Context.Meta.Name } else { $Context.Name }
+                    $childCrumb  = if ($Breadcrumb) { "$Breadcrumb > $currentName" } else { $currentName }
                     if ($isSettingsLevel) {
-                        Show-SettingDetail -Setting $selected -Breadcrumb $Breadcrumb
+                        Show-SettingDetail -Setting $selected -Breadcrumb $childCrumb
                         $refresh = $true
                     }
                     else {
-                        $childBreadcrumb = if ($Breadcrumb) { "$Breadcrumb > $($selected.Name)" }
-                                           else             { $selected.Name }
-                        $result = Invoke-Menu -Context $selected -Breadcrumb $childBreadcrumb -IsChild
+                        $result = Invoke-Menu -Context $selected -Breadcrumb $childCrumb -IsChild
                         if ($result -eq 'Quit') { $exitReason = 'Quit' } else { $refresh = $true }
                     }
                 }
@@ -1040,7 +1128,7 @@ function Invoke-Menu {
         if ($IsChild) { return $exitReason }
     }
     finally {
-        if (-not $IsChild) { [Console]::CursorVisible = $true }
+        if ($isRoot) { [Console]::CursorVisible = $true }
     }
 }
 
@@ -1065,65 +1153,96 @@ function Show-SettingDetail {
     $statusMessage = ''
     $statusColor   = 'White'
 
+    $isHKCU = $Setting.Path -like 'HKCU:*'
+
     while (-not $done) {
         # Render: read current state and display setting detail
         $current = Get-SettingCurrentValue -Path $Setting.Path -ValueName $Setting.ValueName
         $state   = Test-SettingState -Setting $Setting
 
+        $valueLabel   = if ($script:IsBuildMode) { 'Profile Value' } else { 'Current Value' }
+        $valueDisplay = if ($current.Exists) {
+            "$($current.Value)"
+        } elseif ($script:IsBuildMode) {
+            if ($current.ExplicitAbsence) { '(absent)' } else { '(not in profile)' }
+        } else {
+            '(absent)'
+        }
+        $hardenedDisplay = "$($Setting.HardenedValue)"
+        $defaultDisplay  = if ($null -ne $Setting.DefaultValue) { "$($Setting.DefaultValue)" } else { '(absent)' }
+
         Clear-Host
+
+        # Header: location, title, underline, description
         Write-Host "  $Breadcrumb" -ForegroundColor DarkGray
         Write-Host ''
         Write-Host "  $($Setting.Name)" -ForegroundColor Cyan
         Write-Host "  $('-' * $Setting.Name.Length)" -ForegroundColor DarkCyan
-        Write-Host ''
-        Write-Host "  $($Setting.Description)" -ForegroundColor White
-        Write-Host ''
-        Write-Host "  Registry Path : $($Setting.Path)" -ForegroundColor Gray
-        Write-Host "  Value Name    : $($Setting.ValueName)" -ForegroundColor Gray
-        Write-Host "  Value Type    : $($Setting.ValueType)" -ForegroundColor Gray
+        Write-Host "  $($Setting.Description)" -ForegroundColor Gray
         Write-Host ''
 
-        $currentDisplay  = if ($current.Exists) { "$($current.Value)" } else { '(not set)' }
-        $hardenedDisplay = "$($Setting.HardenedValue)"
-        $defaultDisplay  = if ($null -ne $Setting.DefaultValue) { "$($Setting.DefaultValue)" } else { '(absent)' }
+        # Technical block: registry coordinates, plus scope for per-user settings
+        Write-Host "    Registry Path : $($Setting.Path)" -ForegroundColor Gray
+        Write-Host "    Value Name    : $($Setting.ValueName)" -ForegroundColor Gray
+        Write-Host "    Value Type    : $($Setting.ValueType)" -ForegroundColor Gray
+        if ($isHKCU) {
+            Write-Host "    Scope         : Per-user (applies to current user only)" -ForegroundColor Gray
+        }
+        Write-Host ''
 
-        Write-Host "  Current Value : $currentDisplay" -ForegroundColor $(if ($state -eq 'HARDENED') { 'Green' } else { 'Yellow' })
-        Write-Host "  Hardened Value: $hardenedDisplay" -ForegroundColor Green
-        Write-Host "  Default Value : $defaultDisplay" -ForegroundColor Gray
-        Write-Host "  Status        : $state" -ForegroundColor $(
+        # State block: only the State value is colored, by state
+        Write-Host "    $valueLabel : $valueDisplay"
+        Write-Host "    Hardened Value: $hardenedDisplay"
+        Write-Host "    Default Value : $defaultDisplay"
+        Write-Host "    State         : " -NoNewline
+        Write-Host $state -ForegroundColor $(
             switch ($state) {
-                'HARDENED' { 'Green'   }
-                'DEFAULT'  { 'Yellow'  }
-                'CUSTOM'   { 'Magenta' }
-                'NOT SET'  { 'Yellow'  }
+                'HARDENED' { 'Green'    }
+                'DEFAULT'  { 'Yellow'   }
+                'CUSTOM'   { 'Magenta'  }
+                'NOT SET'  { 'DarkGray' }
             }
         )
 
-        if ($Setting.Path -like 'HKCU:*') {
+        # Advisory block: prose at the margin; only the tier label is colored
+        $advisories = @()
+        if ($Setting.ContainsKey('Warning')) { $advisories += @{ Label = 'Warning'; Text = $Setting.Warning; Color = 'Red' } }
+        if ($Setting.ContainsKey('Caution')) { $advisories += @{ Label = 'Caution'; Text = $Setting.Caution; Color = 'Yellow' } }
+        if ($Setting.ContainsKey('Note'))    { $advisories += @{ Label = 'Note';    Text = $Setting.Note;    Color = 'DarkCyan' } }
+        if ($advisories.Count -gt 0) {
             Write-Host ''
-            Write-Host '  * Per-user setting: applies to current user only' -ForegroundColor DarkYellow
+            foreach ($adv in $advisories) {
+                Write-Host "  $($adv.Label):" -NoNewline -ForegroundColor $adv.Color
+                Write-Host " $($adv.Text)"
+            }
         }
 
-        # Input: apply hardened value, reset to default, or exit
+        # Footer: action hints, then the status line
         Write-Host ''
-        $footer = if ($script:IsBuildMode) {
-            '  [H] Apply Hardened  [D] Reset to Default  [X] Exclude from Profile  [Esc] Back'
+        $hints = if ($script:IsBuildMode) {
+            '  [H] Set Hardened  [D] Set Default  [X] Exclude from Profile  [Esc] Back'
         } else {
             '  [H] Apply Hardened  [D] Reset to Default  [Esc] Back'
         }
-        Write-Host $footer -ForegroundColor DarkYellow
+        Write-Host $hints -ForegroundColor DarkYellow
+        Write-Host ''
+        $modeWord     = if ($script:IsBuildMode) { 'build' } else { 'interactive' }
+        $statusTarget = if ($script:IsBuildMode) { [System.IO.Path]::GetFileName($Build) } else { $script:HostName }
+        Write-Host "  $modeWord  -  $statusTarget" -ForegroundColor DarkGray
 
+        # Feedback: last line, below the status line, persisting until the next action
         if ($statusMessage) {
             Write-Host ''
             Write-Host "  $statusMessage" -ForegroundColor $statusColor
         }
 
+        # Input: apply hardened value, reset to default, exclude, or exit
         $key = [Console]::ReadKey($true).Key
 
         switch ($key) {
             'H' {
                 $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
-                $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(not set)' }
+                $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(absent)' }
 
                 $params = @{
                     Name      = $Setting.Name
@@ -1138,30 +1257,30 @@ function Show-SettingDetail {
                     'Written' {
                         $script:AppliedCount++
                         Write-Log "APPLIED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.HardenedValue) | Verified"
-                        $statusMessage = 'Applied and verified.'
+                        $statusMessage = if ($script:IsBuildMode) { 'Hardened value set in profile.' } else { 'Applied and verified.' }
                         $statusColor   = 'Green'
                     }
                     'AlreadyPresent' {
-                        $statusMessage = 'Already at the hardened value.'
+                        $statusMessage = if ($script:IsBuildMode) { 'Hardened value already in profile.' } else { 'Already at the hardened value.' }
                         $statusColor   = 'Green'
                     }
                     'VerifyFailed' {
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Verification failed"
-                        $statusMessage = 'Applied but verification failed.'
+                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Apply verification failed"
+                        $statusMessage = if ($script:IsBuildMode) { 'Set the hardened value but verification failed.' } else { 'Applied but verification failed.' }
                         $statusColor   = 'Red'
                     }
                     'WriteFailed' {
                         $script:FailedCount++
                         Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Apply failed"
-                        $statusMessage = 'Failed to apply.'
+                        $statusMessage = if ($script:IsBuildMode) { 'Failed to set the hardened value.' } else { 'Failed to apply.' }
                         $statusColor   = 'Red'
                     }
                 }
             }
             'D' {
                 $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
-                $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(not set)' }
+                $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(absent)' }
 
                 if ($null -eq $Setting.DefaultValue) {
                     $params = @{
@@ -1177,23 +1296,23 @@ function Show-SettingDetail {
                             $script:AppliedCount++
                             $action = if ($script:IsBuildMode) { 'Removal entry written to profile' } else { 'After: (absent)' }
                             Write-Log "RESET $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | $action | Verified"
-                            $statusMessage = 'Reset to default.'
+                            $statusMessage = if ($script:IsBuildMode) { 'Default value set in profile.' } else { 'Reset to default.' }
                             $statusColor   = 'Green'
                         }
                         'AlreadyAbsent' {
-                            $statusMessage = 'Already not set.'
+                            $statusMessage = if ($script:IsBuildMode) { 'Default value already in profile.' } else { 'Already at the default value.' }
                             $statusColor   = 'Green'
                         }
                         'VerifyFailed' {
                             $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Remove verification failed"
-                            $statusMessage = 'Removed but verification failed.'
+                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset verification failed"
+                            $statusMessage = if ($script:IsBuildMode) { 'Set the default value but verification failed.' } else { 'Reset but verification failed.' }
                             $statusColor   = 'Red'
                         }
                         'RemoveFailed' {
                             $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Remove failed"
-                            $statusMessage = 'Failed to remove.'
+                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset failed"
+                            $statusMessage = if ($script:IsBuildMode) { 'Failed to set the default value.' } else { 'Failed to reset.' }
                             $statusColor   = 'Red'
                         }
                     }
@@ -1212,23 +1331,23 @@ function Show-SettingDetail {
                         'Written' {
                             $script:AppliedCount++
                             Write-Log "RESET $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.DefaultValue) | Verified"
-                            $statusMessage = 'Reset to default.'
+                            $statusMessage = if ($script:IsBuildMode) { 'Default value set in profile.' } else { 'Reset to default.' }
                             $statusColor   = 'Green'
                         }
                         'AlreadyPresent' {
-                            $statusMessage = 'Already at the default value.'
+                            $statusMessage = if ($script:IsBuildMode) { 'Default value already in profile.' } else { 'Already at the default value.' }
                             $statusColor   = 'Green'
                         }
                         'VerifyFailed' {
                             $script:FailedCount++
                             Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset verification failed"
-                            $statusMessage = 'Reset but verification failed.'
+                            $statusMessage = if ($script:IsBuildMode) { 'Set the default value but verification failed.' } else { 'Reset but verification failed.' }
                             $statusColor   = 'Red'
                         }
                         'WriteFailed' {
                             $script:FailedCount++
                             Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset failed"
-                            $statusMessage = 'Failed to reset.'
+                            $statusMessage = if ($script:IsBuildMode) { 'Failed to set the default value.' } else { 'Failed to reset.' }
                             $statusColor   = 'Red'
                         }
                     }
@@ -1237,7 +1356,7 @@ function Show-SettingDetail {
             'X' {
                 if ($script:IsBuildMode) {
                     $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
-                    $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(not set)' }
+                    $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(absent)' }
 
                     $params = @{
                         Path      = $Setting.Path
@@ -1289,31 +1408,95 @@ function Invoke-ApplyAll {
         [string]$SectionName
     )
 
-    Clear-Host
-    Write-Host ''
-    Write-Host "  Apply all hardened values for: $SectionName" -ForegroundColor Cyan
-    Write-Host ''
-
-    $toApply = @()
-    foreach ($setting in $Settings) {
-        $state = Test-SettingState -Setting $setting
-        if ($state -ne 'HARDENED') {
-            $scopeLabel = if ($setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
-            $toApply += $setting
-            Write-Host "    $scopeLabel $($setting.Name)  [$state -> HARDENED]" -ForegroundColor Yellow
+    function StateColor([string]$State) {
+        switch ($State) {
+            'HARDENED' { 'Green'    }
+            'DEFAULT'  { 'Yellow'   }
+            'CUSTOM'   { 'Magenta'  }
+            'NOT SET'  { 'DarkGray' }
         }
     }
 
+    function AdvisoryMarker([hashtable]$Setting) {
+        if ($Setting.ContainsKey('Warning')) { return @{ Glyph = '(!)'; Color = 'Red' } }
+        if ($Setting.ContainsKey('Caution')) { return @{ Glyph = '(!)'; Color = 'Yellow' } }
+        if ($Setting.ContainsKey('Note'))    { return @{ Glyph = '(i)'; Color = 'DarkCyan' } }
+        return @{ Glyph = ''; Color = $null }
+    }
+
+    # Collect the settings not already hardened, with their current state
+    $toApply = @()
+    $stateOf = @{}
+    foreach ($setting in $Settings) {
+        $state = Test-SettingState -Setting $setting
+        if ($state -ne 'HARDENED') {
+            $toApply += $setting
+            $stateOf["$($setting.Path)|$($setting.ValueName)"] = $state
+        }
+    }
+
+    Clear-Host
+    Write-Host ''
+
+    # Nothing to act on: the confirmation is skipped when every setting is hardened
     if ($toApply.Count -eq 0) {
-        Write-Host '  All settings in this section are already hardened.' -ForegroundColor Green
+        $emptyMessage = if ($script:IsBuildMode) {
+            '  All settings in this section are already hardened in the profile.'
+        } else {
+            '  All settings in this section are already hardened.'
+        }
+        Write-Host $emptyMessage -ForegroundColor Green
         Write-Host ''
         Write-Host '  Press any key to continue...' -ForegroundColor DarkYellow
         [void][Console]::ReadKey($true)
         return
     }
 
+    # Confirmation: heading, affected settings, advisory aggregate, prompt
+    $heading = if ($script:IsBuildMode) {
+        "  Set all hardened values in profile for: $SectionName"
+    } else {
+        "  Apply all hardened values for: $SectionName"
+    }
+    Write-Host $heading -ForegroundColor Cyan
     Write-Host ''
-    Write-Host "  Apply hardened values to $($toApply.Count) setting(s)? [Y/N] " -ForegroundColor DarkYellow -NoNewline
+
+    $warningCount = 0
+    $cautionCount = 0
+    foreach ($setting in $toApply) {
+        $state = $stateOf["$($setting.Path)|$($setting.ValueName)"]
+        $adv   = AdvisoryMarker $setting
+        Write-Host "    $($setting.Name)  " -NoNewline
+        Write-Host "[$state]" -NoNewline -ForegroundColor (StateColor $state)
+        if ($adv.Glyph) {
+            Write-Host "  $($adv.Glyph)" -ForegroundColor $adv.Color
+        } else {
+            Write-Host ''
+        }
+        if     ($setting.ContainsKey('Warning')) { $warningCount++ }
+        elseif ($setting.ContainsKey('Caution')) { $cautionCount++ }
+    }
+
+    # Advisory aggregate: one line per tier present, highest severity first
+    if ($warningCount -gt 0 -or $cautionCount -gt 0) {
+        Write-Host ''
+        if ($warningCount -gt 0) {
+            $phrase = if ($warningCount -eq 1) { 'setting carries' } else { 'settings carry' }
+            Write-Host "  (!) $warningCount $phrase a warning." -ForegroundColor Red
+        }
+        if ($cautionCount -gt 0) {
+            $phrase = if ($cautionCount -eq 1) { 'setting carries' } else { 'settings carry' }
+            Write-Host "  (!) $cautionCount $phrase a caution." -ForegroundColor Yellow
+        }
+    }
+
+    Write-Host ''
+    $prompt = if ($script:IsBuildMode) {
+        "  Set hardened values in profile for $($toApply.Count) setting(s)? [Y/N] "
+    } else {
+        "  Apply hardened values to $($toApply.Count) setting(s)? [Y/N] "
+    }
+    Write-Host $prompt -ForegroundColor DarkYellow -NoNewline
     $confirm = [Console]::ReadKey($true).Key
 
     if ($confirm -ne 'Y') {
@@ -1329,7 +1512,7 @@ function Invoke-ApplyAll {
     foreach ($setting in $toApply) {
         $scopeLabel    = if ($setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
         $before        = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
-        $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(not set)' }
+        $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(absent)' }
 
         $params = @{
             Name      = $setting.Name
@@ -1351,7 +1534,7 @@ function Invoke-ApplyAll {
                 $failed++
                 $script:FailedCount++
                 Write-Host "  [!!] $scopeLabel $($setting.Name) - verification failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Verification failed"
+                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Apply verification failed"
             }
             'WriteFailed' {
                 $failed++
@@ -1369,13 +1552,16 @@ function Invoke-ApplyAll {
     [void][Console]::ReadKey($true)
 }
 
-function Get-SectionCounts {
+function Get-SettingCounts {
     <#
     .SYNOPSIS
-        Returns the hardened and total setting counts for a given node,
-        recursing into categories and sections as needed.
+        Counts the settings under a category or section,
+        recursing through nested categories and sections.
     .OUTPUTS
-        Returns a hashtable with Hardened and Total integer counts.
+        Returns a hashtable with Selected and Total integer counts.
+        In Interactive Mode, Selected is the number of hardened settings.
+        In Build Mode, Selected is the number of configured settings,
+        both hardened and default.
     #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -1386,21 +1572,23 @@ function Get-SectionCounts {
 
     if ($Node.Settings) {
         $settings = @($Node.Settings)
-        return @{
-            Hardened = @($settings | Where-Object { (Test-SettingState -Setting $_) -eq 'HARDENED' }).Count
-            Total    = $settings.Count
-        }
+        $selected = @($settings | Where-Object {
+            $state = Test-SettingState -Setting $_
+            if ($script:IsBuildMode) { $state -eq 'HARDENED' -or $state -eq 'DEFAULT' }
+            else                     { $state -eq 'HARDENED' }
+        }).Count
+        return @{ Selected = $selected; Total = $settings.Count }
     }
 
-    $hardened = 0
+    $selected = 0
     $total    = 0
     $children = if ($Node.Categories) { $Node.Categories } else { $Node.Sections }
     foreach ($child in $children) {
-        $c        = Get-SectionCounts -Node $child
-        $hardened += $c.Hardened
-        $total    += $c.Total
+        $c         = Get-SettingCounts -Node $child
+        $selected += $c.Selected
+        $total     += $c.Total
     }
-    return @{ Hardened = $hardened; Total = $total }
+    return @{ Selected = $selected; Total = $total }
 }
 
 #endregion
@@ -1445,7 +1633,7 @@ function Invoke-ProfileMode {
         if (-not $entry.Exists) {
             # Exists = $false: desired state is absent; remove the value if present
             $before = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
-            $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(not set)' }
+            $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(absent)' }
 
             $params = @{
                 Name      = $entry.Name
@@ -1460,7 +1648,7 @@ function Invoke-ProfileMode {
                     $applied++
                     $script:AppliedCount++
                     Write-Host "  [OK] $scopeLabel $($entry.Name) - removed" -ForegroundColor Green
-                    Write-Log "RESET $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: (absent) | Verified"
+                    Write-Log "REMOVED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: (absent) | Verified"
                 }
                 'AlreadyAbsent' {
                     $skipped++
@@ -1482,7 +1670,7 @@ function Invoke-ProfileMode {
         else {
             # Exists = $true: desired state is present; write the value if not already correct
             $before = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
-            $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(not set)' }
+            $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(absent)' }
 
             $params = @{
                 Name      = $entry.Name
@@ -1507,7 +1695,7 @@ function Invoke-ProfileMode {
                     $failed++
                     $script:FailedCount++
                     Write-Host "  [!!] $scopeLabel $($entry.Name) - verification failed" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Verification failed"
+                    Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Apply verification failed"
                 }
                 'WriteFailed' {
                     $failed++
