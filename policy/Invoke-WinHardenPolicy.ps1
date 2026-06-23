@@ -1235,7 +1235,8 @@ function Show-SettingDetail {
         switch ($key) {
             'H' {
                 $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
-                $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(absent)' }
+                $beforeDisplay = $valueDisplay
+                $action        = if ($script:IsBuildMode) { 'Set hardened' } else { 'Apply' }
 
                 $params = @{
                     Name      = $Setting.Name
@@ -1249,7 +1250,7 @@ function Show-SettingDetail {
                 switch ($result) {
                     'Written' {
                         $script:AppliedCount++
-                        Write-Log "APPLIED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.HardenedValue) | Verified"
+                        Write-Log "HARDENED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.HardenedValue) | Verified"
                         $statusMessage = if ($script:IsBuildMode) { 'Hardened value set in profile.' } else { 'Applied and verified.' }
                         $statusColor   = 'Green'
                     }
@@ -1259,13 +1260,13 @@ function Show-SettingDetail {
                     }
                     'VerifyFailed' {
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Apply verification failed"
+                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action verification failed"
                         $statusMessage = if ($script:IsBuildMode) { 'Set the hardened value but verification failed.' } else { 'Applied but verification failed.' }
                         $statusColor   = 'Red'
                     }
                     'WriteFailed' {
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Apply failed"
+                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action failed"
                         $statusMessage = if ($script:IsBuildMode) { 'Failed to set the hardened value.' } else { 'Failed to apply.' }
                         $statusColor   = 'Red'
                     }
@@ -1273,7 +1274,8 @@ function Show-SettingDetail {
             }
             'D' {
                 $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
-                $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(absent)' }
+                $beforeDisplay = $valueDisplay
+                $action        = if ($script:IsBuildMode) { 'Set default' } else { 'Reset' }
 
                 if ($null -eq $Setting.DefaultValue) {
                     $params = @{
@@ -1282,8 +1284,8 @@ function Show-SettingDetail {
                         ValueName = $Setting.ValueName
                         ValueType = $Setting.ValueType
                     }
-                    $result     = Invoke-SettingRemove @params
-                    $afterField = if ($script:IsBuildMode) { 'Removal entry written to profile' } else { 'After: (absent)' }
+                    $result       = Invoke-SettingRemove @params
+                    $afterDisplay = '(absent)'
                 }
                 else {
                     $params = @{
@@ -1293,14 +1295,14 @@ function Show-SettingDetail {
                         ValueType = $Setting.ValueType
                         Value     = $Setting.DefaultValue
                     }
-                    $result     = Invoke-SettingWrite @params
-                    $afterField = "After: $($Setting.DefaultValue)"
+                    $result       = Invoke-SettingWrite @params
+                    $afterDisplay = "$($Setting.DefaultValue)"
                 }
 
                 switch ($result) {
                     { $_ -in 'Written','Removed' } {
                         $script:AppliedCount++
-                        Write-Log "RESET $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | $afterField | Verified"
+                        Write-Log "DEFAULT $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
                         $statusMessage = if ($script:IsBuildMode) { 'Default value set in profile.' } else { 'Reset to default.' }
                         $statusColor   = 'Green'
                     }
@@ -1310,13 +1312,13 @@ function Show-SettingDetail {
                     }
                     'VerifyFailed' {
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset verification failed"
+                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action verification failed"
                         $statusMessage = if ($script:IsBuildMode) { 'Set the default value but verification failed.' } else { 'Reset but verification failed.' }
                         $statusColor   = 'Red'
                     }
                     { $_ -in 'WriteFailed','RemoveFailed' } {
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset failed"
+                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action failed"
                         $statusMessage = if ($script:IsBuildMode) { 'Failed to set the default value.' } else { 'Failed to reset.' }
                         $statusColor   = 'Red'
                     }
@@ -1325,7 +1327,7 @@ function Show-SettingDetail {
             'X' {
                 if ($script:IsBuildMode) {
                     $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
-                    $beforeDisplay = if ($current.Exists) { "$($current.Value)" } else { '(absent)' }
+                    $beforeDisplay = $valueDisplay
 
                     $params = @{
                         Path      = $Setting.Path
@@ -1335,7 +1337,7 @@ function Show-SettingDetail {
 
                     switch ($result) {
                         'Removed' {
-                            Write-Log "EXCLUDED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | Removed from build profile | Verified"
+                            Write-Log "EXCLUDED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: (not in profile) | Verified"
                             $statusMessage = 'Excluded from profile.'
                             $statusColor   = 'Green'
                         }
@@ -1477,11 +1479,18 @@ function Invoke-ApplyAll {
 
     $applied = 0
     $failed  = 0
+    $action  = if ($script:IsBuildMode) { 'Set hardened' } else { 'Apply' }
 
     foreach ($setting in $toApply) {
         $scopeLabel    = if ($setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
         $before        = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
-        $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(absent)' }
+        $beforeDisplay = if ($before.Exists) {
+            "$($before.Value)"
+        } elseif ($script:IsBuildMode) {
+            if ($before.ExplicitAbsence) { '(absent)' } else { '(not in profile)' }
+        } else {
+            '(absent)'
+        }
 
         $params = @{
             Name      = $setting.Name
@@ -1497,25 +1506,25 @@ function Invoke-ApplyAll {
                 $applied++
                 $script:AppliedCount++
                 Write-Host "  [OK] $scopeLabel $($setting.Name)" -ForegroundColor Green
-                Write-Log "APPLIED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $($setting.HardenedValue) | Verified"
+                Write-Log "HARDENED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $($setting.HardenedValue) | Verified"
             }
             'VerifyFailed' {
                 $failed++
                 $script:FailedCount++
                 Write-Host "  [!!] $scopeLabel $($setting.Name) - verification failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Apply verification failed"
+                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | $action verification failed"
             }
             'WriteFailed' {
                 $failed++
                 $script:FailedCount++
-                Write-Host "  [!!] $scopeLabel $($setting.Name) - apply failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Apply failed"
+                Write-Host "  [!!] $scopeLabel $($setting.Name) - $($action.ToLower()) failed" -ForegroundColor Red
+                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | $action failed"
             }
         }
     }
 
     Write-Host ''
-    Write-Host "  Results: $applied applied, $failed failed" -ForegroundColor Cyan
+    Write-Host "  Results: $applied hardened, $failed failed" -ForegroundColor Cyan
     Write-Host ''
     Write-Host '  Press any key to continue...' -ForegroundColor DarkYellow
     [void][Console]::ReadKey($true)
