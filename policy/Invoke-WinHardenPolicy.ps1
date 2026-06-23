@@ -1282,33 +1282,8 @@ function Show-SettingDetail {
                         ValueName = $Setting.ValueName
                         ValueType = $Setting.ValueType
                     }
-                    $result = Invoke-SettingRemove @params
-
-                    switch ($result) {
-                        'Removed' {
-                            $script:AppliedCount++
-                            $action = if ($script:IsBuildMode) { 'Removal entry written to profile' } else { 'After: (absent)' }
-                            Write-Log "RESET $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | $action | Verified"
-                            $statusMessage = if ($script:IsBuildMode) { 'Default value set in profile.' } else { 'Reset to default.' }
-                            $statusColor   = 'Green'
-                        }
-                        'AlreadyAbsent' {
-                            $statusMessage = if ($script:IsBuildMode) { 'Default value already in profile.' } else { 'Already at the default value.' }
-                            $statusColor   = 'Green'
-                        }
-                        'VerifyFailed' {
-                            $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset verification failed"
-                            $statusMessage = if ($script:IsBuildMode) { 'Set the default value but verification failed.' } else { 'Reset but verification failed.' }
-                            $statusColor   = 'Red'
-                        }
-                        'RemoveFailed' {
-                            $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset failed"
-                            $statusMessage = if ($script:IsBuildMode) { 'Failed to set the default value.' } else { 'Failed to reset.' }
-                            $statusColor   = 'Red'
-                        }
-                    }
+                    $result     = Invoke-SettingRemove @params
+                    $afterField = if ($script:IsBuildMode) { 'Removal entry written to profile' } else { 'After: (absent)' }
                 }
                 else {
                     $params = @{
@@ -1318,31 +1293,32 @@ function Show-SettingDetail {
                         ValueType = $Setting.ValueType
                         Value     = $Setting.DefaultValue
                     }
-                    $result = Invoke-SettingWrite @params
+                    $result     = Invoke-SettingWrite @params
+                    $afterField = "After: $($Setting.DefaultValue)"
+                }
 
-                    switch ($result) {
-                        'Written' {
-                            $script:AppliedCount++
-                            Write-Log "RESET $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.DefaultValue) | Verified"
-                            $statusMessage = if ($script:IsBuildMode) { 'Default value set in profile.' } else { 'Reset to default.' }
-                            $statusColor   = 'Green'
-                        }
-                        'AlreadyPresent' {
-                            $statusMessage = if ($script:IsBuildMode) { 'Default value already in profile.' } else { 'Already at the default value.' }
-                            $statusColor   = 'Green'
-                        }
-                        'VerifyFailed' {
-                            $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset verification failed"
-                            $statusMessage = if ($script:IsBuildMode) { 'Set the default value but verification failed.' } else { 'Reset but verification failed.' }
-                            $statusColor   = 'Red'
-                        }
-                        'WriteFailed' {
-                            $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset failed"
-                            $statusMessage = if ($script:IsBuildMode) { 'Failed to set the default value.' } else { 'Failed to reset.' }
-                            $statusColor   = 'Red'
-                        }
+                switch ($result) {
+                    { $_ -in 'Written','Removed' } {
+                        $script:AppliedCount++
+                        Write-Log "RESET $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | $afterField | Verified"
+                        $statusMessage = if ($script:IsBuildMode) { 'Default value set in profile.' } else { 'Reset to default.' }
+                        $statusColor   = 'Green'
+                    }
+                    { $_ -in 'AlreadyPresent','AlreadyAbsent' } {
+                        $statusMessage = if ($script:IsBuildMode) { 'Default value already in profile.' } else { 'Already at the default value.' }
+                        $statusColor   = 'Green'
+                    }
+                    'VerifyFailed' {
+                        $script:FailedCount++
+                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset verification failed"
+                        $statusMessage = if ($script:IsBuildMode) { 'Set the default value but verification failed.' } else { 'Reset but verification failed.' }
+                        $statusColor   = 'Red'
+                    }
+                    { $_ -in 'WriteFailed','RemoveFailed' } {
+                        $script:FailedCount++
+                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Reset failed"
+                        $statusMessage = if ($script:IsBuildMode) { 'Failed to set the default value.' } else { 'Failed to reset.' }
+                        $statusColor   = 'Red'
                     }
                 }
             }
