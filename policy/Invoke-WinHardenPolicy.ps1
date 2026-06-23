@@ -120,7 +120,7 @@ $script:Component = 'Policy'
 $script:ToolName  = 'Invoke-WinHardenPolicy'
 
 # Session counters for the log summary
-$script:AppliedCount = 0
+$script:ChangedCount = 0
 $script:FailedCount  = 0
 
 # Windows edition context: populated by Initialize-EditionContext before write operations.
@@ -197,7 +197,7 @@ function Write-LogSessionEnd {
     #>
     [CmdletBinding()]
     param()
-    Write-Log "Session ended - $($script:AppliedCount) applied, $($script:FailedCount) failed"
+    Write-Log "Session ended - $($script:ChangedCount) changed, $($script:FailedCount) failed"
 }
 
 function Write-FatalError {
@@ -1249,7 +1249,7 @@ function Show-SettingDetail {
 
                 switch ($result) {
                     'Written' {
-                        $script:AppliedCount++
+                        $script:ChangedCount++
                         Write-Log "HARDENED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.HardenedValue) | Verified"
                         $statusMessage = if ($script:IsBuildMode) { 'Hardened value set in profile.' } else { 'Applied and verified.' }
                         $statusColor   = 'Green'
@@ -1301,7 +1301,7 @@ function Show-SettingDetail {
 
                 switch ($result) {
                     { $_ -in 'Written','Removed' } {
-                        $script:AppliedCount++
+                        $script:ChangedCount++
                         Write-Log "DEFAULT $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
                         $statusMessage = if ($script:IsBuildMode) { 'Default value set in profile.' } else { 'Reset to default.' }
                         $statusColor   = 'Green'
@@ -1337,6 +1337,7 @@ function Show-SettingDetail {
 
                     switch ($result) {
                         'Removed' {
+                            $script:ChangedCount++
                             Write-Log "EXCLUDED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: (not in profile) | Verified"
                             $statusMessage = 'Excluded from profile.'
                             $statusColor   = 'Green'
@@ -1477,9 +1478,9 @@ function Invoke-ApplyAll {
     Write-Host ''
     Write-Host ''
 
-    $applied = 0
-    $failed  = 0
-    $action  = if ($script:IsBuildMode) { 'Set hardened' } else { 'Apply' }
+    $hardened = 0
+    $failed   = 0
+    $action   = if ($script:IsBuildMode) { 'Set hardened' } else { 'Apply' }
 
     foreach ($setting in $toApply) {
         $scopeLabel    = if ($setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
@@ -1503,8 +1504,8 @@ function Invoke-ApplyAll {
 
         switch ($result) {
             'Written' {
-                $applied++
-                $script:AppliedCount++
+                $hardened++
+                $script:ChangedCount++
                 Write-Host "  [OK] $scopeLabel $($setting.Name)" -ForegroundColor Green
                 Write-Log "HARDENED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $($setting.HardenedValue) | Verified"
             }
@@ -1524,7 +1525,7 @@ function Invoke-ApplyAll {
     }
 
     Write-Host ''
-    Write-Host "  Results: $applied hardened, $failed failed" -ForegroundColor Cyan
+    Write-Host "  Results: $hardened hardened, $failed failed" -ForegroundColor Cyan
     Write-Host ''
     Write-Host '  Press any key to continue...' -ForegroundColor DarkYellow
     [void][Console]::ReadKey($true)
@@ -1599,7 +1600,7 @@ function Invoke-ProfileMode {
     Export-SnapshotProfile -Settings $ProfileData.Settings -Source $inheritedSource -OutputPath $snapshotPath
     Write-Host "  Snapshot: $snapshotPath"
 
-    $applied = 0
+    $changed = 0
     $failed  = 0
     $skipped = 0
 
@@ -1623,8 +1624,8 @@ function Invoke-ProfileMode {
 
             switch ($result) {
                 'Removed' {
-                    $applied++
-                    $script:AppliedCount++
+                    $changed++
+                    $script:ChangedCount++
                     Write-Host "  [OK] $scopeLabel $($entry.Name) - removed" -ForegroundColor Green
                     Write-Log "REMOVED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: (absent) | Verified"
                 }
@@ -1661,8 +1662,8 @@ function Invoke-ProfileMode {
 
             switch ($result) {
                 'Written' {
-                    $applied++
-                    $script:AppliedCount++
+                    $changed++
+                    $script:ChangedCount++
                     Write-Host "  [OK] $scopeLabel $($entry.Name) - applied" -ForegroundColor Green
                     Write-Log "APPLIED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $($entry.Value) | Verified"
                 }
@@ -1686,7 +1687,7 @@ function Invoke-ProfileMode {
     }
 
     Write-Host ''
-    Write-Host "  Results: $applied applied, $failed failed, $skipped skipped" -ForegroundColor Cyan
+    Write-Host "  Results: $changed changed, $failed failed, $skipped skipped" -ForegroundColor Cyan
     return ($failed -eq 0)
 }
 
