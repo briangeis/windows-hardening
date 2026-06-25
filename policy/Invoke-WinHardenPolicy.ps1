@@ -1424,11 +1424,13 @@ function Show-SettingDetail {
                             $statusColor   = 'Green'
                         }
                         'VerifyFailed' {
+                            $script:FailedCount++
                             Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude verification failed"
                             $statusMessage = 'Excluded from profile but verification failed.'
                             $statusColor   = 'Red'
                         }
                         'RemoveFailed' {
+                            $script:FailedCount++
                             Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude failed"
                             $statusMessage = 'Failed to exclude from profile.'
                             $statusColor   = 'Red'
