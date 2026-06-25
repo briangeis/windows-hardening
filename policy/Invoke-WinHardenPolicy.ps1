@@ -140,9 +140,9 @@ $script:BuildData   = @{ Meta = @{}; Settings = @{} }
 
 # Resolved log file path: generated from -LogPath or defaulted if omitted.
 $script:LogPath = if (-not $LogPath) {
-    Join-Path (Get-Location) "Policy-Log_${script:HostName}.log"
+    Join-Path (Get-Location) "${script:Component}-Log_${script:HostName}.log"
 } elseif (Test-Path $LogPath -PathType Container) {
-    Join-Path $LogPath "Policy-Log_${script:HostName}.log"
+    Join-Path $LogPath "${script:Component}-Log_${script:HostName}.log"
 } else {
     $LogPath
 }
@@ -2033,7 +2033,7 @@ function Get-SnapshotProfilePath {
         [string]$Directory = (Get-Location)
     )
     $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-    return Join-Path $Directory "Policy-Snapshot_${script:HostName}_${timestamp}.psd1"
+    return Join-Path $Directory "${script:Component}-Snapshot_${script:HostName}_${timestamp}.psd1"
 }
 
 function Export-SnapshotProfile {
