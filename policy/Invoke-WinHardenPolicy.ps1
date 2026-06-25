@@ -119,8 +119,13 @@ $script:HostName = [System.Net.Dns]::GetHostName()
 $script:Component = 'Policy'
 $script:ToolName  = 'Invoke-WinHardenPolicy'
 
-# Supported value types: the scalar registry types the script handles
-$script:SupportedValueTypes = 'DWord', 'String', 'ExpandString', 'QWord'
+# Supported value types: scalar registry types and their LGPO prefixes
+$script:SupportedValueTypes = [ordered]@{
+    DWord        = 'DWORD'
+    String       = 'SZ'
+    ExpandString = 'EXSZ'
+    QWord        = 'QWORD'
+}
 
 # Session counters for the log summary
 $script:ChangedCount = 0
@@ -414,8 +419,8 @@ function Import-DefinitionsFile {
             }
         }
         # Guard against value types the comparison, LGPO, and serialization paths cannot handle
-        if ($Setting.ValueType -notin $script:SupportedValueTypes) {
-            Write-FatalError "Setting '$($Setting.Name)' at '$Location' has unsupported ValueType '$($Setting.ValueType)'. Supported types: $($script:SupportedValueTypes -join ', ')."
+        if ($Setting.ValueType -notin $script:SupportedValueTypes.Keys) {
+            Write-FatalError "Setting '$($Setting.Name)' at '$Location' has unsupported ValueType '$($Setting.ValueType)'. Supported types: $($script:SupportedValueTypes.Keys -join ', ')."
         }
     }
 
@@ -519,10 +524,10 @@ function Import-ProfileFile {
                 Write-FatalError @params
             }
         }
-        if ($entry.ValueType -notin $script:SupportedValueTypes) {
+        if ($entry.ValueType -notin $script:SupportedValueTypes.Keys) {
             $params = @{
                 Message = "Profile $label has unsupported ValueType '$($entry.ValueType)'."
-                Detail  = "Supported types: $($script:SupportedValueTypes -join ', ')."
+                Detail  = "Supported types: $($script:SupportedValueTypes.Keys -join ', ')."
             }
             Write-FatalError @params
         }
@@ -718,16 +723,8 @@ function Invoke-LGPOWrite {
     $section  = if ($Path -like 'HKLM:*') { 'Computer' } else { 'User' }
     $lgpoPath = $Path -replace '^HKL[MC]:\\', '' -replace '^HKCU:\\', ''
 
-    # Convert PowerShell value type to LGPO type prefix
-    $lgpoType = switch ($ValueType) {
-        'DWord'       { 'DWORD' }
-        'String'      { 'SZ' }
-        'ExpandString'{ 'EXSZ' }
-        'MultiString' { 'MULTISZ' }
-        'QWord'       { 'QWORD' }
-        'Binary'      { 'BINARY' }
-        default       { 'DWORD' }
-    }
+    # Convert the value type to its LGPO type prefix
+    $lgpoType = $script:SupportedValueTypes[$ValueType]
 
     # Format value: DWORD and QWORD as decimal, all others as literal string
     $lgpoValue = if ($lgpoType -eq 'DWORD') {
