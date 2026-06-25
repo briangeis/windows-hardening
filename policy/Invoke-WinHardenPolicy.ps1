@@ -119,6 +119,9 @@ $script:HostName = [System.Net.Dns]::GetHostName()
 $script:Component = 'Policy'
 $script:ToolName  = 'Invoke-WinHardenPolicy'
 
+# Supported value types: the scalar registry types the script handles
+$script:SupportedValueTypes = 'DWord', 'String', 'ExpandString', 'QWord'
+
 # Session counters for the log summary
 $script:ChangedCount = 0
 $script:FailedCount  = 0
@@ -411,9 +414,8 @@ function Import-DefinitionsFile {
             }
         }
         # Guard against value types the comparison, LGPO, and serialization paths cannot handle
-        $supportedTypes = 'DWord', 'String', 'ExpandString', 'QWord'
-        if ($Setting.ValueType -notin $supportedTypes) {
-            Write-FatalError "Setting '$($Setting.Name)' at '$Location' has unsupported ValueType '$($Setting.ValueType)'. Supported types: $($supportedTypes -join ', ')."
+        if ($Setting.ValueType -notin $script:SupportedValueTypes) {
+            Write-FatalError "Setting '$($Setting.Name)' at '$Location' has unsupported ValueType '$($Setting.ValueType)'. Supported types: $($script:SupportedValueTypes -join ', ')."
         }
     }
 
@@ -516,6 +518,13 @@ function Import-ProfileFile {
                 }
                 Write-FatalError @params
             }
+        }
+        if ($entry.ValueType -notin $script:SupportedValueTypes) {
+            $params = @{
+                Message = "Profile $label has unsupported ValueType '$($entry.ValueType)'."
+                Detail  = "Supported types: $($script:SupportedValueTypes -join ', ')."
+            }
+            Write-FatalError @params
         }
     }
 
