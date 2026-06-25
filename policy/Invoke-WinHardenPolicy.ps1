@@ -130,9 +130,9 @@ $script:FailedCount  = 0
 $script:IsHomeEdition = $false
 $script:LGPOExePath   = $null
 
-# Verify retry: attempt count and delay between re-reads
-$script:VerifyMaxAttempts  = 5
-$script:VerifyRetryDelayMs = 150
+# Read retry: attempt count and delay between re-reads
+$script:ReadRetryMaxAttempts = 5
+$script:ReadRetryDelayMs     = 150
 
 # Build Mode profile data: profile file contents held in memory for the session.
 $script:IsBuildMode = $false
@@ -883,8 +883,8 @@ function Invoke-SettingWrite {
     # Verify: confirm the write took effect, re-reading through the refresh window
     $verify  = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
     $attempt = 1
-    while (-not ($verify.Exists -and $verify.Value -eq $Value) -and $attempt -lt $script:VerifyMaxAttempts) {
-        Start-Sleep -Milliseconds $script:VerifyRetryDelayMs
+    while (-not ($verify.Exists -and $verify.Value -eq $Value) -and $attempt -lt $script:ReadRetryMaxAttempts) {
+        Start-Sleep -Milliseconds $script:ReadRetryDelayMs
         $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
         $attempt++
     }
@@ -957,8 +957,8 @@ function Invoke-SettingRemove {
     # Verify: confirm the removal took effect, re-reading through the refresh window
     $verify  = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
     $attempt = 1
-    while (($verify.Error -or $verify.Exists) -and $attempt -lt $script:VerifyMaxAttempts) {
-        Start-Sleep -Milliseconds $script:VerifyRetryDelayMs
+    while (($verify.Error -or $verify.Exists) -and $attempt -lt $script:ReadRetryMaxAttempts) {
+        Start-Sleep -Milliseconds $script:ReadRetryDelayMs
         $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
         $attempt++
     }
@@ -2084,10 +2084,21 @@ function Export-SnapshotProfile {
 
     # Collect: Exists = $false captures absent values for removal when applied
     foreach ($setting in $settingSource) {
+        # Read: retry a transient read error before recording the value
         $current = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
-        if ($current.Error) {
-            Write-Log "Snapshot: read failed for $($setting.Name): $($current.Error)"
+        $attempt = 1
+        while ($current.Error -and $attempt -lt $script:ReadRetryMaxAttempts) {
+            Start-Sleep -Milliseconds $script:ReadRetryDelayMs
+            $current = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
+            $attempt++
         }
+
+        # Omit on a persistent error: a false absence would remove it on apply
+        if ($current.Error) {
+            Write-Log "Snapshot: read failed for $($setting.Name), setting omitted: $($current.Error)"
+            continue
+        }
+
         $entries += @{
             Name      = $setting.Name
             Path      = $setting.Path
