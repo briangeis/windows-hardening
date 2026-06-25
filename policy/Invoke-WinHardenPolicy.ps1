@@ -420,7 +420,11 @@ function Import-DefinitionsFile {
         }
         # Guard against value types the comparison, LGPO, and serialization paths cannot handle
         if ($Setting.ValueType -notin $script:SupportedValueTypes.Keys) {
-            Write-FatalError "Setting '$($Setting.Name)' at '$Location' has unsupported ValueType '$($Setting.ValueType)'. Supported types: $($script:SupportedValueTypes.Keys -join ', ')."
+            $params = @{
+                Message = "Setting '$($Setting.Name)' at '$Location' has unsupported ValueType '$($Setting.ValueType)'."
+                Detail  = "Set ValueType to one of: $($script:SupportedValueTypes.Keys -join ', ')."
+            }
+            Write-FatalError @params
         }
     }
 
@@ -527,7 +531,7 @@ function Import-ProfileFile {
         if ($entry.ValueType -notin $script:SupportedValueTypes.Keys) {
             $params = @{
                 Message = "Profile $label has unsupported ValueType '$($entry.ValueType)'."
-                Detail  = "Supported types: $($script:SupportedValueTypes.Keys -join ', ')."
+                Detail  = "Set ValueType to one of: $($script:SupportedValueTypes.Keys -join ', ')."
             }
             Write-FatalError @params
         }
