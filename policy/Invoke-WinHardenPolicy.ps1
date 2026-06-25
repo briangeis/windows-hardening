@@ -156,8 +156,30 @@ function Write-Log {
     )
 
     $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-    $entry = "[$timestamp] $Message"
+    # Collapse embedded line breaks so each entry stays on one physical line
+    $singleLine = [regex]::Replace($Message, '\s*[\r\n]+\s*', ' ').Trim()
+    $entry = "[$timestamp] $singleLine"
     $entry | Out-File -FilePath $script:LogPath -Append -Encoding ASCII
+}
+
+function Write-LogError {
+    <#
+    .SYNOPSIS
+        Logs a failed registry operation, naming the command that threw.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [System.Management.Automation.ErrorRecord]$ErrorRecord
+    )
+
+    # CategoryInfo.Activity names the failing cmdlet; a .NET method leaves it empty
+    $source = if ($ErrorRecord.CategoryInfo.Activity) {
+        $ErrorRecord.CategoryInfo.Activity
+    } else {
+        'Registry operation'
+    }
+    Write-Log "${source}: $ErrorRecord"
 }
 
 function Write-LogSessionStart {
@@ -581,8 +603,9 @@ function Get-SettingCurrentValue {
     .SYNOPSIS
         Reads a setting's current value from the registry or build profile.
     .OUTPUTS
-        Returns a hashtable with Exists (bool) and Value properties.
-        In Build Mode, also includes ExplicitAbsence (bool).
+        Returns a hashtable with Exists (bool) and Value properties. A read
+        failure that is not a genuine absence also includes Error, the
+        caught error record. In Build Mode, includes ExplicitAbsence (bool).
     #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -601,8 +624,14 @@ function Get-SettingCurrentValue {
         $item = Get-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
         return @{ Exists = $true; Value = $item.$ValueName }
     }
-    catch {
+    catch [System.Management.Automation.ItemNotFoundException],
+          [System.Management.Automation.PSArgumentException] {
+        # Genuine absence: the key or value is not present
         return @{ Exists = $false; Value = $null }
+    }
+    catch {
+        # A real read error: surface it so callers can tell it from absence
+        return @{ Exists = $false; Value = $null; Error = $_ }
     }
 }
 
@@ -707,7 +736,7 @@ function Invoke-LGPOWrite {
         Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type $ValueType -Force
     }
     catch {
-        Write-Log "Set-ItemProperty: $_"
+        Write-LogError $_
         return 'WriteFailed'
     }
     finally {
@@ -752,15 +781,18 @@ function Invoke-LGPORemove {
         }
 
         # Remove directly from registry for immediate effect
-        if ($null -ne (Get-ItemProperty -Path $Path -Name $ValueName -ErrorAction SilentlyContinue)) {
+        if ((Get-SettingCurrentValue -Path $Path -ValueName $ValueName).Exists) {
             Remove-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
         }
     }
     catch {
-        if ($null -eq (Get-ItemProperty -Path $Path -Name $ValueName -ErrorAction SilentlyContinue)) {
+        # A concurrent Group Policy refresh may remove the value first
+        $err   = $_
+        $check = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
+        if (-not $check.Exists -and -not $check.Error) {
             return 'Removed'
         }
-        Write-Log "Remove-ItemProperty: $_"
+        Write-LogError $err
         return 'RemoveFailed'
     }
     finally {
@@ -817,7 +849,7 @@ function Invoke-SettingWrite {
             Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type $ValueType -Force
         }
         catch {
-            Write-Log "Set-ItemProperty: $_"
+            Write-LogError $_
             return 'WriteFailed'
         }
     }
@@ -830,6 +862,13 @@ function Invoke-SettingWrite {
     # Verify: confirm the write took effect
     $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
     if (-not ($verify.Exists -and $verify.Value -eq $Value)) {
+        if ($verify.Error) {
+            Write-LogError $verify.Error
+        } elseif ($verify.Exists) {
+            Write-Log "Verify: read $($verify.Value), expected $Value"
+        } else {
+            Write-Log "Verify: read (absent), expected $Value"
+        }
         return 'VerifyFailed'
     }
 
@@ -877,7 +916,7 @@ function Invoke-SettingRemove {
             Remove-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
         }
         catch {
-            Write-Log "Remove-ItemProperty: $_"
+            Write-LogError $_
             return 'RemoveFailed'
         }
     }
@@ -889,7 +928,11 @@ function Invoke-SettingRemove {
 
     # Verify: confirm the removal took effect
     $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
+    if ($verify.Error) {
+        Write-LogError $verify.Error
+    }
     if ($verify.Exists) {
+        Write-Log "Verify: read $($verify.Value), expected (absent)"
         return 'VerifyFailed'
     }
 
@@ -2006,6 +2049,9 @@ function Export-SnapshotProfile {
     # Collect: Exists = $false captures absent values for removal when applied
     foreach ($setting in $settingSource) {
         $current = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
+        if ($current.Error) {
+            Write-Log "Snapshot: read failed for $($setting.Name): $($current.Error)"
+        }
         $entries += @{
             Name      = $setting.Name
             Path      = $setting.Path
