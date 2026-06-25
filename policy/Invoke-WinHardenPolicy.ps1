@@ -540,6 +540,9 @@ function Export-ProfileFile {
 
     $sb = [System.Text.StringBuilder]::new()
 
+    # Render a value as a single-quoted PSD1 literal, escaping embedded quotes
+    function QuoteString([string]$Text) { "'" + ($Text -replace "'", "''") + "'" }
+
     # Banner: project signature, component identity, and generating mode
     [void]$sb.AppendLine('#')
     [void]$sb.AppendLine('# windows-hardening')
@@ -555,21 +558,21 @@ function Export-ProfileFile {
 
     # Meta: provenance fields in fixed order (ComputerName omitted when absent)
     [void]$sb.AppendLine('    Meta = @{')
-    [void]$sb.AppendLine("        Component    = '$($Meta.Component)'")
-    [void]$sb.AppendLine("        Mode         = '$($Meta.Mode)'")
-    [void]$sb.AppendLine("        GeneratedBy  = '$($Meta.GeneratedBy)'")
-    [void]$sb.AppendLine("        GeneratedOn  = '$($Meta.GeneratedOn)'")
+    [void]$sb.AppendLine("        Component    = $(QuoteString $Meta.Component)")
+    [void]$sb.AppendLine("        Mode         = $(QuoteString $Meta.Mode)")
+    [void]$sb.AppendLine("        GeneratedBy  = $(QuoteString $Meta.GeneratedBy)")
+    [void]$sb.AppendLine("        GeneratedOn  = $(QuoteString $Meta.GeneratedOn)")
     if ($Meta.ContainsKey('ComputerName')) {
-        [void]$sb.AppendLine("        ComputerName = '$($Meta.ComputerName)'")
+        [void]$sb.AppendLine("        ComputerName = $(QuoteString $Meta.ComputerName)")
     }
     [void]$sb.AppendLine('        Source       = @(')
     foreach ($src in @($Meta.Source)) {
         if ($null -eq $src) { continue }
         [void]$sb.AppendLine('            @{')
-        [void]$sb.AppendLine("                Name     = '$($src.Name)'")
-        [void]$sb.AppendLine("                File     = '$($src.File)'")
-        [void]$sb.AppendLine("                Target   = '$($src.Target)'")
-        [void]$sb.AppendLine("                Reviewed = '$($src.Reviewed)'")
+        [void]$sb.AppendLine("                Name     = $(QuoteString $src.Name)")
+        [void]$sb.AppendLine("                File     = $(QuoteString $src.File)")
+        [void]$sb.AppendLine("                Target   = $(QuoteString $src.Target)")
+        [void]$sb.AppendLine("                Reviewed = $(QuoteString $src.Reviewed)")
         [void]$sb.AppendLine('            }')
     }
     [void]$sb.AppendLine('        )')
@@ -580,15 +583,15 @@ function Export-ProfileFile {
     [void]$sb.AppendLine('    Settings = @(')
     foreach ($entry in $Entries) {
         [void]$sb.AppendLine('        @{')
-        [void]$sb.AppendLine("            Name      = '$($entry.Name)'")
-        [void]$sb.AppendLine("            Path      = '$($entry.Path)'")
-        [void]$sb.AppendLine("            ValueName = '$($entry.ValueName)'")
-        [void]$sb.AppendLine("            ValueType = '$($entry.ValueType)'")
+        [void]$sb.AppendLine("            Name      = $(QuoteString $entry.Name)")
+        [void]$sb.AppendLine("            Path      = $(QuoteString $entry.Path)")
+        [void]$sb.AppendLine("            ValueName = $(QuoteString $entry.ValueName)")
+        [void]$sb.AppendLine("            ValueType = $(QuoteString $entry.ValueType)")
         if ($null -eq $entry.Value) {
             [void]$sb.AppendLine('            Value     = $null')
         }
         elseif ($entry.Value -is [string]) {
-            [void]$sb.AppendLine("            Value     = '$($entry.Value)'")
+            [void]$sb.AppendLine("            Value     = $(QuoteString $entry.Value)")
         }
         else {
             [void]$sb.AppendLine("            Value     = $($entry.Value)")
