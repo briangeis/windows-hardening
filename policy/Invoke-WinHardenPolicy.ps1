@@ -127,6 +127,10 @@ $script:FailedCount  = 0
 $script:IsHomeEdition = $false
 $script:LGPOExePath   = $null
 
+# Verify retry: attempt count and delay between re-reads
+$script:VerifyMaxAttempts  = 5
+$script:VerifyRetryDelayMs = 150
+
 # Build Mode profile data: profile file contents held in memory for the session.
 $script:IsBuildMode = $false
 $script:BuildData   = @{ Meta = @{}; Settings = @{} }
@@ -859,8 +863,14 @@ function Invoke-SettingWrite {
         if ($alreadyPresent) { return 'AlreadyPresent' }
     }
 
-    # Verify: confirm the write took effect
-    $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
+    # Verify: confirm the write took effect, re-reading through the refresh window
+    $verify  = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
+    $attempt = 1
+    while (-not ($verify.Exists -and $verify.Value -eq $Value) -and $attempt -lt $script:VerifyMaxAttempts) {
+        Start-Sleep -Milliseconds $script:VerifyRetryDelayMs
+        $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
+        $attempt++
+    }
     if (-not ($verify.Exists -and $verify.Value -eq $Value)) {
         if ($verify.Error) {
             Write-LogError $verify.Error
@@ -926,8 +936,14 @@ function Invoke-SettingRemove {
         if ($alreadyAbsent) { return 'AlreadyAbsent' }
     }
 
-    # Verify: confirm the removal took effect
-    $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
+    # Verify: confirm the removal took effect, re-reading through the refresh window
+    $verify  = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
+    $attempt = 1
+    while (($verify.Error -or $verify.Exists) -and $attempt -lt $script:VerifyMaxAttempts) {
+        Start-Sleep -Milliseconds $script:VerifyRetryDelayMs
+        $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
+        $attempt++
+    }
     if ($verify.Error) {
         Write-LogError $verify.Error
     }
