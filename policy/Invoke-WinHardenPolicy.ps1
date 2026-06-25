@@ -965,6 +965,7 @@ function Invoke-SettingRemove {
     }
     if ($verify.Error) {
         Write-LogError $verify.Error
+        return 'VerifyFailed'
     }
     if ($verify.Exists) {
         Write-Log "Verify: read $($verify.Value), expected (absent)"
