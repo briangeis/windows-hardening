@@ -2022,16 +2022,18 @@ function Invoke-BuildSettingExclude {
 function Get-SnapshotProfilePath {
     <#
     .SYNOPSIS
-        Generates a timestamped snapshot file path
-        in the current working directory.
+        Generates a timestamped snapshot file path in the given directory,
+        defaulting to the current working directory.
     .OUTPUTS
         Returns the generated file path as a string.
     #>
     [CmdletBinding()]
     [OutputType([string])]
-    param()
+    param(
+        [string]$Directory = (Get-Location)
+    )
     $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-    return Join-Path (Get-Location) "Policy-Snapshot_${script:HostName}_${timestamp}.psd1"
+    return Join-Path $Directory "Policy-Snapshot_${script:HostName}_${timestamp}.psd1"
 }
 
 function Export-SnapshotProfile {
@@ -2181,8 +2183,7 @@ switch ($PSCmdlet.ParameterSetName) {
         $definitions = Import-DefinitionsFile -Path $DefinitionsPath
 
         $outputPath = if (Test-Path $Snapshot -PathType Container) {
-            $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-            Join-Path $Snapshot "Policy-Snapshot_${script:HostName}_${timestamp}.psd1"
+            Get-SnapshotProfilePath -Directory $Snapshot
         } else {
             $Snapshot
         }
