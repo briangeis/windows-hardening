@@ -1218,7 +1218,8 @@ function Show-SettingDetail {
     $statusMessage = ''
     $statusColor   = 'White'
 
-    $isHKCU = $Setting.Path -like 'HKCU:*'
+    $isHKCU     = $Setting.Path -like 'HKCU:*'
+    $scopeLabel = if ($isHKCU) { '[USER]' } else { '[DEVICE]' }
 
     function StateColor([string]$State) {
         switch ($State) {
@@ -1308,7 +1309,6 @@ function Show-SettingDetail {
 
         switch ($key) {
             'H' {
-                $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
                 $beforeDisplay = $valueDisplay
                 $action        = if ($script:IsBuildMode) { 'Set hardened' } else { 'Apply' }
 
@@ -1347,7 +1347,6 @@ function Show-SettingDetail {
                 }
             }
             'D' {
-                $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
                 $beforeDisplay = $valueDisplay
                 $action        = if ($script:IsBuildMode) { 'Set default' } else { 'Reset' }
 
@@ -1400,7 +1399,6 @@ function Show-SettingDetail {
             }
             'X' {
                 if ($script:IsBuildMode) {
-                    $scopeLabel    = if ($Setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
                     $beforeDisplay = $valueDisplay
 
                     $params = @{
