@@ -721,7 +721,7 @@ function Invoke-LGPOWrite {
 
     # Determine section and strip hive from path for LGPO text format
     $section  = if ($Path -like 'HKLM:*') { 'Computer' } else { 'User' }
-    $lgpoPath = $Path -replace '^HKL[MC]:\\', '' -replace '^HKCU:\\', ''
+    $lgpoPath = $Path -replace '^HK(LM|CU):\\', ''
 
     # Convert the value type to its LGPO type prefix
     $lgpoType = $script:SupportedValueTypes[$ValueType]
@@ -784,7 +784,7 @@ function Invoke-LGPORemove {
 
     # Determine section and strip hive from path for LGPO text format
     $section  = if ($Path -like 'HKLM:*') { 'Computer' } else { 'User' }
-    $lgpoPath = $Path -replace '^HKL[MC]:\\', '' -replace '^HKCU:\\', ''
+    $lgpoPath = $Path -replace '^HK(LM|CU):\\', ''
 
     $content  = "$section`r`n$lgpoPath`r`n$ValueName`r`nDELETE`r`n`r`n"
     $tempFile = [System.IO.Path]::GetTempFileName()
