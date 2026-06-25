@@ -916,8 +916,9 @@ function Invoke-SettingRemove {
     }
 
     # Pre-check: capture current state to determine return value
+    # A read error is not an absence, so it must not short-circuit the removal
     $current = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-    $alreadyAbsent = -not $current.Exists
+    $alreadyAbsent = (-not $current.Exists) -and (-not $current.Error)
 
     # Remove: dispatch to direct registry remove (Home) or LGPO (non-Home)
     if ($script:IsHomeEdition) {
