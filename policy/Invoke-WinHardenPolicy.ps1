@@ -410,6 +410,11 @@ function Import-DefinitionsFile {
                 Write-FatalError "Setting '$label' at '$Location' is missing required key '$key'."
             }
         }
+        # Guard against value types the comparison, LGPO, and serialization paths cannot handle
+        $supportedTypes = 'DWord', 'String', 'ExpandString', 'QWord'
+        if ($Setting.ValueType -notin $supportedTypes) {
+            Write-FatalError "Setting '$($Setting.Name)' at '$Location' has unsupported ValueType '$($Setting.ValueType)'. Supported types: $($supportedTypes -join ', ')."
+        }
     }
 
     if (-not $definitions.ContainsKey('Meta')) {
