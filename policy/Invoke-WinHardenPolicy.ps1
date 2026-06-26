@@ -665,7 +665,7 @@ function Get-SettingCurrentValue {
     }
 }
 
-function Test-SettingState {
+function Get-SettingState {
     <#
     .SYNOPSIS
         Determines a setting's state by comparing its value, or its absence,
@@ -1095,7 +1095,7 @@ function Invoke-Menu {
 
                 if ($isSettingsLevel) {
                     foreach ($setting in $children) {
-                        $state    = Test-SettingState -Setting $setting
+                        $state    = Get-SettingState -Setting $setting
                         $adv      = AdvisoryMarker $setting
                         $trailing = @("  [$state]", (StateColor $state))
                         if ($adv.Glyph) { $trailing += @("  $($adv.Glyph)", $adv.Color) }
@@ -1241,7 +1241,7 @@ function Show-SettingDetail {
     while (-not $done) {
         # Render: read current state and display setting detail
         $current = Get-SettingCurrentValue -Path $Setting.Path -ValueName $Setting.ValueName
-        $state   = Test-SettingState -Setting $Setting
+        $state   = Get-SettingState -Setting $Setting
 
         $valueLabel   = if ($script:IsBuildMode) { 'Profile Value' } else { 'Current Value' }
         $valueDisplay = if ($current.Exists) {
@@ -1482,7 +1482,7 @@ function Invoke-ApplyAll {
     $toApply = @()
     $stateOf = @{}
     foreach ($setting in $Settings) {
-        $state = Test-SettingState -Setting $setting
+        $state = Get-SettingState -Setting $setting
         if ($state -ne 'HARDENED') {
             $toApply += $setting
             $stateOf["$($setting.Path)|$($setting.ValueName)"] = $state
@@ -1634,7 +1634,7 @@ function Get-SettingCounts {
     if ($Node.Settings) {
         $settings = @($Node.Settings)
         $selected = @($settings | Where-Object {
-            $state = Test-SettingState -Setting $_
+            $state = Get-SettingState -Setting $_
             if ($script:IsBuildMode) { $state -eq 'HARDENED' -or $state -eq 'DEFAULT' }
             else                     { $state -eq 'HARDENED' }
         }).Count
