@@ -1039,7 +1039,7 @@ function Invoke-Menu {
     }
 
     # Render a menu row; truncate an overlong name to keep the tokens visible
-    function Write-MenuItem([string]$Name, [string[]]$Trailing, [switch]$Selected) {
+    function WriteMenuItem([string]$Name, [string[]]$Trailing, [switch]$Selected) {
         $w      = [Console]::WindowWidth
         $prefix = if ($Selected) { '  > ' } else { '    ' }
 
@@ -1163,7 +1163,7 @@ function Invoke-Menu {
 
             # Items: the selectable rows, with the current row highlighted
             for ($i = 0; $i -lt $items.Count; $i++) {
-                Write-MenuItem -Name $items[$i].Name -Trailing $items[$i].Trailing -Selected:($i -eq $selectedIndex)
+                WriteMenuItem -Name $items[$i].Name -Trailing $items[$i].Trailing -Selected:($i -eq $selectedIndex)
             }
 
             # Footer: action hints, then the status line
