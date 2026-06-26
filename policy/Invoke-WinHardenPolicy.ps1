@@ -296,14 +296,15 @@ function Initialize-EditionContext {
 
     function GetWindowsEdition {
         try {
-            $caption = (Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop).Caption
-            if ($caption -like '*Home*') { return 'Home' }
+            # The Home family reports a 'Core' edition
+            $editionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name EditionID -ErrorAction Stop).EditionID
+            if ($editionId -like 'Core*') { return 'Home' }
             return 'NonHome'
         }
         catch {
             $params = @{
                 Message = 'Could not determine the Windows edition.'
-                Detail  = 'Ensure WMI is available and the Win32_OperatingSystem class is accessible.'
+                Detail  = 'Ensure the EditionID value under HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion is accessible.'
             }
             Write-FatalError @params
         }
