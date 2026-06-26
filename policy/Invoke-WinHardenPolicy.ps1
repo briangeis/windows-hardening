@@ -656,18 +656,26 @@ function Get-SettingCurrentValue {
         return Get-BuildSettingCurrentValue -Path $Path -ValueName $ValueName
     }
 
-    try {
-        $item = Get-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
-        return @{ Exists = $true; Value = $item.$ValueName }
-    }
-    catch [System.Management.Automation.ItemNotFoundException],
-          [System.Management.Automation.PSArgumentException] {
-        # Genuine absence: the key or value is not present
-        return @{ Exists = $false; Value = $null }
-    }
-    catch {
-        # A real read error: surface it so callers can tell it from absence
-        return @{ Exists = $false; Value = $null; Error = $_ }
+    # Retry a transient read error through the Group Policy refresh window
+    $attempt = 1
+    while ($attempt -le $script:ReadRetryMaxAttempts) {
+        try {
+            $item = Get-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
+            return @{ Exists = $true; Value = $item.$ValueName }
+        }
+        catch [System.Management.Automation.ItemNotFoundException],
+              [System.Management.Automation.PSArgumentException] {
+            # Genuine absence: the key or value is not present
+            return @{ Exists = $false; Value = $null }
+        }
+        catch {
+            # A real read error: surface it so callers can tell it from absence
+            if ($attempt -ge $script:ReadRetryMaxAttempts) {
+                return @{ Exists = $false; Value = $null; Error = $_ }
+            }
+            Start-Sleep -Milliseconds $script:ReadRetryDelayMs
+            $attempt++
+        }
     }
 }
 
@@ -887,14 +895,8 @@ function Invoke-SettingWrite {
         if ($alreadyPresent) { return 'AlreadyPresent' }
     }
 
-    # Verify: confirm the write took effect, re-reading through the refresh window
-    $verify  = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-    $attempt = 1
-    while (-not ($verify.Exists -and $verify.Value -eq $Value) -and $attempt -lt $script:ReadRetryMaxAttempts) {
-        Start-Sleep -Milliseconds $script:ReadRetryDelayMs
-        $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-        $attempt++
-    }
+    # Verify: confirm the write took effect
+    $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
     if (-not ($verify.Exists -and $verify.Value -eq $Value)) {
         if ($verify.Error) {
             Write-LogError $verify.Error
@@ -961,14 +963,8 @@ function Invoke-SettingRemove {
         if ($alreadyAbsent) { return 'AlreadyAbsent' }
     }
 
-    # Verify: confirm the removal took effect, re-reading through the refresh window
-    $verify  = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-    $attempt = 1
-    while (($verify.Error -or $verify.Exists) -and $attempt -lt $script:ReadRetryMaxAttempts) {
-        Start-Sleep -Milliseconds $script:ReadRetryDelayMs
-        $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-        $attempt++
-    }
+    # Verify: confirm the removal took effect
+    $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
     if ($verify.Error) {
         Write-LogError $verify.Error
         return 'VerifyFailed'
@@ -2121,14 +2117,7 @@ function Export-SnapshotProfile {
 
     # Collect: Exists = $false captures absent values for removal when applied
     foreach ($setting in $settingSource) {
-        # Read: retry a transient read error before recording the value
         $current = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
-        $attempt = 1
-        while ($current.Error -and $attempt -lt $script:ReadRetryMaxAttempts) {
-            Start-Sleep -Milliseconds $script:ReadRetryDelayMs
-            $current = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
-            $attempt++
-        }
 
         # Omit on a persistent error: a false absence would remove it on apply
         if ($current.Error) {
