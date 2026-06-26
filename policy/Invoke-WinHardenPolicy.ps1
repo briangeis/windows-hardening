@@ -382,9 +382,12 @@ function Import-DefinitionsFile {
     }
 
     function ValidateCategory([hashtable]$Category, [string]$Location) {
-        if (-not $Category.ContainsKey('Name')) {
-            $where = if ($Location) { "at '$Location'" } else { 'at the top level' }
-            Write-FatalError "Definitions file has a category $where missing key 'Name'."
+        $where = if ($Location) { "at '$Location'" } else { 'at the top level' }
+        foreach ($key in 'Name', 'Description') {
+            if (-not $Category.ContainsKey($key)) {
+                $label = if ($Category.ContainsKey('Name')) { $Category.Name } else { '(unnamed)' }
+                Write-FatalError "Category '$label' $where is missing key '$key'."
+            }
         }
         $childLocation = if ($Location) { "$Location > $($Category.Name)" } else { $Category.Name }
         if ($Category.ContainsKey('Categories')) {
@@ -394,14 +397,16 @@ function Import-DefinitionsFile {
             foreach ($section in @($Category.Sections)) { ValidateSection $section $childLocation }
         }
         else {
-            $where = if ($Location) { "at '$Location'" } else { 'at the top level' }
             Write-FatalError "Category '$($Category.Name)' $where has neither 'Categories' nor 'Sections'."
         }
     }
 
     function ValidateSection([hashtable]$Section, [string]$Location) {
-        if (-not $Section.ContainsKey('Name')) {
-            Write-FatalError "Definitions file has a section at '$Location' missing key 'Name'."
+        foreach ($key in 'Name', 'Description') {
+            if (-not $Section.ContainsKey($key)) {
+                $label = if ($Section.ContainsKey('Name')) { $Section.Name } else { '(unnamed)' }
+                Write-FatalError "Section '$label' at '$Location' is missing key '$key'."
+            }
         }
         if (-not $Section.ContainsKey('Settings')) {
             Write-FatalError "Section '$($Section.Name)' at '$Location' is missing key 'Settings'."
