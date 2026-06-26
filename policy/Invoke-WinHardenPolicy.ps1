@@ -500,7 +500,7 @@ function Import-ProfileFile {
     }
     if ($profileData.Meta.Component -ne $script:Component) {
         $params = @{
-            Message = "Profile targets the '$($profileData.Meta.Component)' component, not '$script:Component'."
+            Message = "Profile file targets the '$($profileData.Meta.Component)' component, not '$script:Component'."
             Detail  = 'Provide a profile generated for this component.'
         }
         Write-FatalError @params
