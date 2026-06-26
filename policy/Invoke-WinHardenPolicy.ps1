@@ -169,7 +169,7 @@ function Write-Log {
 
     $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
     # Collapse embedded line breaks so each entry stays on one physical line
-    $singleLine = [regex]::Replace($Message, '\s*[\r\n]+\s*', ' ').Trim()
+    $singleLine = ($Message -replace '\s*[\r\n]+\s*', ' ').Trim()
     $entry = "[$timestamp] $singleLine"
     $entry | Out-File -FilePath $script:LogPath -Append -Encoding ASCII
 }
