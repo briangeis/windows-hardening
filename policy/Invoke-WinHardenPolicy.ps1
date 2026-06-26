@@ -1038,9 +1038,11 @@ function Invoke-Menu {
         $w      = [Console]::WindowWidth
         $prefix = if ($Selected) { '  > ' } else { '    ' }
 
+        # Sum the pinned token widths from the flat [text, color] pairs
         $pinnedWidth = 0
         for ($k = 0; $k -lt $Trailing.Count; $k += 2) { $pinnedWidth += $Trailing[$k].Length }
 
+        # Truncate to the budget, which a narrow window can make negative
         $nameBudget  = $w - $prefix.Length - $pinnedWidth
         $displayName = $Name
         if ($displayName.Length -gt $nameBudget) {
@@ -1048,6 +1050,7 @@ function Invoke-Menu {
                            else                   { $displayName.Substring(0, [Math]::Max($nameBudget, 0)) }
         }
 
+        # Assemble the row as flat [text, color] pairs: name, tokens, padding
         $used     = $prefix.Length + $displayName.Length + $pinnedWidth
         $pad      = [Math]::Max($w - $used, 0)
         $segments = @("$prefix$displayName", '') + $Trailing + @((' ' * $pad), '')
