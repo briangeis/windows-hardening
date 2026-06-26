@@ -1251,7 +1251,7 @@ function Show-SettingDetail {
         } else {
             '(absent)'
         }
-        $hardenedDisplay = "$($Setting.HardenedValue)"
+        $hardenedDisplay = if ($null -ne $Setting.HardenedValue) { "$($Setting.HardenedValue)" } else { '(absent)' }
         $defaultDisplay  = if ($null -ne $Setting.DefaultValue) { "$($Setting.DefaultValue)" } else { '(absent)' }
 
         Clear-Host
@@ -1320,23 +1320,36 @@ function Show-SettingDetail {
                 $beforeDisplay = $valueDisplay
                 $action        = if ($script:IsBuildMode) { 'Set hardened' } else { 'Apply' }
 
-                $params = @{
-                    Name      = $Setting.Name
-                    Path      = $Setting.Path
-                    ValueName = $Setting.ValueName
-                    ValueType = $Setting.ValueType
-                    Value     = $Setting.HardenedValue
+                if ($null -eq $Setting.HardenedValue) {
+                    $params = @{
+                        Name      = $Setting.Name
+                        Path      = $Setting.Path
+                        ValueName = $Setting.ValueName
+                        ValueType = $Setting.ValueType
+                    }
+                    $result       = Invoke-SettingRemove @params
+                    $afterDisplay = '(absent)'
                 }
-                $result = Invoke-SettingWrite @params
+                else {
+                    $params = @{
+                        Name      = $Setting.Name
+                        Path      = $Setting.Path
+                        ValueName = $Setting.ValueName
+                        ValueType = $Setting.ValueType
+                        Value     = $Setting.HardenedValue
+                    }
+                    $result       = Invoke-SettingWrite @params
+                    $afterDisplay = "$($Setting.HardenedValue)"
+                }
 
                 switch ($result) {
-                    'Written' {
+                    { $_ -in 'Written','Removed' } {
                         $script:ChangedCount++
-                        Write-Log "HARDENED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $($Setting.HardenedValue) | Verified"
+                        Write-Log "HARDENED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
                         $statusMessage = if ($script:IsBuildMode) { 'Hardened value set in profile.' } else { 'Applied and verified.' }
                         $statusColor   = 'Green'
                     }
-                    'AlreadyPresent' {
+                    { $_ -in 'AlreadyPresent','AlreadyAbsent' } {
                         $statusMessage = if ($script:IsBuildMode) { 'Hardened value already in profile.' } else { 'Already at the hardened value.' }
                         $statusColor   = 'Green'
                     }
@@ -1346,7 +1359,7 @@ function Show-SettingDetail {
                         $statusMessage = if ($script:IsBuildMode) { 'Set the hardened value but verification failed.' } else { 'Applied but verification failed.' }
                         $statusColor   = 'Red'
                     }
-                    'WriteFailed' {
+                    { $_ -in 'WriteFailed','RemoveFailed' } {
                         $script:FailedCount++
                         Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action failed"
                         $statusMessage = if ($script:IsBuildMode) { 'Failed to set the hardened value.' } else { 'Failed to apply.' }
@@ -1575,21 +1588,34 @@ function Invoke-ApplyAll {
             '(absent)'
         }
 
-        $params = @{
-            Name      = $setting.Name
-            Path      = $setting.Path
-            ValueName = $setting.ValueName
-            ValueType = $setting.ValueType
-            Value     = $setting.HardenedValue
+        if ($null -eq $setting.HardenedValue) {
+            $params = @{
+                Name      = $setting.Name
+                Path      = $setting.Path
+                ValueName = $setting.ValueName
+                ValueType = $setting.ValueType
+            }
+            $result       = Invoke-SettingRemove @params
+            $afterDisplay = '(absent)'
         }
-        $result = Invoke-SettingWrite @params
+        else {
+            $params = @{
+                Name      = $setting.Name
+                Path      = $setting.Path
+                ValueName = $setting.ValueName
+                ValueType = $setting.ValueType
+                Value     = $setting.HardenedValue
+            }
+            $result       = Invoke-SettingWrite @params
+            $afterDisplay = "$($setting.HardenedValue)"
+        }
 
         switch ($result) {
-            'Written' {
+            { $_ -in 'Written','Removed' } {
                 $hardened++
                 $script:ChangedCount++
                 Write-Host "  [OK] $scopeLabel $($setting.Name)" -ForegroundColor Green
-                Write-Log "HARDENED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $($setting.HardenedValue) | Verified"
+                Write-Log "HARDENED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
             }
             'VerifyFailed' {
                 $failed++
@@ -1597,7 +1623,7 @@ function Invoke-ApplyAll {
                 Write-Host "  [!!] $scopeLabel $($setting.Name) - verification failed" -ForegroundColor Red
                 Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | $action verification failed"
             }
-            'WriteFailed' {
+            { $_ -in 'WriteFailed','RemoveFailed' } {
                 $failed++
                 $script:FailedCount++
                 Write-Host "  [!!] $scopeLabel $($setting.Name) - $($action.ToLower()) failed" -ForegroundColor Red
