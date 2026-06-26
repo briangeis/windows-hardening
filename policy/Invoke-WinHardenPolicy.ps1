@@ -435,7 +435,7 @@ function Import-DefinitionsFile {
         }
         Write-FatalError @params
     }
-    foreach ($key in 'Component', 'Name', 'Target') {
+    foreach ($key in 'Component', 'Name', 'Description', 'Target', 'Reviewed') {
         if (-not $definitions.Meta.ContainsKey($key)) {
             Write-FatalError "Definitions file 'Meta' block is missing key '$key'."
         }
