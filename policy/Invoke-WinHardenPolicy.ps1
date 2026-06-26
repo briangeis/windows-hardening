@@ -115,7 +115,7 @@ param(
 
 $script:HostName = [System.Net.Dns]::GetHostName()
 
-# Component identity and tool name: written into generated files and checked on import.
+# Component identity and tool name: written into generated files and checked on import
 $script:Component = 'Policy'
 $script:ToolName  = 'Invoke-WinHardenPolicy'
 
@@ -131,7 +131,7 @@ $script:SupportedValueTypes = [ordered]@{
 $script:ChangedCount = 0
 $script:FailedCount  = 0
 
-# Windows edition context: populated by Initialize-EditionContext before write operations.
+# Windows edition context: populated by Initialize-EditionContext before write operations
 $script:IsHomeEdition = $false
 $script:LGPOExePath   = $null
 
@@ -139,11 +139,11 @@ $script:LGPOExePath   = $null
 $script:ReadRetryMaxAttempts = 5
 $script:ReadRetryDelayMs     = 150
 
-# Build Mode profile data: profile file contents held in memory for the session.
+# Build Mode profile data: profile file contents held in memory for the session
 $script:IsBuildMode = $false
 $script:BuildData   = @{ Meta = @{}; Settings = @{} }
 
-# Resolved log file path: generated from -LogPath or defaulted if omitted.
+# Resolved log file path: generated from -LogPath or defaulted if omitted
 $script:LogPath = if (-not $LogPath) {
     Join-Path (Get-Location) "${script:Component}-Log_${script:HostName}.log"
 } elseif (Test-Path $LogPath -PathType Container) {
@@ -1020,7 +1020,7 @@ function Invoke-Menu {
         return @{ Glyph = ''; Color = $null }
     }
 
-    # Fit a breadcrumb to one line by dropping its leading segments.
+    # Fit a breadcrumb to one line by dropping its leading segments
     function FitBreadcrumb([string]$Text) {
         $max = [Console]::WindowWidth - 3
         if ($Text.Length -le $max) { return $Text }
@@ -1033,7 +1033,7 @@ function Invoke-Menu {
         return $Text.Substring(0, [Math]::Max($max, 0))
     }
 
-    # Render a menu row; truncate an overlong name to keep the tokens visible.
+    # Render a menu row; truncate an overlong name to keep the tokens visible
     function Write-MenuItem([string]$Name, [string[]]$Trailing, [switch]$Selected) {
         $w      = [Console]::WindowWidth
         $prefix = if ($Selected) { '  > ' } else { '    ' }
@@ -1064,7 +1064,7 @@ function Invoke-Menu {
         Write-Host ''
     }
 
-    # At the root, hide the cursor; the finally restores it on any root exit.
+    # At the root, hide the cursor; the finally restores it on any root exit
     if ($isRoot) { [Console]::CursorVisible = $false }
     try {
         while (-not $exitReason) {
