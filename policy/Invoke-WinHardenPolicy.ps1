@@ -1831,7 +1831,7 @@ function Import-BuildProfile {
         if ($profileData.ContainsKey('Meta') -and $profileData.Meta.ContainsKey('Source')) {
             $existingSource = @($profileData.Meta.Source)
         }
-        foreach ($entry in $profileData.Settings) {
+        foreach ($entry in @($profileData.Settings)) {
             $key = "$($entry.Path)|$($entry.ValueName)"
             $existingSettings[$key] = $entry
         }
