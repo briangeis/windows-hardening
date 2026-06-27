@@ -392,9 +392,15 @@ function Import-DefinitionsFile {
         }
         $childLocation = if ($Location) { "$Location > $($Category.Name)" } else { $Category.Name }
         if ($Category.ContainsKey('Categories')) {
+            if (-not $Category.Categories) {
+                Write-FatalError "Category '$($Category.Name)' $where has an empty 'Categories' array."
+            }
             foreach ($child in @($Category.Categories)) { ValidateCategory $child $childLocation }
         }
         elseif ($Category.ContainsKey('Sections')) {
+            if (-not $Category.Sections) {
+                Write-FatalError "Category '$($Category.Name)' $where has an empty 'Sections' array."
+            }
             foreach ($section in @($Category.Sections)) { ValidateSection $section $childLocation }
         }
         else {
@@ -411,6 +417,9 @@ function Import-DefinitionsFile {
         }
         if (-not $Section.ContainsKey('Settings')) {
             Write-FatalError "Section '$($Section.Name)' at '$Location' is missing key 'Settings'."
+        }
+        if (-not $Section.Settings) {
+            Write-FatalError "Section '$($Section.Name)' at '$Location' has an empty 'Settings' array."
         }
         $sectionLocation = "$Location > $($Section.Name)"
         foreach ($setting in @($Section.Settings)) { ValidateSetting $setting $sectionLocation }
@@ -429,6 +438,14 @@ function Import-DefinitionsFile {
             $params = @{
                 Message = "Setting '$($Setting.Name)' at '$Location' has unsupported ValueType '$($Setting.ValueType)'."
                 Detail  = "Set ValueType to one of: $($script:SupportedValueTypes.Keys -join ', ')."
+            }
+            Write-FatalError @params
+        }
+        # Guard against a Path under any hive but HKLM or HKCU
+        if ($Setting.Path -notmatch '^HK(LM|CU):\\') {
+            $params = @{
+                Message = "Setting '$($Setting.Name)' at '$Location' has an unsupported registry Path."
+                Detail  = "Path must be rooted at HKLM:\ or HKCU:\. Found: '$($Setting.Path)'."
             }
             Write-FatalError @params
         }
