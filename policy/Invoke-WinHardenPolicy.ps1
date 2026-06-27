@@ -760,19 +760,19 @@ function Invoke-LGPOWrite {
     # Convert the value type to its LGPO type prefix
     $lgpoType = $script:SupportedValueTypes[$ValueType]
 
-    # Format value: DWORD and QWORD as decimal, all others as literal string
-    $lgpoValue = if ($lgpoType -eq 'DWORD') {
-        [uint32]$Value
-    } elseif ($lgpoType -eq 'QWORD') {
-        [uint64]$Value
-    } else {
-        "$Value"
-    }
-
-    $content  = "$section`r`n$lgpoPath`r`n$ValueName`r`n${lgpoType}:$lgpoValue`r`n`r`n"
     $tempFile = [System.IO.Path]::GetTempFileName()
 
     try {
+        # Format value: DWORD and QWORD as decimal, all others as literal string
+        $lgpoValue = if ($lgpoType -eq 'DWORD') {
+            [uint32]$Value
+        } elseif ($lgpoType -eq 'QWORD') {
+            [uint64]$Value
+        } else {
+            "$Value"
+        }
+        $content = "$section`r`n$lgpoPath`r`n$ValueName`r`n${lgpoType}:$lgpoValue`r`n`r`n"
+
         # Write to LGPO first: the authoritative record that survives any Group Policy refresh
         [System.IO.File]::WriteAllText($tempFile, $content, [System.Text.Encoding]::ASCII)
         $lgpoOutput = & $script:LGPOExePath /t $tempFile 2>&1
