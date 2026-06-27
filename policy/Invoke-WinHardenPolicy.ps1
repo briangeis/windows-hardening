@@ -627,7 +627,7 @@ function Export-ProfileFile {
     [void]$sb.AppendLine('    )')
     [void]$sb.AppendLine('}')
 
-    $sb.ToString() | Out-File -FilePath $OutputPath -Encoding ASCII -Force
+    $sb.ToString() | Out-File -FilePath $OutputPath -Encoding ASCII -Force -ErrorAction Stop
 }
 
 #endregion
@@ -1356,9 +1356,10 @@ function Show-SettingDetail {
                         $statusColor   = 'Green'
                     }
                     'VerifyFailed' {
+                        # A profile write fails outright, so Build never reaches this case
                         $script:FailedCount++
                         Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action verification failed"
-                        $statusMessage = if ($script:IsBuildMode) { 'Set the hardened value but verification failed.' } else { 'Applied but verification failed.' }
+                        $statusMessage = 'Applied but verification failed.'
                         $statusColor   = 'Red'
                     }
                     { $_ -in 'WriteFailed','RemoveFailed' } {
@@ -1407,9 +1408,10 @@ function Show-SettingDetail {
                         $statusColor   = 'Green'
                     }
                     'VerifyFailed' {
+                        # A profile write fails outright, so Build never reaches this case
                         $script:FailedCount++
                         Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action verification failed"
-                        $statusMessage = if ($script:IsBuildMode) { 'Set the default value but verification failed.' } else { 'Reset but verification failed.' }
+                        $statusMessage = 'Reset but verification failed.'
                         $statusColor   = 'Red'
                     }
                     { $_ -in 'WriteFailed','RemoveFailed' } {
@@ -1440,12 +1442,6 @@ function Show-SettingDetail {
                         'AlreadyAbsent' {
                             $statusMessage = 'Already not in profile.'
                             $statusColor   = 'Green'
-                        }
-                        'VerifyFailed' {
-                            $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude verification failed"
-                            $statusMessage = 'Excluded from profile but verification failed.'
-                            $statusColor   = 'Red'
                         }
                         'RemoveFailed' {
                             $script:FailedCount++
@@ -1905,7 +1901,7 @@ function Invoke-BuildSettingWrite {
     .SYNOPSIS
         Writes a setting to the build profile.
     .OUTPUTS
-        Returns 'Written', 'AlreadyPresent', 'WriteFailed', or 'VerifyFailed'.
+        Returns 'Written', 'AlreadyPresent', or 'WriteFailed'.
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -1930,27 +1926,24 @@ function Invoke-BuildSettingWrite {
         return 'AlreadyPresent'
     }
 
-    # Write: update in-memory store and persist to file
+    # Write: update in-memory store and persist to file; roll back on failure
+    $previous = if ($script:BuildData.Settings.ContainsKey($key)) { $script:BuildData.Settings[$key] } else { $null }
+    $script:BuildData.Settings[$key] = @{
+        Name      = $Name
+        Path      = $Path
+        ValueName = $ValueName
+        ValueType = $ValueType
+        Value     = $Value
+        Exists    = $true
+    }
     try {
-        $script:BuildData.Settings[$key] = @{
-            Name      = $Name
-            Path      = $Path
-            ValueName = $ValueName
-            ValueType = $ValueType
-            Value     = $Value
-            Exists    = $true
-        }
         Export-BuildProfile
     }
     catch {
+        if ($null -eq $previous) { $script:BuildData.Settings.Remove($key) }
+        else                     { $script:BuildData.Settings[$key] = $previous }
+        Write-LogError $_
         return 'WriteFailed'
-    }
-
-    # Verify: confirm the entry reflects the written value
-    if (-not ($script:BuildData.Settings.ContainsKey($key) -and
-              $script:BuildData.Settings[$key].Exists -and
-              $script:BuildData.Settings[$key].Value -eq $Value)) {
-        return 'VerifyFailed'
     }
 
     return 'Written'
@@ -1962,7 +1955,7 @@ function Invoke-BuildSettingRemove {
         Records a removal instruction for a setting in the build profile
         by writing an Exists = $false entry.
     .OUTPUTS
-        Returns 'Removed', 'AlreadyAbsent', 'RemoveFailed', or 'VerifyFailed'.
+        Returns 'Removed', 'AlreadyAbsent', or 'RemoveFailed'.
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -1983,25 +1976,24 @@ function Invoke-BuildSettingRemove {
         return 'AlreadyAbsent'
     }
 
-    # Write: store Exists = $false to instruct Profile Mode to remove this value
+    # Write: store an Exists = $false removal entry; roll back on failure
+    $previous = if ($script:BuildData.Settings.ContainsKey($key)) { $script:BuildData.Settings[$key] } else { $null }
+    $script:BuildData.Settings[$key] = @{
+        Name      = $Name
+        Path      = $Path
+        ValueName = $ValueName
+        ValueType = $ValueType
+        Value     = $null
+        Exists    = $false
+    }
     try {
-        $script:BuildData.Settings[$key] = @{
-            Name      = $Name
-            Path      = $Path
-            ValueName = $ValueName
-            ValueType = $ValueType
-            Value     = $null
-            Exists    = $false
-        }
         Export-BuildProfile
     }
     catch {
+        if ($null -eq $previous) { $script:BuildData.Settings.Remove($key) }
+        else                     { $script:BuildData.Settings[$key] = $previous }
+        Write-LogError $_
         return 'RemoveFailed'
-    }
-
-    # Verify: confirm the removal entry is recorded correctly
-    if (-not $script:BuildData.Settings.ContainsKey($key) -or $script:BuildData.Settings[$key].Exists) {
-        return 'VerifyFailed'
     }
 
     return 'Removed'
@@ -2012,7 +2004,7 @@ function Invoke-BuildSettingExclude {
     .SYNOPSIS
         Removes a setting entry from the build profile entirely.
     .OUTPUTS
-        Returns 'Removed', 'AlreadyAbsent', 'RemoveFailed', or 'VerifyFailed'.
+        Returns 'Removed', 'AlreadyAbsent', or 'RemoveFailed'.
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -2029,18 +2021,16 @@ function Invoke-BuildSettingExclude {
         return 'AlreadyAbsent'
     }
 
-    # Remove: delete from in-memory store and persist to file
+    # Remove: delete from in-memory store and persist to file; roll back on failure
+    $previous = $script:BuildData.Settings[$key]
+    $script:BuildData.Settings.Remove($key)
     try {
-        $script:BuildData.Settings.Remove($key)
         Export-BuildProfile
     }
     catch {
+        $script:BuildData.Settings[$key] = $previous
+        Write-LogError $_
         return 'RemoveFailed'
-    }
-
-    # Verify: confirm the entry is no longer present
-    if ($script:BuildData.Settings.ContainsKey($key)) {
-        return 'VerifyFailed'
     }
 
     return 'Removed'
