@@ -127,7 +127,7 @@ Every setting entry is a hashtable. Core fields are required. Advisory fields ar
 | `Description`   | String | Yes      | One-line description of what the setting does |
 | `Path`          | String | Yes      | Registry key path, using `HKLM:` or `HKCU:` notation |
 | `ValueName`     | String | Yes      | Registry value name within the key |
-| `ValueType`     | String | Yes      | Registry value type: `DWord`, `String`, `ExpandString`, `MultiString`, `QWord`, or `Binary` |
+| `ValueType`     | String | Yes      | Registry value type, one of `DWord`, `String`, or `QWord` |
 | `HardenedValue` | Varies | Yes      | The value applied when the setting is hardened |
 | `DefaultValue`  | Varies | Yes      | The Windows default value, or `$null` if the value does not exist by default. When `$null`, the script removes the registry value rather than writing one |
 | `GPOPath`       | String | Yes      | Group Policy path to the equivalent policy setting, or `$null` if none exists |

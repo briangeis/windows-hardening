@@ -121,10 +121,9 @@ $script:ToolName  = 'Invoke-WinHardenPolicy'
 
 # Supported value types: scalar registry types and their LGPO prefixes
 $script:SupportedValueTypes = [ordered]@{
-    DWord        = 'DWORD'
-    String       = 'SZ'
-    ExpandString = 'EXSZ'
-    QWord        = 'QWORD'
+    DWord  = 'DWORD'
+    String = 'SZ'
+    QWord  = 'QWORD'
 }
 
 # Session counters for the log summary
