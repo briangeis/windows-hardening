@@ -1730,12 +1730,11 @@ function Invoke-ProfileMode {
 
     foreach ($entry in $ProfileData.Settings) {
         $scopeLabel = if ($entry.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
+        $before = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
+        $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(absent)' }
 
         if (-not $entry.Exists) {
             # Exists = $false: desired state is absent; remove the value if present
-            $before = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
-            $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(absent)' }
-
             $params = @{
                 Name      = $entry.Name
                 Path      = $entry.Path
@@ -1770,9 +1769,6 @@ function Invoke-ProfileMode {
         }
         else {
             # Exists = $true: desired state is present; write the value if not already correct
-            $before = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
-            $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(absent)' }
-
             $params = @{
                 Name      = $entry.Name
                 Path      = $entry.Path
