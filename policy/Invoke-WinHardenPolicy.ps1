@@ -718,8 +718,7 @@ function Get-SettingState {
         return 'NOT SET'
     }
 
-    # Compare the value-state to each anchor; an absent value matches an anchor
-    # whose value is $null (absence)
+    # Compare the value-state to each anchor; absence matches a $null anchor
     if ($current.Exists) {
         if ($current.Value -eq $Setting.HardenedValue) { return 'HARDENED' }
         if ($null -ne $Setting.DefaultValue -and $current.Value -eq $Setting.DefaultValue) { return 'DEFAULT' }
@@ -958,8 +957,8 @@ function Invoke-SettingRemove {
     }
 
     # Pre-check: capture current state to determine return value
-    # A read error is not an absence, so it must not short-circuit the removal
     $current = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
+    # A read error is not an absence, so it must not short-circuit the removal
     $alreadyAbsent = (-not $current.Exists) -and (-not $current.Error)
 
     # Remove: dispatch to direct registry remove (Home) or LGPO (non-Home)
