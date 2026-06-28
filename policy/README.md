@@ -71,11 +71,22 @@ Build Mode writes selections to the profile file path provided with `-Build`. If
 
 ## Parameters
 
-- **`-DefinitionsPath`**: Path to a definitions file. Required for Interactive, Build, and Snapshot modes.
-- **`-ProfilePath`**: Path to a profile file to apply. Triggers Profile Mode.
-- **`-Build`**: Path to the profile file to build. Triggers Build Mode.
-- **`-Snapshot`**: File or directory path for the snapshot profile. Triggers Snapshot Mode.
-- **`-LogPath`**: Output path for the log file. Accepts a full file path or a directory.
-- **`-LGPOPath`**: Explicit path to `LGPO.exe`. If not provided, the script searches the `policy` directory and then the system `PATH`.
+**`-DefinitionsPath`**  
+Path to a definitions file. Required for Interactive, Build, and Snapshot modes.
+
+**`-ProfilePath`**  
+Path to a profile file to apply. Triggers Profile Mode.
+
+**`-Build`**  
+Path to the profile file to build. Triggers Build Mode.
+
+**`-Snapshot`**  
+File or directory path for the snapshot profile. Triggers Snapshot Mode.
+
+**`-LogPath`**  
+Output path for the log file. Accepts a full file path or a directory.
+
+**`-LGPOPath`**  
+Explicit path to `LGPO.exe`. If not provided, the script searches the `policy` directory and then the system `PATH`.
 
 Run `Get-Help .\policy\Invoke-WinHardenPolicy.ps1 -Detailed` for the full parameter reference.
