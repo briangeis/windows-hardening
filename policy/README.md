@@ -11,6 +11,8 @@ Applies registry and Local Group Policy hardening settings to a standalone Windo
 
 Place `LGPO.exe` in the `policy` directory alongside the script, or ensure it is available on the system `PATH`.
 
+Pro and higher include the Local Group Policy Editor (`gpedit.msc`), but it is a graphical tool and cannot be scripted. `LGPO.exe` is Microsoft's command-line counterpart for the same Local Group Policy system, which is why the script requires it to apply settings on these editions.
+
 ## Modes of Operation
 
 The script supports four modes, determined by which parameters are provided.
