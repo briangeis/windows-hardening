@@ -44,7 +44,7 @@ Opens the same settings menu as Interactive Mode, but saves selections to a prof
 Use Build Mode to prepare a configuration profile for later application to a Windows device. Build Mode can be run multiple times, each time with a different definitions file and the same profile file path, to accumulate settings from each source into a single profile.
 
 ```powershell
-.\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Build .\my-profile.psd1
+.\policy\Invoke-WinHardenPolicy.ps1 -Build .\my-profile.psd1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1
 ```
 
 ### Snapshot Mode
@@ -54,7 +54,7 @@ Reads the current registry state for every setting in a definitions file and wri
 Use Snapshot Mode to capture the state of a configured device for replication on other devices, or as a backup before reimaging.
 
 ```powershell
-.\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Snapshot .\my-snapshot.psd1
+.\policy\Invoke-WinHardenPolicy.ps1 -Snapshot .\my-snapshot.psd1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1
 ```
 
 ## Output Files

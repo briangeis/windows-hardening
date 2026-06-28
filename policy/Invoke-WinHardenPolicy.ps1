@@ -72,11 +72,11 @@
     Profile Mode: applies all settings in the profile without prompting.
 
 .EXAMPLE
-    .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Build .\my-profile.psd1
+    .\policy\Invoke-WinHardenPolicy.ps1 -Build .\my-profile.psd1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1
     Build Mode: saves selections to my-profile.psd1 for later application.
 
 .EXAMPLE
-    .\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1 -Snapshot .\my-snapshot.psd1
+    .\policy\Invoke-WinHardenPolicy.ps1 -Snapshot .\my-snapshot.psd1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1
     Snapshot Mode: captures the current registry state for each defined setting.
 
 .NOTES
