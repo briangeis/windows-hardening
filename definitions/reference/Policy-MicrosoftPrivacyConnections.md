@@ -384,7 +384,7 @@ Policy-MicrosoftPrivacyConnections.psd1
 |   |   |   \-- Deny App Access to Motion
 |   |   \-- Other Devices
 |   |       +-- Deny Sync with Unpaired Devices
-|   |       \-- Deny Access to Trusted Devices
+|   |       \-- Deny App Access to Trusted Devices
 |   +-- Communication
 |   |   +-- Account Info
 |   |   |   \-- Deny App Access to Account Info

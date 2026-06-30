@@ -161,7 +161,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Defender Antivirus > MAPS > Join Microsoft MAPS'
                             GPOState      = 'Enabled (Disabled)'
-                            Note          = 'Disabling reduces real-time cloud-based threat detection in Defender.'
+                            Caution       = 'Disabling reduces real-time cloud-based threat detection in Defender.'
                         }
                         @{
                             Name          = 'Disable Sample Submission'
@@ -173,7 +173,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Microsoft Defender Antivirus > MAPS > Send file samples when further analysis is required'
                             GPOState      = 'Enabled (Never Send)'
-                            Note          = 'Disabling reduces Defender''s ability to analyze new or unknown threats.'
+                            Caution       = 'Disabling reduces Defender''s ability to analyze new or unknown threats.'
                         }
                         @{
                             Name          = 'Disable MSRT Diagnostic Data'
@@ -246,7 +246,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable OneDrive File Storage'
-                            Description   = 'Prevents the usage of OneDrive for file storage'
+                            Description   = 'Prevents using OneDrive for file storage'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive'
                             ValueName     = 'DisableFileSyncNGSC'
                             ValueType     = 'DWord'
@@ -361,7 +361,7 @@
                         }
                         @{
                             Name          = 'Disable Settings Sync'
-                            Description   = 'Turns off settings synchronization and blocks the user from re-enabling'
+                            Description   = 'Turns off settings synchronization across devices'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\SettingSync'
                             ValueName     = 'DisableSettingSync'
                             ValueType     = 'DWord'
@@ -432,7 +432,7 @@
                         # -- Section: Location --
                         @{
                             Name        = 'Location'
-                            Description = 'Controls app access to device location'
+                            Description = 'Controls device location services and app access to location'
                             Settings    = @(
                                 @{
                                     Name          = 'Disable Location Services'
@@ -559,7 +559,7 @@
                                     Note          = 'Applies to UWP apps only. Win32 desktop apps are not affected.'
                                 }
                                 @{
-                                    Name          = 'Deny Access to Trusted Devices'
+                                    Name          = 'Deny App Access to Trusted Devices'
                                     Description   = 'Prevents apps from accessing paired hardware and connected accessories'
                                     Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy'
                                     ValueName     = 'LetAppsAccessTrustedDevices'
@@ -915,6 +915,7 @@
                             DefaultValue  = $null
                             GPOPath       = $null
                             GPOState      = $null
+                            Caution       = 'Removes SmartScreen checks of web content used by Store apps.'
                         }
                     )
                 }
@@ -1425,7 +1426,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Defender SmartScreen > Microsoft Edge > Configure Windows Defender SmartScreen'
                             GPOState      = 'Disabled'
-                            Warning       = 'Removes phishing and malware protection within Microsoft Edge.'
+                            Caution       = 'Removes phishing and malware protection within Microsoft Edge.'
                         }
                         @{
                             Name          = 'Set New Tab to Blank'
@@ -1587,7 +1588,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Internet Explorer > Prevent managing SmartScreen Filter'
                             GPOState      = 'Enabled (Off)'
-                            Warning       = 'Removes phishing and malware protection within Internet Explorer.'
+                            Caution       = 'Removes phishing and malware protection within Internet Explorer.'
                         }
                         @{
                             Name          = 'Disable ActiveX VersionList Download'
@@ -1790,7 +1791,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > System > Internet Communication Management > Internet Communication settings > Turn off Windows Network Connectivity Status Indicator active tests'
                             GPOState      = 'Enabled'
-                            Warning       = 'Connectivity status reporting to apps and system services is disabled.'
+                            Caution       = 'Connectivity status reporting to apps and system services is disabled.'
                         }
                     )
                 }

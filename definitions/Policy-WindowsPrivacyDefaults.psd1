@@ -146,7 +146,7 @@
         # ===== Category: Security Defaults =====
         @{
             Name        = 'Security Defaults'
-            Description = 'Security behaviors that ship enabled by default on Home and Pro editions'
+            Description = 'Default Windows behaviors with security implications'
             Sections    = @(
 
                 # -- Section: Removable Media --
@@ -155,7 +155,7 @@
                     Description = 'Controls AutoPlay and AutoRun behavior for drives and devices'
                     Settings    = @(
                         @{
-                            Name          = 'Disallow AutoPlay for Nonvolume Devices'
+                            Name          = 'Disallow AutoPlay for Non-Volume Devices'
                             Description   = 'Prevents AutoPlay from running for non-volume devices such as phones'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer'
                             ValueName     = 'NoAutoplayfornonVolume'
@@ -217,7 +217,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Network > DNS Client > Turn off smart multi-homed name resolution'
                             GPOState      = 'Enabled'
-                            Note          = 'Relevant for devices using a VPN or with multiple active interfaces.'
+                            Note          = 'Relevant for devices that use a VPN or have multiple active interfaces.'
                         }
                     )
                 }
@@ -228,7 +228,7 @@
                     Description = 'Controls sign-in, local account authentication defaults, and lock screen'
                     Settings    = @(
                         @{
-                            Name          = 'Turn Off Lock Screen App Notifications'
+                            Name          = 'Disable Lock Screen App Notifications'
                             Description   = 'Prevents app notification content from appearing on the lock screen'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
                             ValueName     = 'DisableLockScreenAppNotifications'
@@ -270,7 +270,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Hibernation'
-                            Description   = 'Disables hibernation, which writes RAM contents to disk on shutdown'
+                            Description   = 'Turns off hibernation, which writes RAM contents to disk on shutdown'
                             Path          = 'HKLM:\SYSTEM\CurrentControlSet\Control\Power'
                             ValueName     = 'HibernateEnabled'
                             ValueType     = 'DWord'
@@ -282,7 +282,7 @@
                         }
                         @{
                             Name          = 'Disable Fast Startup'
-                            Description   = 'Disables Fast Startup, which saves a partial kernel session on shutdown'
+                            Description   = 'Turns off Fast Startup, which saves a partial kernel session on shutdown'
                             Path          = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power'
                             ValueName     = 'HiberbootEnabled'
                             ValueType     = 'DWord'
@@ -739,7 +739,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Windows Components > Windows Media Digital Rights Management > Prevent Windows Media DRM Internet Access'
                             GPOState      = 'Enabled'
-                            Note          = 'Protected content requiring a new DRM license will not play.'
+                            Caution       = 'Protected content requiring a new DRM license will not play.'
                         }
                         @{
                             Name          = 'Disable CD and DVD Media Information Retrieval'

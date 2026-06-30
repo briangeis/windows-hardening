@@ -151,7 +151,7 @@ Setting `HibernateEnabled` to `0` prevents new hibernation writes but does not r
 
 ### Disable AutoPlay and AutoRun (Removable Media)
 
-All three settings are required to fully close the AutoPlay and AutoRun attack surface. **Disable AutoPlay** prevents the AutoPlay dialog from launching for drive-type devices. **Disallow AutoPlay for Nonvolume Devices** extends AutoPlay control to cameras, phones, and other non-drive devices. **Disable AutoRun Command Execution** prevents `AutoRun.inf` command execution independently of whether AutoPlay is active. Any subset of the three leaves a gap.
+All three settings are required to fully close the AutoPlay and AutoRun attack surface. **Disable AutoPlay** prevents the AutoPlay dialog from launching for drive-type devices. **Disallow AutoPlay for Non-Volume Devices** extends AutoPlay control to cameras, phones, and other non-drive devices. **Disable AutoRun Command Execution** prevents `AutoRun.inf` command execution independently of whether AutoPlay is active. Any subset of the three leaves a gap.
 
 ## Counterintuitive GPO Behavior
 
@@ -187,14 +187,14 @@ Policy-WindowsPrivacyDefaults.psd1
 |
 +-- Security Defaults
 |   +-- Removable Media
-|   |   +-- Disallow AutoPlay for Nonvolume Devices
+|   |   +-- Disallow AutoPlay for Non-Volume Devices
 |   |   +-- Disable AutoRun Command Execution
 |   |   \-- Disable AutoPlay
 |   +-- Network
 |   |   +-- Disable Multicast Name Resolution
 |   |   \-- Disable Smart Multi-Homed Name Resolution
 |   +-- Authentication & Lock Screen
-|   |   +-- Turn Off Lock Screen App Notifications
+|   |   +-- Disable Lock Screen App Notifications
 |   |   +-- Disable Automatic Sign-In After Restart
 |   |   \-- Disable Local Account Security Questions
 |   +-- Data at Rest
