@@ -45,7 +45,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Send required and optional diagnostic data about browser usage'
                             GPOState      = 'Enabled (Off)'
-                            Note          = 'Microsoft marks the Off setting as not recommended for managed devices.'
+                            Note          = 'Microsoft marks the Off setting as not recommended.'
                         }
                         @{
                             Name          = 'Disable URL Reporting in Diagnostic Data'
@@ -207,7 +207,7 @@
                         }
                         @{
                             Name          = 'Disable Copilot Page Context Access'
-                            Description   = 'Prevents Copilot from reading page content for Entra ID profiles'
+                            Description   = 'Prevents Copilot from accessing the content of the current page'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'CopilotPageContext'
                             ValueType     = 'DWord'
@@ -667,7 +667,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Configure Microsoft Defender SmartScreen'
                             GPOState      = 'Disabled'
-                            Warning       = 'Removes phishing and malware protection from Microsoft Edge.'
+                            Caution       = 'Removes phishing and malware protection from Microsoft Edge.'
                         }
                         @{
                             Name          = 'Disable SmartScreen Checks for Trusted Downloads'
@@ -679,7 +679,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Force Microsoft Defender SmartScreen checks on downloads from trusted sources'
                             GPOState      = 'Disabled'
-                            Warning       = 'Removes SmartScreen reputation checks on downloads from trusted sources.'
+                            Caution       = 'Removes SmartScreen reputation checks on downloads from trusted sources.'
                         }
                         @{
                             Name          = 'Disable SmartScreen PUA Protection'
@@ -691,7 +691,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Configure Microsoft Defender SmartScreen to block potentially unwanted apps'
                             GPOState      = 'Disabled'
-                            Warning       = 'Removes PUA protection from SmartScreen download checks.'
+                            Caution       = 'Removes PUA protection from SmartScreen download checks.'
                         }
                         @{
                             Name          = 'Disable SmartScreen DNS Requests'
@@ -703,7 +703,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > SmartScreen settings > Enable Microsoft Defender SmartScreen DNS requests'
                             GPOState      = 'Disabled'
-                            Warning       = 'Removes DNS-based threat detection from SmartScreen URL checks.'
+                            Caution       = 'Removes DNS-based threat detection from SmartScreen URL checks.'
                         }
                         @{
                             Name          = 'Disable Scareware Blocker'
@@ -715,7 +715,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Scareware Blocker settings > Configure Microsoft Edge Scareware blocker protection'
                             GPOState      = 'Disabled'
-                            Warning       = 'Removes protection against tech support scam and browser-lock pages.'
+                            Caution       = 'Removes protection against tech support scam and browser-lock pages.'
                         }
                     )
                 }
@@ -735,7 +735,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Enhance the security state in Microsoft Edge'
                             GPOState      = 'Enabled (Strict Mode)'
-                            Note          = 'Strict mode may affect site compatibility due to enhanced mitigations.'
+                            Caution       = 'Strict mode may affect site compatibility due to enhanced mitigations.'
                         }
                         @{
                             Name          = 'Enable Site Isolation'
@@ -803,7 +803,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Block JavaScript JIT'
-                            Description   = 'Disables JavaScript JIT compilation to reduce memory attack risk'
+                            Description   = 'Turns off JavaScript JIT compilation to reduce memory attack risk'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'DefaultJavaScriptJitSetting'
                             ValueType     = 'DWord'
@@ -888,7 +888,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Enable network prediction'
                             GPOState      = 'Enabled (Do not predict network actions)'
-                            Caution       = 'May slightly slow page loads by disabling preconnect and prerender.'
+                            Note          = 'May slightly slow page loads by disabling preconnect and prerender.'
                         }
                     )
                 }
@@ -917,6 +917,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Allow or block audio capture'
                             GPOState      = 'Disabled'
+                            Caution       = 'Blocks every site from the microphone, breaking web conferencing.'
                         }
                         @{
                             Name          = 'Block Video Capture'
@@ -928,6 +929,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Allow or block video capture'
                             GPOState      = 'Disabled'
+                            Caution       = 'Blocks every site from the camera, breaking video conferencing.'
                         }
                         @{
                             Name          = 'Block Screen Capture'
@@ -939,6 +941,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Allow or deny screen capture'
                             GPOState      = 'Disabled'
+                            Caution       = 'Blocks every site from screen capture, breaking screen sharing.'
                         }
                     )
                 }
@@ -1025,7 +1028,7 @@
                     )
                 }
 
-                # -- Section: File System & Storage --
+                # -- Section: Files & Storage --
                 @{
                     Name        = 'Files & Storage'
                     Description = 'Controls website access to local files, automatic downloads, and storage'
@@ -1144,6 +1147,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Live captions allowed'
                             GPOState      = 'Disabled'
+                            Note          = 'Removes live captions, an accessibility aid for audio and video.'
                         }
                         @{
                             Name          = 'Disable Microsoft Editor Spell Check'
@@ -1188,6 +1192,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Let screen reader users get image descriptions from Microsoft'
                             GPOState      = 'Disabled'
+                            Note          = 'Screen readers lose Microsoft-provided descriptions for images.'
                         }
                     )
                 }
@@ -1328,7 +1333,7 @@
                         }
                         @{
                             Name          = 'Disable Typo Protection'
-                            Description   = 'Turns off URL typo checking that redirects to Microsoft for corrections'
+                            Description   = 'Turns off Microsoft typosquatting protection for mistyped URLs'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'TyposquattingCheckerEnabled'
                             ValueType     = 'DWord'
@@ -1336,6 +1341,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Edge Website Typo Protection settings > Configure Edge Website Typo Protection'
                             GPOState      = 'Disabled'
+                            Caution       = 'Removes protection against typosquatting and lookalike sites.'
                         }
                         @{
                             Name          = 'Disable Edge Search Bar'
@@ -1358,7 +1364,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Address Bar Search'
-                            Description   = 'Disables address bar search by removing the default search provider'
+                            Description   = 'Turns off address bar search by removing the default search provider'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'DefaultSearchProviderEnabled'
                             ValueType     = 'DWord'
