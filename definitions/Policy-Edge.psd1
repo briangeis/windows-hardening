@@ -1080,12 +1080,11 @@
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'WebRtcLocalhostIpHandling'
                             ValueType     = 'String'
-                            HardenedValue = 'disable_non_proxied_udp'
+                            HardenedValue = 'default_public_interface_only'
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > WebRtc settings > Restrict exposure of local IP address by WebRTC'
-                            GPOState      = 'Enabled (Disable Non-Proxied UDP)'
+                            GPOState      = 'Enabled (Allow Public Interface Only)'
                             Note          = 'Prevents WebRTC from leaking the real IP address through a VPN tunnel.'
-                            Caution       = 'May break browser-based video calls on networks without a proxy.'
                         }
                     )
                 }
