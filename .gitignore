@@ -3,3 +3,4 @@
 LGPO.exe
 *.psd1
 !definitions/*.psd1
+!profiles/*.psd1
