@@ -6,15 +6,15 @@ Curated profiles are ready-to-apply configurations for a target such as Windows 
 
 ### Policy
 
-**Windows** ([reference doc](reference/Policy-Windows.md))
+**Windows Profiles** ([reference doc](reference/Policy-Windows.md))
 
-- [Policy-Windows-Base.psd1](Policy-Windows-Base.psd1) is a curated privacy and security baseline for standalone devices (112 settings).
-- [Policy-Windows-NoStoreApps.psd1](Policy-Windows-NoStoreApps.psd1) is an additive layer for devices that do not use the Microsoft Store or its apps (22 settings).
+- [Policy-Windows-Base.psd1](Policy-Windows-Base.psd1) is a privacy and security baseline for standalone devices, with 112 settings covering telemetry, app permissions, activity history, content delivery, and default-behavior security hardening.
+- [Policy-Windows-NoStoreApps.psd1](Policy-Windows-NoStoreApps.psd1) is an additive layer for devices that do not use the Microsoft Store or its apps, with 22 settings disabling the Microsoft account, OneDrive, Store, cross-device services, and core app permissions.
 
-**Edge** ([reference doc](reference/Policy-Edge.md))
+**Edge Profiles** ([reference doc](reference/Policy-Edge.md))
 
-- [Policy-Edge-Base.psd1](Policy-Edge-Base.psd1) is a curated privacy and security baseline for Microsoft Edge (117 settings).
-- [Policy-Edge-NoWebConferencing.psd1](Policy-Edge-NoWebConferencing.psd1) is an additive layer for devices that do not use web conferencing (3 settings).
+- [Policy-Edge-Base.psd1](Policy-Edge-Base.psd1) is a privacy and security baseline for Microsoft Edge, with 117 settings covering telemetry and tracking, Copilot and AI, sign-in and data retention, browser hardening, and Microsoft-feature removals.
+- [Policy-Edge-NoWebConferencing.psd1](Policy-Edge-NoWebConferencing.psd1) is an additive layer for devices that do not use web conferencing, with 3 settings blocking microphone, camera, and screen capture.
 
 ## Naming Convention
 
