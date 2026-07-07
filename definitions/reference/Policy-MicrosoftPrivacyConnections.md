@@ -186,7 +186,7 @@ Disabling the Microsoft Account Sign-In Assistant service removes the foundation
 
 ### Disable Cross-Device Experiences (Microsoft Cloud Services)
 
-Disabling the Connected Devices Platform removes the infrastructure underlying cross-device features. Phone Link features such as SMS mirroring and call handling through the Windows app will not function.
+Disabling the Connected Devices Platform turns off the cross-device features that depend on it. Nearby Sharing is disabled outright. Apps that use the platform for part of their functionality, such as Phone Link, lose the capabilities that route through it.
 
 ### Disable Windows Update Access (Windows Update)
 

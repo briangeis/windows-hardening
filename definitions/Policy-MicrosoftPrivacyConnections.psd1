@@ -357,7 +357,7 @@
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > System > Group Policy > Continue experiences on this device'
                             GPOState      = 'Disabled'
-                            Caution       = 'May break Phone Link features including SMS mirroring and call handling.'
+                            Caution       = 'Disables Nearby Sharing and other cross-device features.'
                         }
                         @{
                             Name          = 'Disable Settings Sync'
