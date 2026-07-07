@@ -1445,7 +1445,7 @@
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'RestoreOnStartup'
                             ValueType     = 'DWord'
-                            HardenedValue = 5  # 5 = Open a specific page or pages
+                            HardenedValue = 5  # 5 = Open a new tab
                             DefaultValue  = $null
                             GPOPath       = $null
                             GPOState      = $null
