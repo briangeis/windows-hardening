@@ -5,9 +5,9 @@
 [![PowerShell](https://img.shields.io/badge/powershell-5.1%2B-blue)](https://github.com/briangeis/windows-hardening)
 [![License](https://img.shields.io/github/license/briangeis/windows-hardening?color=blue)](LICENSE)
 
-A PowerShell toolkit for hardening Windows on standalone devices. Scripts run in four modes of operation, using curated definitions files and reusable configuration profiles.
+A PowerShell toolkit for hardening Windows on standalone devices. Scripts run in four modes of operation, from interactive setup to scripted automation. Curated definitions files catalog what can be configured, and curated profiles record what to apply and why. Data and logic remain separate by design, and together form one complete, self-contained toolkit.
 
-The toolkit is intended for standalone Windows 11 devices. Scripts are broadly compatible with Windows 10. Domain-joined devices are not supported, as Group Policy applied by Active Directory takes precedence over local policy changes.
+All editions of Windows 11 are supported, with broad Windows 10 compatibility. The toolkit is intended for personal or business devices managed locally. On a device joined to an Active Directory domain, central management can override local changes. Coverage spans registry and Local Group Policy settings, Windows services, and preinstalled packages.
 
 ## Requirements
 
