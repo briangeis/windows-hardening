@@ -14,7 +14,7 @@ Curated profiles are ready-to-apply configurations for a target such as Windows 
 **Edge Profiles** ([reference doc](reference/Policy-Edge.md))
 
 - [Policy-Edge-Base.psd1](Policy-Edge-Base.psd1) is a privacy and security baseline for Microsoft Edge, with 117 settings covering telemetry and tracking, Copilot and AI, sign-in and data retention, browser hardening, and Microsoft-feature removals.
-- [Policy-Edge-NoWebConferencing.psd1](Policy-Edge-NoWebConferencing.psd1) is an additive layer for devices that do not use web conferencing, with 3 settings blocking microphone, camera, and screen capture.
+- [Policy-Edge-NoWebConferencing.psd1](Policy-Edge-NoWebConferencing.psd1) is an additive layer for devices that do not use web conferencing, with 3 settings blocking website access to the microphone, camera, and screen capture.
 
 ## Naming Convention
 
