@@ -30,7 +30,7 @@ The source article covers both Windows 10 and Windows 11, and some Group Policy 
 - [Intentional Deviations from Source Article](#intentional-deviations-from-source-article)
 - [Counterintuitive GPO Behavior](#counterintuitive-gpo-behavior)
 - [Article Content Not Included](#article-content-not-included)
-- [Settings Tree](#settings-tree)  
+- [Settings Tree](#settings-tree)
 
 ## Telemetry & Diagnostics
 

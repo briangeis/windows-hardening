@@ -143,7 +143,7 @@ Setting `DefaultSearchProviderEnabled` to `0` is more restrictive than disabling
 
 The GPO governing this setting is named `Hide App Launcher on Microsoft Edge new tab page`. To hide the App Launcher, the policy must be set to Disabled, which writes `NewTabPageAppLauncherEnabled` to `0`. Setting the policy to Enabled writes `NewTabPageAppLauncherEnabled` to `1`, showing the App Launcher. The registry value name is self-consistent: `0` hides the App Launcher and `1` does not. The GPO name is counterintuitive because disabling a policy named `Hide App Launcher on Microsoft Edge new tab page` is what hides the App Launcher.
 
-### Entra ID and tenant scope labels (Copilot & AI Data Access)
+### Entra ID and Tenant Scope Labels (Copilot & AI Data Access)
 
 Two settings carry Microsoft Entra ID or tenant scope labels in their Group Policy names yet apply on all configurations, standalone personal devices included. **Disable Copilot Page Context Access** (`CopilotPageContext`) is labeled for "Microsoft Entra ID profiles," and **Disable Browsing History Sharing with Copilot Search** (`ShareBrowsingHistoryWithCopilotSearchAllowed`) is labeled for "tenant-approved" history shared with Microsoft 365 Copilot Search. Both were confirmed to take effect on a standalone device. The Edge ADMX templates recurrently attach an Enterprise or Entra scope label to policies that are not in fact scoped that way, so the definitions descriptions for these settings state their universal effect rather than repeating the label.
 
