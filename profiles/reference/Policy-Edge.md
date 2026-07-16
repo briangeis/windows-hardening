@@ -58,18 +58,18 @@ These are the base's genuine tradeoffs, each balancing a real benefit against a 
 
 The base and layer curate 120 of the definitions file's 128 settings.
 
-| Profile | Settings | Source |
-|---------|:--------:|--------|
-| [Policy-Edge-Base.psd1](../Policy-Edge-Base.psd1) | 117 | Policy-Edge definitions |
-| [Policy-Edge-NoWebConferencing.psd1](../Policy-Edge-NoWebConferencing.psd1) | 3 | Policy-Edge definitions |
+| Profile                                                                     | Settings | Source                  |
+|-----------------------------------------------------------------------------|:--------:|-------------------------|
+| [Policy-Edge-Base.psd1](../Policy-Edge-Base.psd1)                           | 117      | Policy-Edge definitions |
+| [Policy-Edge-NoWebConferencing.psd1](../Policy-Edge-NoWebConferencing.psd1) | 3        | Policy-Edge definitions |
 
 ### Exclusions
 
 The remaining eight are excluded outright, each with its reason.
 
-| Excluded setting or group | Reason |
-|---------------------------|--------|
-| Enable Ephemeral Profiles | Deletes the whole profile on exit, not just browsing data |
-| Disable Address Bar Search | Removes the search provider; non-URL queries become navigation errors |
-| Disable Local Provider Suggestions | Local-only autocomplete; disabling is usability loss with no privacy gain |
+| Excluded setting or group                                                     | Reason |
+|-------------------------------------------------------------------------------|--------|
+| Enable Ephemeral Profiles                                                     | Deletes the whole profile on exit, not just browsing data |
+| Disable Address Bar Search                                                    | Removes the search provider; non-URL queries become navigation errors |
+| Disable Local Provider Suggestions                                            | Local-only autocomplete; disabling is usability loss with no privacy gain |
 | Favorites bar, split screen, QR generator, efficiency mode, sleeping tabs (5) | Preference toggles with no bearing on privacy or security |

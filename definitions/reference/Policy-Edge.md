@@ -107,15 +107,15 @@ Contains the settings that produce a clean, stock browser experience. Unlike the
 
 ## Settings Distribution by Category
 
-| Category                 |  HKLM   |  HKCU  |  Total  |
-|--------------------------|:-------:|:------:|:-------:|
-| Privacy & Telemetry      | 21      | 0      | 21      |
-| Identity & Data          | 26      | 0      | 26      |
-| Security                 | 18      | 0      | 18      |
-| Content Permissions      | 13      | 0      | 13      |
-| Microsoft Features       | 30      | 0      | 30      |
-| Browser UI & Performance | 20      | 0      | 20      |
-| **Totals**               | **128** | **0**  | **128** |
+| Category                 | HKLM    | HKCU  | Total   |
+|--------------------------|:-------:|:-----:|:-------:|
+| Privacy & Telemetry      | 21      | 0     | 21      |
+| Identity & Data          | 26      | 0     | 26      |
+| Security                 | 18      | 0     | 18      |
+| Content Permissions      | 13      | 0     | 13      |
+| Microsoft Features       | 30      | 0     | 30      |
+| Browser UI & Performance | 20      | 0     | 20      |
+| **Totals**               | **128** | **0** | **128** |
 
 ## Settings with Notable Side Effects
 

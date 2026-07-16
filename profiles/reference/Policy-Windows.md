@@ -58,21 +58,21 @@ These are the base's genuine tradeoffs, each balancing a real benefit against a 
 
 The base and layer curate 134 of the 162 settings across both definitions files.
 
-| Profile | Settings | Source |
-|---------|:--------:|--------|
-| [Policy-Windows-Base.psd1](../Policy-Windows-Base.psd1) | 112 | Both definitions files |
-| [Policy-Windows-NoStoreApps.psd1](../Policy-Windows-NoStoreApps.psd1) | 22 | Both definitions files |
+| Profile                                                               | Settings | Source                 |
+|-----------------------------------------------------------------------|:--------:|------------------------|
+| [Policy-Windows-Base.psd1](../Policy-Windows-Base.psd1)               | 112      | Both definitions files |
+| [Policy-Windows-NoStoreApps.psd1](../Policy-Windows-NoStoreApps.psd1) | 22       | Both definitions files |
 
 ### Exclusions
 
 The remaining 28 are excluded outright, each with its reason.
 
-| Excluded setting or group | Reason |
-|---------------------------|--------|
-| Windows Update settings (8) | Block updates or their automatic installation |
-| Microsoft Edge and Edge Update (14) | Decisions deferred to the Edge profile |
+| Excluded setting or group                   | Reason |
+|---------------------------------------------|--------|
+| Windows Update settings (8)                 | Block updates or their automatic installation |
+| Microsoft Edge and Edge Update (14)         | Decisions deferred to the Edge profile |
 | Set Time Sync to NoSync, Disable NTP Client | Clock drift breaks TLS certificate validation and time-based 2FA |
-| Disable Automatic Root Certificate Updates | TLS failures for sites whose root certificate the device lacks |
-| Disable SmartScreen (system-wide) | Kept on for broad malware and phishing protection |
-| Disable NCSI Active Tests | Relied on by apps and services to detect internet access |
-| Disable Hibernation | Protects an unencrypted disk while removing hibernation |
+| Disable Automatic Root Certificate Updates  | TLS failures for sites whose root certificate the device lacks |
+| Disable SmartScreen (system-wide)           | Kept on for broad malware and phishing protection |
+| Disable NCSI Active Tests                   | Relied on by apps and services to detect internet access |
+| Disable Hibernation                         | Protects an unencrypted disk while removing hibernation |

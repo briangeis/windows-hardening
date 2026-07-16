@@ -90,13 +90,13 @@ Controls app access to device capabilities and personal data. Settings in this c
 
 ### App Behavior
 
-| PSD1 Section       | Article Section | HKLM | HKCU | Total |
-|--------------------|:---------------:|:----:|:----:|:-----:|
-| Background Apps    | 18.17           | 1    | 0    | 1     |
-| Notifications      | 18.5            | 1    | 0    | 1     |
-| Voice Activation   | 18.23           | 2    | 0    | 2     |
-| Tasks              | 18.19           | 1    | 0    | 1     |
-| App Diagnostics    | 18.20           | 1    | 0    | 1     |
+| PSD1 Section     | Article Section | HKLM | HKCU | Total |
+|------------------|:---------------:|:----:|:----:|:-----:|
+| Background Apps  | 18.17           | 1    | 0    | 1     |
+| Notifications    | 18.5            | 1    | 0    | 1     |
+| Voice Activation | 18.23           | 2    | 0    | 2     |
+| Tasks            | 18.19           | 1    | 0    | 1     |
+| App Diagnostics  | 18.20           | 1    | 0    | 1     |
 
 ## Windows Features
 
@@ -137,11 +137,11 @@ Groups Windows Update alongside settings that share the same core behavior: Wind
 
 Each section orders settings by browser-focused decision priority: data-to-Microsoft settings lead, followed by credential storage, security features, and UI and startup defaults. Microsoft Edge Update is a standalone section for update control, separated from Microsoft Edge because disabling updates is a security concern rather than a privacy decision.
 
-| PSD1 Section              | Article Section | HKLM | HKCU | Total |
-|---------------------------|:---------------:|:----:|:----:|:-----:|
-| Microsoft Edge            | 13.2            | 12   | 0    | 12    |
-| Microsoft Edge Update     | 13.2            | 2    | 0    | 2     |
-| Internet Explorer         | 8, 8.1          | 10   | 3    | 13    |
+| PSD1 Section          | Article Section | HKLM | HKCU | Total |
+|-----------------------|:---------------:|:----:|:----:|:-----:|
+| Microsoft Edge        | 13.2            | 12   | 0    | 12    |
+| Microsoft Edge Update | 13.2            | 2    | 0    | 2     |
+| Internet Explorer     | 8, 8.1          | 10   | 3    | 13    |
 
 ## Background Services
 
@@ -165,7 +165,7 @@ The technical catch-all for background infrastructure settings. Sections are ord
 
 ## Settings Distribution by Category
 
-| Category                 |  HKLM   |  HKCU  |  Total  |
+| Category                 | HKLM    | HKCU   | Total   |
 |--------------------------|:-------:|:------:|:-------:|
 | Telemetry & Diagnostics  | 11      | 4      | 15      |
 | Microsoft Cloud Services | 12      | 0      | 12      |
@@ -262,14 +262,14 @@ The following 23 settings have `GPOPath` and `GPOState` set to `$null` in the de
 
 The following GPOs are each controlled by more than one setting in the definitions file. A single entry appears in `gpedit.msc` for each GPO regardless of how many registry values it controls, so the total number of `gpedit.msc` entries is lower than the total number of settings in the file.
 
-| Group Policy                                         | Setting Names                                                                                                                     | Count |
-|------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|:-----:|
-| `Turn off automatic learning`                        | Restrict Implicit Text Collection, Restrict Implicit Ink Collection                                                               | 2     |
-| `Do not sync`                                        | Disable Settings Sync, Disable Settings Sync User Override                                                                        | 2     |
-| `Turn off the advertising ID`                        | Disable Advertising ID (Feature), Disable Advertising ID (Policy)                                                                 | 2     |
-| `Configure app install control`                      | Suppress Store App Recommendations (Policy), Suppress Store App Recommendations (Source)                                          | 2     |
-| `Specify intranet Microsoft update service location` | Set WSUS Server to Blank, Set WSUS Status Server to Blank, Set Alternate Download Server to Blank, Enforce Intranet Update Server | 4     |
-| `Disable changing home page settings`                | Set IE Home Page to Blank, Lock IE Home Page Setting                                                                              | 2     |
+| Group Policy                                         | Count | Setting Names |
+|------------------------------------------------------|:-----:|---------------|
+| `Turn off automatic learning`                        | 2     | Restrict Implicit Text Collection, Restrict Implicit Ink Collection |
+| `Do not sync`                                        | 2     | Disable Settings Sync, Disable Settings Sync User Override |
+| `Turn off the advertising ID`                        | 2     | Disable Advertising ID (Feature), Disable Advertising ID (Policy) |
+| `Configure app install control`                      | 2     | Suppress Store App Recommendations (Policy), Suppress Store App Recommendations (Source) |
+| `Specify intranet Microsoft update service location` | 4     | Set WSUS Server to Blank, Set WSUS Status Server to Blank, Set Alternate Download Server to Blank, Enforce Intranet Update Server |
+| `Disable changing home page settings`                | 2     | Set IE Home Page to Blank, Lock IE Home Page Setting |
 
 ## Intentional Deviations from Source Article
 
@@ -311,19 +311,19 @@ The GPO governing this setting is named `Disable all apps from Microsoft Store`.
 
 ### Excluded Sections
 
-| Article Section | Title             | Reason                                                                                                                                               |
-|:---------------:|-------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 11              | Windows Mail      | The Windows Mail application was removed in Windows 8 and is not present on any Windows 10 or Windows 11 installation.                               |
-| 13.1            | Legacy Edge       | Legacy Edge does not exist on Windows 11. Chromium Edge does not read these registry paths.                                                          |
-| 17              | Preinstalled apps | Handled via PowerShell `Remove-AppxPackage` commands, not registry settings.                                                                         |
+| Article Section | Title             | Reason |
+|:---------------:|-------------------|--------|
+| 11              | Windows Mail      | The Windows Mail application was removed in Windows 8 and is not present on any Windows 10 or Windows 11 installation. |
+| 13.1            | Legacy Edge       | Legacy Edge does not exist on Windows 11. Chromium Edge does not read these registry paths. |
+| 17              | Preinstalled apps | Handled via PowerShell `Remove-AppxPackage` commands, not registry settings. |
 | 23              | Wi-Fi Sense       | The Wi-Fi Sense feature was removed in Windows 10 version 1703 (April 2017) and is not present on any current Windows 10 or Windows 11 installation. |
 
 ### Excluded Settings
 
-| Article Section | Registry Value            | Reason                                                                                                       |
-|:---------------:|---------------------------|--------------------------------------------------------------------------------------------------------------|
+| Article Section | Registry Value            | Reason |
+|:---------------:|---------------------------|--------|
 | 21              | `CloudServiceSyncEnabled` | The Windows Messaging app that used this registry value was removed in Windows 10 version 1703 (April 2017). |
-| 18.12           | `AllowMessageSync`        | Targets the same Windows Messaging platform cloud sync infrastructure as `CloudServiceSyncEnabled`.          |
+| 18.12           | `AllowMessageSync`        | Targets the same Windows Messaging platform cloud sync infrastructure as `CloudServiceSyncEnabled`. |
 
 ## Settings Tree
 

@@ -27,12 +27,12 @@ Each component script supports four modes of operation, consistent across the to
 
 A snapshot of the current system state is saved automatically before any changes are applied in Interactive or Profile Mode. `Get-Help` is available on every script for full parameter and usage documentation.
 
-| Script                     | Component                  | Description                              | Status      |
-|----------------------------|----------------------------|------------------------------------------|:-----------:|
-| `Invoke-WinHardenPolicy`   | [Policy](policy/README.md) | Registry and Local Group Policy settings | Complete    |
-| `Invoke-WinHardenServices` | Services                   | Windows service startup configuration    | Planned     |
-| `Invoke-WinHardenPackages` | Packages                   | Preinstalled appx package removal        | Planned     |
-| `Invoke-WinHardenSuite`    | Orchestrator               | Coordinates execution of all components  | Planned     |
+| Script                     | Component                  | Description                              | Status   |
+|----------------------------|----------------------------|------------------------------------------|:--------:|
+| `Invoke-WinHardenPolicy`   | [Policy](policy/README.md) | Registry and Local Group Policy settings | Complete |
+| `Invoke-WinHardenServices` | Services                   | Windows service startup configuration    | Planned  |
+| `Invoke-WinHardenPackages` | Packages                   | Preinstalled appx package removal        | Planned  |
+| `Invoke-WinHardenSuite`    | Orchestrator               | Coordinates execution of all components  | Planned  |
 
 ## Definitions Files
 
