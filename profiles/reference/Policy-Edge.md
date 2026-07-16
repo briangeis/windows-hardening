@@ -67,9 +67,9 @@ The base and layer curate 120 of the definitions file's 128 settings.
 
 The remaining eight are excluded outright, each with its reason.
 
-| Excluded setting or group                                                     | Reason |
-|-------------------------------------------------------------------------------|--------|
-| Enable Ephemeral Profiles                                                     | Deletes the whole profile on exit, not just browsing data |
-| Disable Address Bar Search                                                    | Removes the search provider; non-URL queries become navigation errors |
-| Disable Local Provider Suggestions                                            | Local-only autocomplete; disabling is usability loss with no privacy gain |
-| Favorites bar, split screen, QR generator, efficiency mode, sleeping tabs (5) | Preference toggles with no bearing on privacy or security |
+| Excluded setting or group              | Reason |
+|----------------------------------------|--------|
+| Enable Ephemeral Profiles              | Deletes the whole profile on exit, not just browsing data |
+| Disable Address Bar Search             | Removes the search provider; non-URL queries become navigation errors |
+| Disable Local Provider Suggestions     | Local-only autocomplete; disabling is usability loss with no privacy gain |
+| Browser UI and performance toggles (5) | Preferences with no bearing on privacy or security |
