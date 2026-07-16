@@ -2,7 +2,7 @@
 
 **Source Article:** [Manage connections from Windows 10 and Windows 11 operating system components to Microsoft services](https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services)
 
-This document maps each setting in [Policy-MicrosoftPrivacyConnections.psd1](Policy-MicrosoftPrivacyConnections.psd1) to its corresponding section in the Microsoft article. It also covers the distribution of settings across registry hives, settings with notable side effects, settings that have no Group Policy equivalent, intentional deviations from the article's registry recommendations, and known inconsistencies in the article's guidance.
+This document maps each setting in [Policy-MicrosoftPrivacyConnections.psd1](../Policy-MicrosoftPrivacyConnections.psd1) to its corresponding section in the Microsoft article. It also covers the distribution of settings across registry hives, settings with notable side effects, settings that have no Group Policy equivalent, intentional deviations from the article's registry recommendations, and known inconsistencies in the article's guidance.
 
 The categories are organized navigation-first: each category answers a specific question a sysadmin asks when hardening a standalone device. Telemetry & Diagnostics, Microsoft Cloud Services, and App Permissions cover the highest-priority privacy and compliance decisions. Windows Features and Windows Update cover feature hardening and update policy. Browsers groups all browser-specific configuration. Background Services is a technical catch-all for background infrastructure that does not fit naturally elsewhere and is the least likely to be browsed by most users.
 
