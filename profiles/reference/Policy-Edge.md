@@ -30,7 +30,7 @@ The base excludes the following settings outright, grouped by reason:
 
 ## The No Web Conferencing Layer
 
-[Policy-Edge-NoWebConferencing.psd1](../Policy-Edge-NoWebConferencing.psd1) is the optional layer for a device where Edge is not used for web conferencing. Blocking Edge's access to the microphone, camera, and screen is genuine hardening, and on such a device it comes at no cost. A typical device relies on that access for Microsoft Teams, Zoom, Google Meet, and Discord, so the base holds these settings back rather than break them.
+[Policy-Edge-NoWebConferencing.psd1](../Policy-Edge-NoWebConferencing.psd1) is the optional layer for a device where Edge is not used for web conferencing. Blocking website access to the microphone, camera, and screen is genuine hardening, and on such a device it comes at no cost. A typical device relies on that access for Microsoft Teams, Zoom, Google Meet, and Discord, so the base holds these settings back rather than break them.
 
 The layer blocks audio, video, and screen capture at the browser level, a hard block with no per-site override. Note that this layer holds no WebRTC setting, since the base already closes the WebRTC IP leak for every device without affecting calls.
 
