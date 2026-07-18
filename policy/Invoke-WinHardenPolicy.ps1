@@ -782,9 +782,9 @@ function Invoke-LGPOWrite {
 
         # Write directly to registry for immediate effect
         if (-not (Test-Path $Path)) {
-            New-Item -Path $Path -Force | Out-Null
+            New-Item -Path $Path -Force -ErrorAction Stop | Out-Null
         }
-        Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type $ValueType -Force
+        Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type $ValueType -Force -ErrorAction Stop
     }
     catch {
         Write-LogError $_
@@ -895,9 +895,9 @@ function Invoke-SettingWrite {
         if ($alreadyPresent) { return 'AlreadyPresent' }
         try {
             if (-not (Test-Path $Path)) {
-                New-Item -Path $Path -Force | Out-Null
+                New-Item -Path $Path -Force -ErrorAction Stop | Out-Null
             }
-            Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type $ValueType -Force
+            Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type $ValueType -Force -ErrorAction Stop
         }
         catch {
             Write-LogError $_
