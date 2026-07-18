@@ -3,7 +3,7 @@
 # https://github.com/briangeis/windows-hardening
 #
 # Policy Profile: Edge No Web Conferencing
-# Additive layer for devices that do not use web conferencing.
+# Additive layer for devices not using Edge for web conferencing.
 #
 # Reference: profiles/reference/Policy-Edge.md
 #
@@ -15,7 +15,7 @@
     Meta = @{
         Component   = 'Policy'
         Name        = 'Edge No Web Conferencing'
-        Description = 'Additive layer for devices that do not use web conferencing.'
+        Description = 'Additive layer for devices not using Edge for web conferencing.'
         Target      = 'Microsoft Edge 148'
         Reviewed    = '2026-06-30'
         Source      = @(

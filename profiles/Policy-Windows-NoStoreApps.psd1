@@ -3,7 +3,7 @@
 # https://github.com/briangeis/windows-hardening
 #
 # Policy Profile: Windows No Store Apps
-# Additive layer for devices that do not use the Microsoft Store or its apps.
+# Additive layer for devices not using the Microsoft Store or its apps.
 #
 # Reference: profiles/reference/Policy-Windows.md
 #
@@ -15,7 +15,7 @@
     Meta = @{
         Component   = 'Policy'
         Name        = 'Windows No Store Apps'
-        Description = 'Additive layer for devices that do not use the Microsoft Store or its apps.'
+        Description = 'Additive layer for devices not using the Microsoft Store or its apps.'
         Target      = 'Windows 11 25H2'
         Reviewed    = '2026-06-29'
         Source      = @(
