@@ -599,7 +599,7 @@
                     Settings    = @(
                         @{
                             Name          = 'Disable Automatic Windows Update'
-                            Description   = 'Sets Windows Update to manual mode, requiring explicit checks for updates'
+                            Description   = 'Sets Windows Update to manual mode, requiring explicit update checks'
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU'
                             ValueName     = 'NoAutoUpdate'
                             ValueType     = 'DWord'

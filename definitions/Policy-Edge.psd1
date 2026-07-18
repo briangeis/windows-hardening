@@ -1511,7 +1511,7 @@
                             Path          = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
                             ValueName     = 'RestoreOnStartup'
                             ValueType     = 'DWord'
-                            HardenedValue = 5
+                            HardenedValue = 5  # 5 = Open a new tab
                             DefaultValue  = $null
                             GPOPath       = 'Computer Configuration > Administrative Templates > Microsoft Edge > Startup, home page and new tab page > Action to take on Microsoft Edge startup'
                             GPOState      = 'Enabled (Open a new tab)'
