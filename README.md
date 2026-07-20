@@ -86,12 +86,6 @@ git clone https://github.com/briangeis/windows-hardening
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
 ```
 
-**Remove the download restriction Windows applies to the toolkit scripts:**
-
-```powershell
-Get-ChildItem -Path .\windows-hardening -Recurse -Filter *.ps1 | Unblock-File
-```
-
 **Download LGPO.exe, required on Pro, Enterprise, Education, and LTSC editions:**
 
 Extract `LGPO.exe` from the [Microsoft Security Compliance Toolkit](https://www.microsoft.com/en-us/download/details.aspx?id=55319) and place it in the `policy` directory.
