@@ -29,7 +29,6 @@
             ValueName = 'AudioCaptureAllowed'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Block Video Capture'
@@ -37,7 +36,6 @@
             ValueName = 'VideoCaptureAllowed'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Block Screen Capture'
@@ -45,7 +43,6 @@
             ValueName = 'ScreenCaptureAllowed'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
     )
 }

@@ -536,7 +536,7 @@ function Import-ProfileFile {
         Write-FatalError @params
     }
 
-    $requiredKeys = 'Name', 'Path', 'ValueName', 'ValueType', 'Value', 'Exists'
+    $requiredKeys = 'Name', 'Path', 'ValueName', 'ValueType', 'Value'
     $index = 0
     foreach ($entry in @($profileData.Settings)) {
         $index++
@@ -636,7 +636,6 @@ function Export-ProfileFile {
         else {
             [void]$sb.AppendLine("            Value     = $($entry.Value)")
         }
-        [void]$sb.AppendLine("            Exists    = `$$($entry.Exists)")
         [void]$sb.AppendLine('        }')
     }
 
@@ -718,7 +717,7 @@ function Get-SettingState {
         return 'NOT SET'
     }
 
-    # Compare the value-state to each anchor; absence matches a $null anchor
+    # Compare the value to the hardened and default values; $null matches absence
     if ($current.Exists) {
         if ($current.Value -eq $Setting.HardenedValue) { return 'HARDENED' }
         if ($null -ne $Setting.DefaultValue -and $current.Value -eq $Setting.DefaultValue) { return 'DEFAULT' }
@@ -1732,8 +1731,8 @@ function Invoke-ProfileMode {
         $before = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
         $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(absent)' }
 
-        if (-not $entry.Exists) {
-            # Exists = $false: desired state is absent; remove the value if present
+        if ($null -eq $entry.Value) {
+            # Remove: $null means absent; a value already absent is skipped
             $params = @{
                 Name      = $entry.Name
                 Path      = $entry.Path
@@ -1767,7 +1766,7 @@ function Invoke-ProfileMode {
             }
         }
         else {
-            # Exists = $true: desired state is present; write the value if not already correct
+            # Write: a value means present; one already correct is skipped
             $params = @{
                 Name      = $entry.Name
                 Path      = $entry.Path
@@ -1885,8 +1884,8 @@ function Get-BuildSettingCurrentValue {
     .OUTPUTS
         Returns a hashtable with Exists (bool), Value, and
         ExplicitAbsence (bool) properties. ExplicitAbsence is true
-        when an Exists = $false entry is present, distinguishing it
-        from a setting not in the profile at all.
+        when a $null entry is present, distinguishing it from a
+        setting not in the profile at all.
     #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -1897,9 +1896,10 @@ function Get-BuildSettingCurrentValue {
         [string]$ValueName
     )
 
+    # Three states: a value, a $null entry meaning absent, or no entry at all
     $key = "$Path|$ValueName"
     if ($script:BuildData.Settings.ContainsKey($key)) {
-        if ($script:BuildData.Settings[$key].Exists) {
+        if ($null -ne $script:BuildData.Settings[$key].Value) {
             return @{ Exists = $true; Value = $script:BuildData.Settings[$key].Value; ExplicitAbsence = $false }
         }
         return @{ Exists = $false; Value = $null; ExplicitAbsence = $true }
@@ -1932,7 +1932,6 @@ function Invoke-BuildSettingWrite {
     # Pre-check: return early if the value is already correct
     $key = "$Path|$ValueName"
     if ($script:BuildData.Settings.ContainsKey($key) -and
-        $script:BuildData.Settings[$key].Exists -and
         $script:BuildData.Settings[$key].Value -eq $Value) {
         return 'AlreadyPresent'
     }
@@ -1945,7 +1944,6 @@ function Invoke-BuildSettingWrite {
         ValueName = $ValueName
         ValueType = $ValueType
         Value     = $Value
-        Exists    = $true
     }
     try {
         Export-BuildProfile
@@ -1963,8 +1961,8 @@ function Invoke-BuildSettingWrite {
 function Invoke-BuildSettingRemove {
     <#
     .SYNOPSIS
-        Records a removal instruction for a setting in the build profile
-        by writing an Exists = $false entry.
+        Records a removal instruction for a setting
+        in the build profile by writing a $null entry.
     .OUTPUTS
         Returns 'Removed', 'AlreadyAbsent', or 'RemoveFailed'.
     #>
@@ -1983,11 +1981,11 @@ function Invoke-BuildSettingRemove {
 
     # Pre-check: return early if a removal entry already exists
     $key = "$Path|$ValueName"
-    if ($script:BuildData.Settings.ContainsKey($key) -and -not $script:BuildData.Settings[$key].Exists) {
+    if ($script:BuildData.Settings.ContainsKey($key) -and $null -eq $script:BuildData.Settings[$key].Value) {
         return 'AlreadyAbsent'
     }
 
-    # Write: store an Exists = $false removal entry; roll back on failure
+    # Write: store a $null removal entry; roll back on failure
     $previous = if ($script:BuildData.Settings.ContainsKey($key)) { $script:BuildData.Settings[$key] } else { $null }
     $script:BuildData.Settings[$key] = @{
         Name      = $Name
@@ -1995,7 +1993,6 @@ function Invoke-BuildSettingRemove {
         ValueName = $ValueName
         ValueType = $ValueType
         Value     = $null
-        Exists    = $false
     }
     try {
         Export-BuildProfile
@@ -2116,7 +2113,7 @@ function Export-SnapshotProfile {
 
     $entries = @()
 
-    # Collect: Exists = $false captures absent values for removal when applied
+    # Collect: $null captures an absent value for removal when applied
     foreach ($setting in $settingSource) {
         $current = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
 
@@ -2132,7 +2129,6 @@ function Export-SnapshotProfile {
             ValueName = $setting.ValueName
             ValueType = $setting.ValueType
             Value     = $current.Value
-            Exists    = $current.Exists
         }
     }
 

@@ -29,7 +29,6 @@
             ValueName = 'DiagnosticData'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable URL Reporting in Diagnostic Data'
@@ -37,7 +36,6 @@
             ValueName = 'UrlDiagnosticDataEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Edge 3P SERP Telemetry'
@@ -45,7 +43,6 @@
             ValueName = 'Edge3PSerpTelemetryEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable DNS Interception Checks'
@@ -53,7 +50,6 @@
             ValueName = 'DNSInterceptionChecksEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable User Feedback'
@@ -61,7 +57,6 @@
             ValueName = 'UserFeedbackAllowed'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Personalization Reporting'
@@ -69,7 +64,6 @@
             ValueName = 'PersonalizationReportingEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Asset Delivery Service'
@@ -77,7 +71,6 @@
             ValueName = 'EdgeAssetDeliveryServiceEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable AI Theme Generation'
@@ -85,7 +78,6 @@
             ValueName = 'AIGenThemesEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Enable Strict Tracking Prevention'
@@ -93,7 +85,6 @@
             ValueName = 'TrackingPrevention'
             ValueType = 'DWord'
             Value     = 3
-            Exists    = $true
         }
         @{
             Name      = 'Block Third Party Cookies'
@@ -101,7 +92,6 @@
             ValueName = 'BlockThirdPartyCookies'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Enable Do Not Track'
@@ -109,7 +99,6 @@
             ValueName = 'ConfigureDoNotTrack'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Browsing with Copilot'
@@ -117,7 +106,6 @@
             ValueName = 'AllowBrowsingWithCopilot'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Copilot Toolbar Button'
@@ -125,7 +113,6 @@
             ValueName = 'Microsoft365CopilotChatIconEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Copilot Page Context Access'
@@ -133,7 +120,6 @@
             ValueName = 'CopilotPageContext'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Built-In AI APIs for Pages'
@@ -141,7 +127,6 @@
             ValueName = 'BuiltInAIAPIsEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Browsing History Sharing with Copilot Search'
@@ -149,7 +134,6 @@
             ValueName = 'ShareBrowsingHistoryWithCopilotSearchAllowed'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable AI-Enhanced History Search'
@@ -157,7 +141,6 @@
             ValueName = 'EdgeHistoryAISearchEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Experimentation Service'
@@ -165,7 +148,6 @@
             ValueName = 'ExperimentationAndConfigurationServiceControl'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Edge Update Experimentation Service'
@@ -173,7 +155,6 @@
             ValueName = 'UpdaterExperimentationAndConfigurationServiceControl'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable WebView2 Experimentation Service'
@@ -181,7 +162,6 @@
             ValueName = 'ExperimentationAndConfigurationServiceControl'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Prevent Feature Flag Overrides'
@@ -189,7 +169,6 @@
             ValueName = 'FeatureFlagOverridesControl'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Browser Sign-In'
@@ -197,7 +176,6 @@
             ValueName = 'BrowserSignin'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Microsoft Sync'
@@ -205,7 +183,6 @@
             ValueName = 'SyncDisabled'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Work Account SSO for Websites'
@@ -213,7 +190,6 @@
             ValueName = 'AADWebSiteSSOUsingThisProfileEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Microsoft Personal Account SSO'
@@ -221,7 +197,6 @@
             ValueName = 'MSAWebSiteSSOUsingThisProfileAllowed'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Guided Profile Switch'
@@ -229,7 +204,6 @@
             ValueName = 'GuidedSwitchEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Seamless Web-to-Browser Sign-In'
@@ -237,7 +211,6 @@
             ValueName = 'SeamlessWebToBrowserSignInEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Password Manager'
@@ -245,7 +218,6 @@
             ValueName = 'PasswordManagerEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Password Autofill'
@@ -253,7 +225,6 @@
             ValueName = 'PrimaryPasswordSetting'
             ValueType = 'DWord'
             Value     = 3
-            Exists    = $true
         }
         @{
             Name      = 'Disable Payment Autofill'
@@ -261,7 +232,6 @@
             ValueName = 'AutofillCreditCardEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Payment Method Query'
@@ -269,7 +239,6 @@
             ValueName = 'PaymentMethodQueryEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Address Autofill'
@@ -277,7 +246,6 @@
             ValueName = 'AutofillAddressEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Membership Autofill'
@@ -285,7 +253,6 @@
             ValueName = 'AutofillMembershipsEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable First-Run Auto-Import'
@@ -293,7 +260,6 @@
             ValueName = 'AutoImportAtFirstRun'
             ValueType = 'DWord'
             Value     = 4
-            Exists    = $true
         }
         @{
             Name      = 'Disable Repeated Imports on Launch'
@@ -301,7 +267,6 @@
             ValueName = 'ImportOnEachLaunch'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Import of Saved Passwords'
@@ -309,7 +274,6 @@
             ValueName = 'ImportSavedPasswords'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Import of Payment Info'
@@ -317,7 +281,6 @@
             ValueName = 'ImportPaymentInfo'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Import of Autofill Data'
@@ -325,7 +288,6 @@
             ValueName = 'ImportAutofillFormData'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Import of Browser Settings'
@@ -333,7 +295,6 @@
             ValueName = 'ImportBrowserSettings'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Import of Home Page Settings'
@@ -341,7 +302,6 @@
             ValueName = 'ImportHomepage'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Import of Search Engine Settings'
@@ -349,7 +309,6 @@
             ValueName = 'ImportSearchEngine'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Clear Browsing Data on Exit'
@@ -357,7 +316,6 @@
             ValueName = 'ClearBrowsingDataOnExit'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Clear Cached Images on Exit'
@@ -365,7 +323,6 @@
             ValueName = 'ClearCachedImagesAndFilesOnExit'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Saving Browser History'
@@ -373,7 +330,6 @@
             ValueName = 'SavingBrowserHistoryDisabled'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Delete Browser Data on Migration'
@@ -381,7 +337,6 @@
             ValueName = 'DeleteDataOnMigration'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Windows Search Access to Edge Data'
@@ -389,7 +344,6 @@
             ValueName = 'LocalBrowserDataShareEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Microsoft Defender SmartScreen'
@@ -397,7 +351,6 @@
             ValueName = 'SmartScreenEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable SmartScreen Checks for Trusted Downloads'
@@ -405,7 +358,6 @@
             ValueName = 'SmartScreenForTrustedDownloadsEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable SmartScreen PUA Protection'
@@ -413,7 +365,6 @@
             ValueName = 'SmartScreenPuaEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable SmartScreen DNS Requests'
@@ -421,7 +372,6 @@
             ValueName = 'SmartScreenDnsRequestsEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Scareware Blocker'
@@ -429,7 +379,6 @@
             ValueName = 'ScarewareBlockerProtectionEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Enable Strict Enhanced Security Mode'
@@ -437,7 +386,6 @@
             ValueName = 'EnhanceSecurityMode'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Enable Site Isolation'
@@ -445,7 +393,6 @@
             ValueName = 'SitePerProcess'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Enable Browser Code Integrity'
@@ -453,7 +400,6 @@
             ValueName = 'BrowserCodeIntegritySetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Enable Dynamic Code Protection'
@@ -461,7 +407,6 @@
             ValueName = 'DynamicCodeSettings'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Block External Extensions'
@@ -469,7 +414,6 @@
             ValueName = 'BlockExternalExtensions'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Enable Network Service Sandbox'
@@ -477,7 +421,6 @@
             ValueName = 'NetworkServiceSandboxEnabled'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Block JavaScript JIT'
@@ -485,7 +428,6 @@
             ValueName = 'DefaultJavaScriptJitSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Block Insecure Content Exceptions'
@@ -493,7 +435,6 @@
             ValueName = 'DefaultInsecureContentSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Disable Internet Explorer Mode'
@@ -501,7 +442,6 @@
             ValueName = 'InternetExplorerIntegrationLevel'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Require OCSP/CRL Checks for Local Trust Anchors'
@@ -509,7 +449,6 @@
             ValueName = 'RequireOnlineRevocationChecksForLocalAnchors'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Enable Encrypted Client Hello'
@@ -517,7 +456,6 @@
             ValueName = 'EncryptedClientHelloEnabled'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Basic Authentication over HTTP'
@@ -525,7 +463,6 @@
             ValueName = 'BasicAuthOverHttpEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Network Prediction'
@@ -533,7 +470,6 @@
             ValueName = 'NetworkPredictionOptions'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Block Geolocation Access'
@@ -541,7 +477,6 @@
             ValueName = 'DefaultGeolocationSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Block Sensor Access'
@@ -549,7 +484,6 @@
             ValueName = 'DefaultSensorsSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Block Serial API Access'
@@ -557,7 +491,6 @@
             ValueName = 'DefaultSerialGuardSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Block Web Bluetooth Access'
@@ -565,7 +498,6 @@
             ValueName = 'DefaultWebBluetoothGuardSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Block WebHID Access'
@@ -573,7 +505,6 @@
             ValueName = 'DefaultWebHidGuardSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Block WebUSB Access'
@@ -581,7 +512,6 @@
             ValueName = 'DefaultWebUsbGuardSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Block File System API (Read)'
@@ -589,7 +519,6 @@
             ValueName = 'DefaultFileSystemReadGuardSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Block File System API (Write)'
@@ -597,7 +526,6 @@
             ValueName = 'DefaultFileSystemWriteGuardSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Block Automatic Downloads'
@@ -605,7 +533,6 @@
             ValueName = 'DefaultAutomaticDownloadsSetting'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Restrict WebRTC Local IP Exposure'
@@ -613,7 +540,6 @@
             ValueName = 'WebRtcLocalhostIpHandling'
             ValueType = 'String'
             Value     = 'default_public_interface_only'
-            Exists    = $true
         }
         @{
             Name      = 'Disable Translate'
@@ -621,7 +547,6 @@
             ValueName = 'TranslateEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Online Text-to-Speech'
@@ -629,7 +554,6 @@
             ValueName = 'ConfigureOnlineTextToSpeech'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Speech Recognition'
@@ -637,7 +561,6 @@
             ValueName = 'SpeechRecognitionEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Live Captions'
@@ -645,7 +568,6 @@
             ValueName = 'LiveCaptionsAllowed'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Microsoft Editor Spell Check'
@@ -653,7 +575,6 @@
             ValueName = 'MicrosoftEditorProofingEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Microsoft Editor Synonyms'
@@ -661,7 +582,6 @@
             ValueName = 'MicrosoftEditorSynonymsEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Tab Organization Suggestions'
@@ -669,7 +589,6 @@
             ValueName = 'TabServicesEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Image Descriptions from Microsoft'
@@ -677,7 +596,6 @@
             ValueName = 'AccessibilityImageLabelsEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Hubs Sidebar'
@@ -685,7 +603,6 @@
             ValueName = 'HubsSidebarEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Standalone Sidebar'
@@ -693,7 +610,6 @@
             ValueName = 'StandaloneHubsSidebarEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Collections'
@@ -701,7 +617,6 @@
             ValueName = 'EdgeCollectionsEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Drop Feature'
@@ -709,7 +624,6 @@
             ValueName = 'EdgeEDropEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Share Experience'
@@ -717,7 +631,6 @@
             ValueName = 'ConfigureShare'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable In-App Support'
@@ -725,7 +638,6 @@
             ValueName = 'InAppSupportEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Search Suggestions'
@@ -733,7 +645,6 @@
             ValueName = 'SearchSuggestEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Similar Page Suggestions'
@@ -741,7 +652,6 @@
             ValueName = 'AlternateErrorPagesEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Navigation Error Web Service'
@@ -749,7 +659,6 @@
             ValueName = 'ResolveNavigationErrorsUseWebService'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Bing Trending Suggestions'
@@ -757,7 +666,6 @@
             ValueName = 'AddressBarTrendingSuggestEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Typo Protection'
@@ -765,7 +673,6 @@
             ValueName = 'TyposquattingCheckerEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Edge Search Bar'
@@ -773,7 +680,6 @@
             ValueName = 'SearchbarAllowed'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Shopping Assistant'
@@ -781,7 +687,6 @@
             ValueName = 'EdgeShoppingAssistantEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Wallet Checkout'
@@ -789,7 +694,6 @@
             ValueName = 'EdgeWalletCheckoutEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Wallet E-Tree'
@@ -797,7 +701,6 @@
             ValueName = 'EdgeWalletEtreeEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Wallet Donations'
@@ -805,7 +708,6 @@
             ValueName = 'WalletDonationEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Microsoft Rewards'
@@ -813,7 +715,6 @@
             ValueName = 'ShowMicrosoftRewards'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Insider Promotion'
@@ -821,7 +722,6 @@
             ValueName = 'MicrosoftEdgeInsiderPromotionEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Default Browser Campaigns'
@@ -829,7 +729,6 @@
             ValueName = 'DefaultBrowserSettingsCampaignEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Feature Recommendations'
@@ -837,7 +736,6 @@
             ValueName = 'ShowRecommendationsEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Hide First-Run Experience'
@@ -845,7 +743,6 @@
             ValueName = 'HideFirstRunExperience'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Open New Tab on Startup'
@@ -853,7 +750,6 @@
             ValueName = 'RestoreOnStartup'
             ValueType = 'DWord'
             Value     = 5
-            Exists    = $true
         }
         @{
             Name      = 'Set New Tab Page to Blank'
@@ -861,7 +757,6 @@
             ValueName = 'NewTabPageLocation'
             ValueType = 'String'
             Value     = 'about:blank'
-            Exists    = $true
         }
         @{
             Name      = 'Disable Microsoft Content on New Tab'
@@ -869,7 +764,6 @@
             ValueName = 'NewTabPageContentEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Quick Links on New Tab'
@@ -877,7 +771,6 @@
             ValueName = 'NewTabPageQuickLinksEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Copilot on New Tab Page'
@@ -885,7 +778,6 @@
             ValueName = 'NewTabPageBingChatEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable New Tab App Launcher'
@@ -893,7 +785,6 @@
             ValueName = 'NewTabPageAppLauncherEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable New Tab Page Preload'
@@ -901,7 +792,6 @@
             ValueName = 'NewTabPagePrerenderEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Search Bar at Windows Startup'
@@ -909,7 +799,6 @@
             ValueName = 'SearchbarIsEnabledOnStartup'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Mobile File Upload'
@@ -917,7 +806,6 @@
             ValueName = 'UploadFromPhoneEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Google Cast'
@@ -925,7 +813,6 @@
             ValueName = 'EnableMediaRouter'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Background Mode'
@@ -933,7 +820,6 @@
             ValueName = 'BackgroundModeEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Startup Boost'
@@ -941,7 +827,6 @@
             ValueName = 'StartupBoostEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Performance Detector'
@@ -949,7 +834,6 @@
             ValueName = 'PerformanceDetectorEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Pin Toolbar Button'
@@ -957,7 +841,6 @@
             ValueName = 'PinBrowserEssentialsToolbarButton'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
     )
 }

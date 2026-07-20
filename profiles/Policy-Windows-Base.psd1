@@ -30,7 +30,6 @@
             ValueName = 'AllowTelemetry'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Tailored Experiences'
@@ -38,7 +37,6 @@
             ValueName = 'DisableTailoredExperiencesWithDiagnosticData'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Consumer Experiences'
@@ -46,7 +44,6 @@
             ValueName = 'DisableWindowsConsumerFeatures'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Feedback Notifications'
@@ -54,7 +51,6 @@
             ValueName = 'DoNotShowFeedbackNotifications'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Set Feedback Period to Zero'
@@ -62,7 +58,6 @@
             ValueName = 'PeriodInNanoSeconds'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Set Feedback Count to Zero'
@@ -70,7 +65,6 @@
             ValueName = 'NumberOfSIUFInPeriod'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Advertising ID (Feature)'
@@ -78,7 +72,6 @@
             ValueName = 'Enabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Advertising ID (Policy)'
@@ -86,7 +79,6 @@
             ValueName = 'DisabledByGroupPolicy'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Language List Access'
@@ -94,7 +86,6 @@
             ValueName = 'HttpAcceptLanguageOptOut'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable MAPS Reporting'
@@ -102,7 +93,6 @@
             ValueName = 'SpyNetReporting'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Sample Submission'
@@ -110,7 +100,6 @@
             ValueName = 'SubmitSamplesConsent'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Disable MSRT Diagnostic Data'
@@ -118,7 +107,6 @@
             ValueName = 'DontReportInfectionInformation'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Enhanced Notifications'
@@ -126,7 +114,6 @@
             ValueName = 'DisableEnhancedNotifications'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Restrict Implicit Text Collection'
@@ -134,7 +121,6 @@
             ValueName = 'RestrictImplicitTextCollection'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Restrict Implicit Ink Collection'
@@ -142,7 +128,6 @@
             ValueName = 'RestrictImplicitInkCollection'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Web Results in Search'
@@ -150,7 +135,6 @@
             ValueName = 'ConnectedSearchUseWeb'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Web Search'
@@ -158,7 +142,6 @@
             ValueName = 'DisableWebSearch'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Search Location'
@@ -166,7 +149,6 @@
             ValueName = 'AllowSearchToUseLocation'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Cortana'
@@ -174,7 +156,6 @@
             ValueName = 'AllowCortana'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Settings Sync'
@@ -182,7 +163,6 @@
             ValueName = 'DisableSettingSync'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Disable Settings Sync User Override'
@@ -190,7 +170,6 @@
             ValueName = 'DisableSettingSyncUserOverride'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Cloud Clipboard'
@@ -198,7 +177,6 @@
             ValueName = 'AllowCrossDeviceClipboard'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Find My Device'
@@ -206,7 +184,6 @@
             ValueName = 'AllowFindMyDevice'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Radios'
@@ -214,7 +191,6 @@
             ValueName = 'LetAppsAccessRadios'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Motion'
@@ -222,7 +198,6 @@
             ValueName = 'LetAppsAccessMotion'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny Sync with Unpaired Devices'
@@ -230,7 +205,6 @@
             ValueName = 'LetAppsSyncWithDevices'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Notifications'
@@ -238,7 +212,6 @@
             ValueName = 'LetAppsAccessNotifications'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny Voice Activation'
@@ -246,7 +219,6 @@
             ValueName = 'LetAppsActivateWithVoice'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny Voice Activation Above Lock'
@@ -254,7 +226,6 @@
             ValueName = 'LetAppsActivateWithVoiceAboveLock'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Tasks'
@@ -262,7 +233,6 @@
             ValueName = 'LetAppsAccessTasks'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Diagnostics'
@@ -270,7 +240,6 @@
             ValueName = 'LetAppsGetDiagnosticInfo'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Suppress Store App Recommendations (Policy)'
@@ -278,7 +247,6 @@
             ValueName = 'ConfigureAppInstallControlEnabled'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Suppress Store App Recommendations (Source)'
@@ -286,7 +254,6 @@
             ValueName = 'ConfigureAppInstallControl'
             ValueType = 'String'
             Value     = 'Anywhere'
-            Exists    = $true
         }
         @{
             Name      = 'Disable SmartScreen for Store Apps'
@@ -294,7 +261,6 @@
             ValueName = 'EnableWebContentEvaluation'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable All Spotlight Features'
@@ -302,7 +268,6 @@
             ValueName = 'DisableWindowsSpotlightFeatures'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Cloud Optimized Content'
@@ -310,7 +275,6 @@
             ValueName = 'DisableCloudOptimizedContent'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Widgets'
@@ -318,7 +282,6 @@
             ValueName = 'AllowNewsAndInterests'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable News and Interests'
@@ -326,7 +289,6 @@
             ValueName = 'EnableFeeds'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Recommendations'
@@ -334,7 +296,6 @@
             ValueName = 'HideRecommendedSection'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable App Launch Tracking'
@@ -342,7 +303,6 @@
             ValueName = 'Start_TrackProgs'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Online Speech Recognition'
@@ -350,7 +310,6 @@
             ValueName = 'AllowInputPersonalization'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Speech Model Updates'
@@ -358,7 +317,6 @@
             ValueName = 'AllowSpeechModelUpdate'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Online Tips'
@@ -366,7 +324,6 @@
             ValueName = 'AllowOnlineTips'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable App URI Handlers'
@@ -374,7 +331,6 @@
             ValueName = 'EnableAppUriHandlers'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Auto Download Map Data'
@@ -382,7 +338,6 @@
             ValueName = 'AutoDownloadAndUpdateMapData'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Unsolicited Map Network Traffic'
@@ -390,7 +345,6 @@
             ValueName = 'AllowUntriggeredNetworkTrafficOnSettingsPage'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Activity Feed'
@@ -398,7 +352,6 @@
             ValueName = 'EnableActivityFeed'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Publish User Activities'
@@ -406,7 +359,6 @@
             ValueName = 'PublishUserActivities'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Upload User Activities'
@@ -414,7 +366,6 @@
             ValueName = 'UploadUserActivities'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Insider Preview Builds'
@@ -422,7 +373,6 @@
             ValueName = 'AllowBuildPreview'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Peer-to-Peer Update Sharing'
@@ -430,7 +380,6 @@
             ValueName = 'DODownloadMode'
             ValueType = 'DWord'
             Value     = 99
-            Exists    = $true
         }
         @{
             Name      = 'Disable Disk Health Model Updates'
@@ -438,7 +387,6 @@
             ValueName = 'AllowDiskHealthModelUpdates'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Services Configuration'
@@ -446,7 +394,6 @@
             ValueName = 'DisableOneSettingsDownloads'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Suggested Sites'
@@ -454,7 +401,6 @@
             ValueName = 'Enabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Enhanced Suggestions'
@@ -462,7 +408,6 @@
             ValueName = 'AllowServicePoweredQSA'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Browser Geolocation'
@@ -470,7 +415,6 @@
             ValueName = 'PolicyDisableGeolocation'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable AutoComplete for Web Addresses'
@@ -478,7 +422,6 @@
             ValueName = 'AutoSuggest'
             ValueType = 'String'
             Value     = 'no'
-            Exists    = $true
         }
         @{
             Name      = 'Disable Feed Background Sync'
@@ -486,7 +429,6 @@
             ValueName = 'BackgroundSyncStatus'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable IE SmartScreen'
@@ -494,7 +436,6 @@
             ValueName = 'EnabledV9'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable ActiveX VersionList Download'
@@ -502,7 +443,6 @@
             ValueName = 'DownloadVersionList'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Set IE Home Page to Blank'
@@ -510,7 +450,6 @@
             ValueName = 'Start Page'
             ValueType = 'String'
             Value     = 'about:blank'
-            Exists    = $true
         }
         @{
             Name      = 'Lock IE Home Page Setting'
@@ -518,7 +457,6 @@
             ValueName = 'HomePage'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable IE First Run Wizard'
@@ -526,7 +464,6 @@
             ValueName = 'DisableFirstRunCustomize'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Set IE New Tab to Blank'
@@ -534,7 +471,6 @@
             ValueName = 'NewTabPageShow'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Compatibility View Editing'
@@ -542,7 +478,6 @@
             ValueName = 'DisableSiteListEditing'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Flip Ahead'
@@ -550,7 +485,6 @@
             ValueName = 'Enabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Device Metadata Retrieval'
@@ -558,7 +492,6 @@
             ValueName = 'PreventDeviceMetadataFromNetwork'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Font Streaming'
@@ -566,7 +499,6 @@
             ValueName = 'EnableFontProviders'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable KMS Online Validation'
@@ -574,7 +506,6 @@
             ValueName = 'NoGenTicket'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Teredo'
@@ -582,7 +513,6 @@
             ValueName = 'Teredo_State'
             ValueType = 'String'
             Value     = 'Disabled'
-            Exists    = $true
         }
         @{
             Name      = 'Exclude Device Name from Diagnostic Data'
@@ -590,7 +520,6 @@
             ValueName = 'AllowDeviceNameInTelemetry'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Limit Diagnostic Log Collection'
@@ -598,7 +527,6 @@
             ValueName = 'LimitDiagnosticLogCollection'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Limit Dump Collection'
@@ -606,7 +534,6 @@
             ValueName = 'LimitDumpCollection'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Windows Error Reporting'
@@ -614,7 +541,6 @@
             ValueName = 'Disabled'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Application Telemetry'
@@ -622,7 +548,6 @@
             ValueName = 'AITEnable'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Inventory Collector'
@@ -630,7 +555,6 @@
             ValueName = 'DisableInventory'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Inking and Typing Data Collection'
@@ -638,7 +562,6 @@
             ValueName = 'AllowLinguisticDataCollection'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disallow AutoPlay for Non-Volume Devices'
@@ -646,7 +569,6 @@
             ValueName = 'NoAutoplayfornonVolume'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable AutoRun Command Execution'
@@ -654,7 +576,6 @@
             ValueName = 'NoAutorun'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable AutoPlay'
@@ -662,7 +583,6 @@
             ValueName = 'NoDriveTypeAutoRun'
             ValueType = 'DWord'
             Value     = 255
-            Exists    = $true
         }
         @{
             Name      = 'Disable Multicast Name Resolution'
@@ -670,7 +590,6 @@
             ValueName = 'EnableMulticast'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Smart Multi-Homed Name Resolution'
@@ -678,7 +597,6 @@
             ValueName = 'DisableSmartNameResolution'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Lock Screen App Notifications'
@@ -686,7 +604,6 @@
             ValueName = 'DisableLockScreenAppNotifications'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Automatic Sign-In After Restart'
@@ -694,7 +611,6 @@
             ValueName = 'DisableAutomaticRestartSignOn'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Local Account Security Questions'
@@ -702,7 +618,6 @@
             ValueName = 'NoLocalPasswordResetQuestions'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Fast Startup'
@@ -710,7 +625,6 @@
             ValueName = 'HiberbootEnabled'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Indexing of Encrypted Files'
@@ -718,7 +632,6 @@
             ValueName = 'AllowIndexingEncryptedStoresOrItems'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable MDM Enrollment'
@@ -726,7 +639,6 @@
             ValueName = 'DisableRegistration'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Recently Opened Document History'
@@ -734,7 +646,6 @@
             ValueName = 'NoRecentDocsHistory'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Remove Recently Added List from Start Menu'
@@ -742,7 +653,6 @@
             ValueName = 'HideRecentlyAddedApps'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable File Explorer Search History'
@@ -750,7 +660,6 @@
             ValueName = 'DisableSearchBoxSuggestions'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Search History'
@@ -758,7 +667,6 @@
             ValueName = 'DisableSearchHistory'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable File Explorer Account Insights'
@@ -766,7 +674,6 @@
             ValueName = 'DisableGraphRecentItems'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Clipboard History'
@@ -774,7 +681,6 @@
             ValueName = 'AllowClipboardHistory'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Windows Tips'
@@ -782,7 +688,6 @@
             ValueName = 'DisableSoftLanding'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Consumer Account State Content'
@@ -790,7 +695,6 @@
             ValueName = 'DisableConsumerAccountStateContent'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Spotlight Collection on Desktop'
@@ -798,7 +702,6 @@
             ValueName = 'DisableSpotlightCollectionOnDesktop'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Windows Welcome Experience'
@@ -806,7 +709,6 @@
             ValueName = 'DisableWindowsSpotlightWindowsWelcomeExperience'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Spotlight on Action Center'
@@ -814,7 +716,6 @@
             ValueName = 'DisableWindowsSpotlightOnActionCenter'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Spotlight on Settings'
@@ -822,7 +723,6 @@
             ValueName = 'DisableWindowsSpotlightOnSettings'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Search Highlights'
@@ -830,7 +730,6 @@
             ValueName = 'EnableDynamicContentInWSB'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Cloud Search'
@@ -838,7 +737,6 @@
             ValueName = 'AllowCloudSearch'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Push To Install Service'
@@ -846,7 +744,6 @@
             ValueName = 'DisablePushToInstall'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Account Notifications in Start'
@@ -854,7 +751,6 @@
             ValueName = 'DisableAccountNotifications'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Windows Copilot'
@@ -862,7 +758,6 @@
             ValueName = 'TurnOffWindowsCopilot'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Recall'
@@ -870,7 +765,6 @@
             ValueName = 'AllowRecallEnablement'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Click to Do'
@@ -878,7 +772,6 @@
             ValueName = 'DisableClickToDo'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Settings Agentic Search'
@@ -886,7 +779,6 @@
             ValueName = 'DisableSettingsAgent'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Game Recording and Broadcasting'
@@ -894,7 +786,6 @@
             ValueName = 'AllowGameDVR'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Windows Media DRM Internet Access'
@@ -902,7 +793,6 @@
             ValueName = 'DisableOnline'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable CD and DVD Media Information Retrieval'
@@ -910,7 +800,6 @@
             ValueName = 'PreventCDDVDMetadataRetrieval'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Music File Media Information Retrieval'
@@ -918,7 +807,6 @@
             ValueName = 'PreventMusicFileMetadataRetrieval'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
     )
 }

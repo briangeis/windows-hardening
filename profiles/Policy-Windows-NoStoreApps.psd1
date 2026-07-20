@@ -30,7 +30,6 @@
             ValueName = 'DisableFileSyncNGSC'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable OneDrive Network Traffic Before Sign-In'
@@ -38,7 +37,6 @@
             ValueName = 'PreventNetworkTrafficPreUserSignIn'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Microsoft Account Sign-In Assistant'
@@ -46,7 +44,6 @@
             ValueName = 'Start'
             ValueType = 'DWord'
             Value     = 4
-            Exists    = $true
         }
         @{
             Name      = 'Disable Cross-Device Experiences'
@@ -54,7 +51,6 @@
             ValueName = 'EnableCdp'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
         @{
             Name      = 'Disable Location Services'
@@ -62,7 +58,6 @@
             ValueName = 'DisableLocation'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Location'
@@ -70,7 +65,6 @@
             ValueName = 'LetAppsAccessLocation'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Camera'
@@ -78,7 +72,6 @@
             ValueName = 'LetAppsAccessCamera'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Microphone'
@@ -86,7 +79,6 @@
             ValueName = 'LetAppsAccessMicrophone'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Trusted Devices'
@@ -94,7 +86,6 @@
             ValueName = 'LetAppsAccessTrustedDevices'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Account Info'
@@ -102,7 +93,6 @@
             ValueName = 'LetAppsAccessAccountInfo'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Contacts'
@@ -110,7 +100,6 @@
             ValueName = 'LetAppsAccessContacts'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Calendar'
@@ -118,7 +107,6 @@
             ValueName = 'LetAppsAccessCalendar'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Email'
@@ -126,7 +114,6 @@
             ValueName = 'LetAppsAccessEmail'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Messaging'
@@ -134,7 +121,6 @@
             ValueName = 'LetAppsAccessMessaging'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Phone Calls'
@@ -142,7 +128,6 @@
             ValueName = 'LetAppsAccessPhone'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny App Access to Call History'
@@ -150,7 +135,6 @@
             ValueName = 'LetAppsAccessCallHistory'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Deny Background App Execution'
@@ -158,7 +142,6 @@
             ValueName = 'LetAppsRunInBackground'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Disable All Store Apps'
@@ -166,7 +149,6 @@
             ValueName = 'DisableStoreApps'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable Auto Download and Install of Updates'
@@ -174,7 +156,6 @@
             ValueName = 'AutoDownload'
             ValueType = 'DWord'
             Value     = 2
-            Exists    = $true
         }
         @{
             Name      = 'Disable Notification Network Traffic'
@@ -182,7 +163,6 @@
             ValueName = 'NoCloudApplicationNotification'
             ValueType = 'DWord'
             Value     = 1
-            Exists    = $true
         }
         @{
             Name      = 'Disable License Manager Service'
@@ -190,7 +170,6 @@
             ValueName = 'Start'
             ValueType = 'DWord'
             Value     = 4
-            Exists    = $true
         }
         @{
             Name      = 'Disable Phone-PC Linking'
@@ -198,7 +177,6 @@
             ValueName = 'EnableMmx'
             ValueType = 'DWord'
             Value     = 0
-            Exists    = $true
         }
     )
 }
