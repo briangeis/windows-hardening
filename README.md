@@ -90,6 +90,30 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
 
 Extract `LGPO.exe` from the [Microsoft Security Compliance Toolkit](https://www.microsoft.com/en-us/download/details.aspx?id=55319) and place it in the `policy` directory.
 
+## Usage
+
+Run PowerShell as Administrator, then enter the following commands as needed.
+
+**Navigate to the toolkit directory:**
+
+```powershell
+cd C:\Tools\windows-hardening
+```
+
+**To apply the curated Windows baseline:**
+
+```powershell
+.\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\profiles\Policy-Windows-Base.psd1
+```
+
+**To review and apply settings individually:**
+
+```powershell
+.\policy\Invoke-WinHardenPolicy.ps1 -DefinitionsPath .\definitions\Policy-MicrosoftPrivacyConnections.psd1
+```
+
+See the [Policy README](policy/README.md) for an example of each of the four modes of operation.
+
 ## License
 
 This toolkit is licensed under the [GNU General Public License v3.0](LICENSE).
