@@ -60,7 +60,7 @@ The `Meta` block carries the same identity in a form a script can read, along wi
 }
 ```
 
-`Component` is the component the file belongs to, `Name` and `Description` are its human-readable identity, `Target` is the upstream version the file was last reviewed against, and `Reviewed` is the date of that review.
+`Component` is the component the file belongs to, `Name` and `Description` are its human-readable identity, `Target` is the version of the operating system or application the file was last reviewed against, and `Reviewed` is the date of that review.
 
 ### Hierarchy
 
