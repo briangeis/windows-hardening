@@ -41,4 +41,4 @@ Every curated profile follows the same six curation principles. A target's refer
 
 ## Reference Documents
 
-Each target has one reference document in [`reference/`](reference/) for the base and all its layers. A reference document records the editorial decisions behind the curation, covering what the base includes and excludes and why, each layer and the device it assumes, and the tradeoffs that required a judgment call. Per-setting detail stays in the definitions references, which the profile reference document cites rather than repeats.
+Each target has one reference document in [reference/](reference/) for the base and all its layers. A reference document records the editorial decisions behind the curation, covering what the base includes and excludes and why, each layer and the device it assumes, and the tradeoffs that required a judgment call. Per-setting detail stays in the definitions references, which the profile reference document cites rather than repeats.
