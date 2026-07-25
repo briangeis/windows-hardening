@@ -26,6 +26,11 @@ Example: `Policy-Edge-NoWebConferencing.psd1`
 
 A profile is applied with `-ProfilePath` in Profile Mode, which reads the self-contained file and applies every setting without prompting. Apply the base first, then any layers, each with its own `-ProfilePath` invocation. Layers are additive and order-independent, and a layer's settings do not overlap the base or any other layer, so applying the base plus any combination of layers never conflicts.
 
+```powershell
+.\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\profiles\Policy-Windows-Base.psd1
+.\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\profiles\Policy-Windows-NoStoreApps.psd1
+```
+
 Apply the base as a vetted configuration, or open it in Build Mode against the definitions file to tune it first.
 
 ## Curation Principles
