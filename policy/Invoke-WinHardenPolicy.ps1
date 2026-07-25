@@ -68,7 +68,7 @@
     Interactive Mode: opens the settings menu. Run from the project root.
 
 .EXAMPLE
-    .\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\my-profile.psd1
+    .\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\profiles\Policy-Windows-Base.psd1
     Profile Mode: applies all settings in the profile without prompting.
 
 .EXAMPLE

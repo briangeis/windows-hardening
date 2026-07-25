@@ -34,7 +34,7 @@ Reads a profile file and applies all settings without prompting. A snapshot of t
 Use Profile Mode to apply a pre-built profile to a device, or as part of an automated hardening workflow.
 
 ```powershell
-.\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\my-profile.psd1
+.\policy\Invoke-WinHardenPolicy.ps1 -ProfilePath .\profiles\Policy-Windows-Base.psd1
 ```
 
 ### Build Mode
