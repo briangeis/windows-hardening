@@ -134,9 +134,9 @@ $script:FailedCount  = 0
 $script:IsHomeEdition = $false
 $script:LGPOExePath   = $null
 
-# Read retry: attempt count and delay between re-reads
-$script:ReadRetryMaxAttempts = 5
-$script:ReadRetryDelayMs     = 150
+# Verify retry: attempt count and delay while a Group Policy refresh completes
+$script:VerifyMaxRetries   = 100
+$script:VerifyRetryDelayMs = 50
 
 # Build Mode profile data: profile file contents held in memory for the session
 $script:IsBuildMode = $false
@@ -176,7 +176,7 @@ function Write-Log {
 function Write-LogError {
     <#
     .SYNOPSIS
-        Logs a failed registry operation, naming the command that threw.
+        Logs a failed operation, naming the command that threw.
     #>
     [CmdletBinding()]
     param(
@@ -671,26 +671,17 @@ function Get-SettingCurrentValue {
         return Get-BuildSettingCurrentValue -Path $Path -ValueName $ValueName
     }
 
-    # Retry a transient read error through the Group Policy refresh window
-    $attempt = 1
-    while ($attempt -le $script:ReadRetryMaxAttempts) {
-        try {
-            $item = Get-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
-            return @{ Exists = $true; Value = $item.$ValueName }
-        }
-        catch [System.Management.Automation.ItemNotFoundException],
-              [System.Management.Automation.PSArgumentException] {
-            # Genuine absence: the key or value is not present
-            return @{ Exists = $false; Value = $null }
-        }
-        catch {
-            # A real read error: surface it so callers can tell it from absence
-            if ($attempt -ge $script:ReadRetryMaxAttempts) {
-                return @{ Exists = $false; Value = $null; Error = $_ }
-            }
-            Start-Sleep -Milliseconds $script:ReadRetryDelayMs
-            $attempt++
-        }
+    try {
+        return @{ Exists = $true; Value = (Get-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop).$ValueName }
+    }
+    catch [System.Management.Automation.ItemNotFoundException],
+          [System.Management.Automation.PSArgumentException] {
+        # Genuine absence: the key or value is not present
+        return @{ Exists = $false; Value = $null }
+    }
+    catch {
+        # A real read error: surface it so callers can tell it from absence
+        return @{ Exists = $false; Value = $null; Error = $_ }
     }
 }
 
@@ -700,7 +691,7 @@ function Get-SettingState {
         Determines a setting's state by comparing its value, or its absence,
         to the hardened and default values from the definitions file.
     .OUTPUTS
-        Returns a string: 'HARDENED', 'DEFAULT', 'CUSTOM', or 'NOT SET'.
+        Returns 'HARDENED', 'DEFAULT', 'CUSTOM', or 'NOT SET'.
         'NOT SET' is Build Mode only; it means the profile has no entry.
     #>
     [CmdletBinding()]
@@ -729,266 +720,210 @@ function Get-SettingState {
     return 'CUSTOM'
 }
 
-function Invoke-LGPOWrite {
+function Invoke-SettingApply {
     <#
     .SYNOPSIS
-        Writes a registry value to the Local Group Policy Object
-        via LGPO.exe, then directly to the registry for immediate effect
-        on Pro, Enterprise, Education, and LTSC editions.
+        Applies a batch of settings and verifies that each one took effect.
     .OUTPUTS
-        Returns 'Written' or 'WriteFailed'.
+        Returns one hashtable per setting, in the order given, holding
+        Setting, Operation ('Write' or 'Remove'), Outcome ('Changed',
+        'Unchanged', 'Failed', or 'VerifyFailed'), and Before (the
+        Get-SettingCurrentValue reading taken before the change).
+    #>
+    [CmdletBinding()]
+    [OutputType([array])]
+    param(
+        [Parameter(Mandatory)]
+        [array]$Settings
+    )
+
+    # Pre-read: the Before state, taken before any write so no read falls in the refresh
+    $results = @()
+    foreach ($entry in $Settings) {
+        $operation = if ($null -eq $entry.Value) { 'Remove' } else { 'Write' }
+        $results += @{
+            Setting   = $entry
+            Operation = $operation
+            Outcome   = $null
+            Before    = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
+        }
+    }
+
+    # Build Mode: a profile write succeeds or fails outright, so there is nothing to verify
+    if ($script:IsBuildMode) {
+        foreach ($result in $results) {
+            $result.Outcome = Invoke-BuildApply -Setting $result.Setting
+        }
+        return $results
+    }
+
+    if ($script:IsHomeEdition) {
+        # Home: a registry read is proof of its own state, so a correct value is left alone
+        foreach ($result in $results) {
+            $result.Outcome = Invoke-RegistryApply -Setting $result.Setting -Before $result.Before
+        }
+    }
+    else {
+        # Non-Home: a registry read is not proof of policy state, so every setting is written
+        if (Invoke-LGPOApply -Settings $Settings) {
+            foreach ($result in $results) { $result.Outcome = 'Changed' }
+        }
+        else {
+            # A failed call hides which entries reached Registry.pol, so the whole batch fails
+            foreach ($result in $results) { $result.Outcome = 'Failed' }
+            return $results
+        }
+    }
+
+    # Verify: re-read until each value matches, on a retry budget shared by the batch
+    $retriesLeft = if ($script:IsHomeEdition) { 0 } else { $script:VerifyMaxRetries }
+
+    foreach ($result in $results) {
+        if ($result.Outcome -ne 'Changed') { continue }
+        $entry = $result.Setting
+
+        # Absence is $null at both ends, so one comparison covers a write and a removal
+        $read     = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
+        $verified = (-not $read.Error) -and ($read.Value -eq $entry.Value)
+        while (-not $verified -and $retriesLeft -gt 0) {
+            Start-Sleep -Milliseconds $script:VerifyRetryDelayMs
+            $retriesLeft--
+            $read     = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
+            $verified = (-not $read.Error) -and ($read.Value -eq $entry.Value)
+        }
+        if ($verified) { continue }
+
+        $expected = if ($null -eq $entry.Value) { '(absent)' } else { "$($entry.Value)" }
+        if ($read.Error) {
+            Write-LogError $read.Error
+        } elseif ($read.Exists) {
+            Write-Log "Verify: read $($read.Value), expected $expected"
+        } else {
+            Write-Log "Verify: read (absent), expected $expected"
+        }
+        $result.Outcome = 'VerifyFailed'
+    }
+
+    return $results
+}
+
+function Invoke-RegistryApply {
+    <#
+    .SYNOPSIS
+        Writes or removes one registry value directly on Home editions.
+    .OUTPUTS
+        Returns 'Changed', 'Unchanged', or 'Failed'.
     #>
     [CmdletBinding()]
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
-        [string]$Path,
+        [hashtable]$Setting,
         [Parameter(Mandatory)]
-        [string]$ValueName,
-        [Parameter(Mandatory)]
-        [string]$ValueType,
-        [Parameter(Mandatory)]
-        $Value
+        [hashtable]$Before
     )
 
-    # Determine section and strip hive from path for LGPO text format
-    $section  = if ($Path -like 'HKLM:*') { 'Computer' } else { 'User' }
-    $lgpoPath = $Path -replace '^HK(LM|CU):\\', ''
+    # Remove: a read error is not an absence, so it must not skip the removal
+    if ($null -eq $Setting.Value) {
+        if (-not $Before.Exists -and -not $Before.Error) { return 'Unchanged' }
+        try {
+            Remove-ItemProperty -Path $Setting.Path -Name $Setting.ValueName -ErrorAction Stop
+        }
+        catch {
+            Write-LogError $_
+            return 'Failed'
+        }
+        return 'Changed'
+    }
 
-    # Convert the value type to its LGPO type prefix
-    $lgpoType = $script:SupportedValueTypes[$ValueType]
-
-    $tempFile = [System.IO.Path]::GetTempFileName()
-
+    # Write: create the key if needed, then set the value
+    if ($Before.Exists -and $Before.Value -eq $Setting.Value) { return 'Unchanged' }
     try {
-        # Format value: DWORD and QWORD as decimal, all others as literal string
-        $lgpoValue = if ($lgpoType -eq 'DWORD') {
-            [uint32]$Value
-        } elseif ($lgpoType -eq 'QWORD') {
-            [uint64]$Value
-        } else {
-            "$Value"
+        if (-not (Test-Path $Setting.Path)) {
+            New-Item -Path $Setting.Path -Force -ErrorAction Stop | Out-Null
         }
-        $content = "$section`r`n$lgpoPath`r`n$ValueName`r`n${lgpoType}:$lgpoValue`r`n`r`n"
-
-        # Write to LGPO first: the authoritative record that survives any Group Policy refresh
-        [System.IO.File]::WriteAllText($tempFile, $content, [System.Text.Encoding]::ASCII)
-        $lgpoOutput = & $script:LGPOExePath /t $tempFile 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            Write-Log "LGPO.exe: $($lgpoOutput -join ' ')"
-            return 'WriteFailed'
+        $params = @{
+            Path        = $Setting.Path
+            Name        = $Setting.ValueName
+            Value       = $Setting.Value
+            Type        = $Setting.ValueType
+            Force       = $true
+            ErrorAction = 'Stop'
         }
-
-        # Write directly to registry for immediate effect
-        if (-not (Test-Path $Path)) {
-            New-Item -Path $Path -Force -ErrorAction Stop | Out-Null
-        }
-        Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type $ValueType -Force -ErrorAction Stop
+        Set-ItemProperty @params
     }
     catch {
         Write-LogError $_
-        return 'WriteFailed'
-    }
-    finally {
-        Remove-Item $tempFile -ErrorAction SilentlyContinue
+        return 'Failed'
     }
 
-    return 'Written'
+    return 'Changed'
 }
 
-function Invoke-LGPORemove {
+function Invoke-LGPOApply {
     <#
     .SYNOPSIS
-        Removes a registry value from the Local Group Policy Object
-        via LGPO.exe, then directly from the registry for immediate effect
-        on Pro, Enterprise, Education, and LTSC editions.
+        Writes a batch of settings to the Local Group Policy Object in
+        a single LGPO.exe call on Pro, Enterprise, Education, and LTSC
+        editions. The values reach the registry through the Group Policy
+        refresh that LGPO.exe triggers, which completes after it returns.
     .OUTPUTS
-        Returns 'Removed' or 'RemoveFailed'.
+        Returns $true when LGPO.exe reported success, $false otherwise.
     #>
     [CmdletBinding()]
-    [OutputType([string])]
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory)]
-        [string]$Path,
-        [Parameter(Mandatory)]
-        [string]$ValueName
+        [array]$Settings
     )
 
-    # Determine section and strip hive from path for LGPO text format
-    $section  = if ($Path -like 'HKLM:*') { 'Computer' } else { 'User' }
-    $lgpoPath = $Path -replace '^HK(LM|CU):\\', ''
-
-    $content  = "$section`r`n$lgpoPath`r`n$ValueName`r`nDELETE`r`n`r`n"
     $tempFile = [System.IO.Path]::GetTempFileName()
 
     try {
-        # Write to LGPO first: the authoritative record that survives any Group Policy refresh
-        [System.IO.File]::WriteAllText($tempFile, $content, [System.Text.Encoding]::ASCII)
+        # Compose one text file: an absent target becomes DELETE, any other its LGPO type
+        $builder = New-Object System.Text.StringBuilder
+        foreach ($setting in $Settings) {
+            $section  = if ($setting.Path -like 'HKLM:*') { 'Computer' } else { 'User' }
+            $lgpoPath = $setting.Path -replace '^HK(LM|CU):\\', ''
+
+            if ($null -eq $setting.Value) {
+                $action = 'DELETE'
+            }
+            else {
+                # DWORD and QWORD are written as decimal, all others literally
+                $lgpoType  = $script:SupportedValueTypes[$setting.ValueType]
+                $lgpoValue = if ($lgpoType -eq 'DWORD') {
+                    [uint32]$setting.Value
+                } elseif ($lgpoType -eq 'QWORD') {
+                    [uint64]$setting.Value
+                } else {
+                    "$($setting.Value)"
+                }
+                $action = "${lgpoType}:$lgpoValue"
+            }
+
+            [void]$builder.Append("$section`r`n$lgpoPath`r`n$($setting.ValueName)`r`n$action`r`n`r`n")
+        }
+
+        [System.IO.File]::WriteAllText($tempFile, $builder.ToString(), [System.Text.Encoding]::ASCII)
         $lgpoOutput = & $script:LGPOExePath /t $tempFile 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Log "LGPO.exe: $($lgpoOutput -join ' ')"
-            return 'RemoveFailed'
+            return $false
         }
-
-        # Remove directly from registry for immediate effect
-        if ((Get-SettingCurrentValue -Path $Path -ValueName $ValueName).Exists) {
-            Remove-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
-        }
+        $count = @($Settings).Count
+        $noun  = if ($count -eq 1) { 'entry' } else { 'entries' }
+        Write-Log "LGPO.exe: $count $noun written to Local Group Policy"
     }
     catch {
-        # A concurrent Group Policy refresh may remove the value first
-        $err   = $_
-        $check = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-        if (-not $check.Exists -and -not $check.Error) {
-            return 'Removed'
-        }
-        Write-LogError $err
-        return 'RemoveFailed'
+        Write-LogError $_
+        return $false
     }
     finally {
         Remove-Item $tempFile -ErrorAction SilentlyContinue
     }
 
-    return 'Removed'
-}
-
-function Invoke-SettingWrite {
-    <#
-    .SYNOPSIS
-        Writes a registry value and verifies the write succeeded.
-    .OUTPUTS
-        Returns 'Written', 'AlreadyPresent', 'WriteFailed', or 'VerifyFailed'.
-    #>
-    [CmdletBinding()]
-    [OutputType([string])]
-    param(
-        [Parameter(Mandatory)]
-        [string]$Name,
-        [Parameter(Mandatory)]
-        [string]$Path,
-        [Parameter(Mandatory)]
-        [string]$ValueName,
-        [Parameter(Mandatory)]
-        [string]$ValueType,
-        [Parameter(Mandatory)]
-        $Value
-    )
-
-    if ($script:IsBuildMode) {
-        $params = @{
-            Name      = $Name
-            Path      = $Path
-            ValueName = $ValueName
-            ValueType = $ValueType
-            Value     = $Value
-        }
-        return Invoke-BuildSettingWrite @params
-    }
-
-    # Pre-check: capture current state to determine return value
-    $current = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-    $alreadyPresent = $current.Exists -and $current.Value -eq $Value
-
-    # Write: dispatch to direct registry write (Home) or LGPO (non-Home)
-    if ($script:IsHomeEdition) {
-        if ($alreadyPresent) { return 'AlreadyPresent' }
-        try {
-            if (-not (Test-Path $Path)) {
-                New-Item -Path $Path -Force -ErrorAction Stop | Out-Null
-            }
-            Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type $ValueType -Force -ErrorAction Stop
-        }
-        catch {
-            Write-LogError $_
-            return 'WriteFailed'
-        }
-    }
-    else {
-        $lgpoResult = Invoke-LGPOWrite -Path $Path -ValueName $ValueName -ValueType $ValueType -Value $Value
-        if ($lgpoResult -eq 'WriteFailed') { return 'WriteFailed' }
-        if ($alreadyPresent) { return 'AlreadyPresent' }
-    }
-
-    # Verify: confirm the write took effect
-    $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-    if (-not ($verify.Exists -and $verify.Value -eq $Value)) {
-        if ($verify.Error) {
-            Write-LogError $verify.Error
-        } elseif ($verify.Exists) {
-            Write-Log "Verify: read $($verify.Value), expected $Value"
-        } else {
-            Write-Log "Verify: read (absent), expected $Value"
-        }
-        return 'VerifyFailed'
-    }
-
-    return 'Written'
-}
-
-function Invoke-SettingRemove {
-    <#
-    .SYNOPSIS
-        Removes a registry value and verifies the removal succeeded.
-    .OUTPUTS
-        Returns 'Removed', 'AlreadyAbsent', 'RemoveFailed', or 'VerifyFailed'.
-    #>
-    [CmdletBinding()]
-    [OutputType([string])]
-    param(
-        [Parameter(Mandatory)]
-        [string]$Name,
-        [Parameter(Mandatory)]
-        [string]$Path,
-        [Parameter(Mandatory)]
-        [string]$ValueName,
-        [Parameter(Mandatory)]
-        [string]$ValueType
-    )
-
-    if ($script:IsBuildMode) {
-        $params = @{
-            Name      = $Name
-            Path      = $Path
-            ValueName = $ValueName
-            ValueType = $ValueType
-        }
-        return Invoke-BuildSettingRemove @params
-    }
-
-    # Pre-check: capture current state to determine return value
-    $current = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-    # A read error is not an absence, so it must not short-circuit the removal
-    $alreadyAbsent = (-not $current.Exists) -and (-not $current.Error)
-
-    # Remove: dispatch to direct registry remove (Home) or LGPO (non-Home)
-    if ($script:IsHomeEdition) {
-        if ($alreadyAbsent) { return 'AlreadyAbsent' }
-        try {
-            Remove-ItemProperty -Path $Path -Name $ValueName -ErrorAction Stop
-        }
-        catch {
-            Write-LogError $_
-            return 'RemoveFailed'
-        }
-    }
-    else {
-        $lgpoResult = Invoke-LGPORemove -Path $Path -ValueName $ValueName
-        if ($lgpoResult -eq 'RemoveFailed') { return 'RemoveFailed' }
-        if ($alreadyAbsent) { return 'AlreadyAbsent' }
-    }
-
-    # Verify: confirm the removal took effect
-    $verify = Get-SettingCurrentValue -Path $Path -ValueName $ValueName
-    if ($verify.Error) {
-        Write-LogError $verify.Error
-        return 'VerifyFailed'
-    }
-    if ($verify.Exists) {
-        Write-Log "Verify: read $($verify.Value), expected (absent)"
-        return 'VerifyFailed'
-    }
-
-    return 'Removed'
+    return $true
 }
 
 #endregion
@@ -1227,8 +1162,9 @@ function Invoke-Menu {
 function Show-SettingDetail {
     <#
     .SYNOPSIS
-        Shows details of a single setting and allows the user
-        to apply the hardened value or reset to default.
+        Shows details of a single setting and allows the user to apply the
+        hardened value or reset to default. In Build Mode, the setting can
+        also be excluded from the profile.
     #>
     [CmdletBinding()]
     param(
@@ -1335,37 +1271,26 @@ function Show-SettingDetail {
             'H' {
                 $beforeDisplay = $valueDisplay
                 $action        = if ($script:IsBuildMode) { 'Set hardened' } else { 'Apply' }
+                $afterDisplay  = if ($null -eq $Setting.HardenedValue) { '(absent)' } else { "$($Setting.HardenedValue)" }
 
-                if ($null -eq $Setting.HardenedValue) {
-                    $params = @{
-                        Name      = $Setting.Name
-                        Path      = $Setting.Path
-                        ValueName = $Setting.ValueName
-                        ValueType = $Setting.ValueType
-                    }
-                    $result       = Invoke-SettingRemove @params
-                    $afterDisplay = '(absent)'
+                $entry = @{
+                    Name      = $Setting.Name
+                    Path      = $Setting.Path
+                    ValueName = $Setting.ValueName
+                    ValueType = $Setting.ValueType
+                    Value     = $Setting.HardenedValue
                 }
-                else {
-                    $params = @{
-                        Name      = $Setting.Name
-                        Path      = $Setting.Path
-                        ValueName = $Setting.ValueName
-                        ValueType = $Setting.ValueType
-                        Value     = $Setting.HardenedValue
-                    }
-                    $result       = Invoke-SettingWrite @params
-                    $afterDisplay = "$($Setting.HardenedValue)"
-                }
+                $result = @(Invoke-SettingApply -Settings @($entry))[0]
 
-                switch ($result) {
-                    { $_ -in 'Written','Removed' } {
+                switch ($result.Outcome) {
+                    'Changed' {
                         $script:ChangedCount++
                         Write-Log "HARDENED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
                         $statusMessage = if ($script:IsBuildMode) { 'Hardened value set in profile.' } else { 'Applied and verified.' }
                         $statusColor   = 'Green'
                     }
-                    { $_ -in 'AlreadyPresent','AlreadyAbsent' } {
+                    'Unchanged' {
+                        # Non-Home always writes, so it never reports this
                         $statusMessage = if ($script:IsBuildMode) { 'Hardened value already in profile.' } else { 'Already at the hardened value.' }
                         $statusColor   = 'Green'
                     }
@@ -1376,7 +1301,7 @@ function Show-SettingDetail {
                         $statusMessage = 'Applied but verification failed.'
                         $statusColor   = 'Red'
                     }
-                    { $_ -in 'WriteFailed','RemoveFailed' } {
+                    'Failed' {
                         $script:FailedCount++
                         Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action failed"
                         $statusMessage = if ($script:IsBuildMode) { 'Failed to set the hardened value.' } else { 'Failed to apply.' }
@@ -1387,37 +1312,26 @@ function Show-SettingDetail {
             'D' {
                 $beforeDisplay = $valueDisplay
                 $action        = if ($script:IsBuildMode) { 'Set default' } else { 'Reset' }
+                $afterDisplay  = if ($null -eq $Setting.DefaultValue) { '(absent)' } else { "$($Setting.DefaultValue)" }
 
-                if ($null -eq $Setting.DefaultValue) {
-                    $params = @{
-                        Name      = $Setting.Name
-                        Path      = $Setting.Path
-                        ValueName = $Setting.ValueName
-                        ValueType = $Setting.ValueType
-                    }
-                    $result       = Invoke-SettingRemove @params
-                    $afterDisplay = '(absent)'
+                $entry = @{
+                    Name      = $Setting.Name
+                    Path      = $Setting.Path
+                    ValueName = $Setting.ValueName
+                    ValueType = $Setting.ValueType
+                    Value     = $Setting.DefaultValue
                 }
-                else {
-                    $params = @{
-                        Name      = $Setting.Name
-                        Path      = $Setting.Path
-                        ValueName = $Setting.ValueName
-                        ValueType = $Setting.ValueType
-                        Value     = $Setting.DefaultValue
-                    }
-                    $result       = Invoke-SettingWrite @params
-                    $afterDisplay = "$($Setting.DefaultValue)"
-                }
+                $result = @(Invoke-SettingApply -Settings @($entry))[0]
 
-                switch ($result) {
-                    { $_ -in 'Written','Removed' } {
+                switch ($result.Outcome) {
+                    'Changed' {
                         $script:ChangedCount++
                         Write-Log "DEFAULT $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
                         $statusMessage = if ($script:IsBuildMode) { 'Default value set in profile.' } else { 'Reset to default.' }
                         $statusColor   = 'Green'
                     }
-                    { $_ -in 'AlreadyPresent','AlreadyAbsent' } {
+                    'Unchanged' {
+                        # Non-Home always writes, so it never reports this
                         $statusMessage = if ($script:IsBuildMode) { 'Default value already in profile.' } else { 'Already at the default value.' }
                         $statusColor   = 'Green'
                     }
@@ -1428,7 +1342,7 @@ function Show-SettingDetail {
                         $statusMessage = 'Reset but verification failed.'
                         $statusColor   = 'Red'
                     }
-                    { $_ -in 'WriteFailed','RemoveFailed' } {
+                    'Failed' {
                         $script:FailedCount++
                         Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action failed"
                         $statusMessage = if ($script:IsBuildMode) { 'Failed to set the default value.' } else { 'Failed to reset.' }
@@ -1447,17 +1361,17 @@ function Show-SettingDetail {
                     $result = Invoke-BuildSettingExclude @params
 
                     switch ($result) {
-                        'Removed' {
+                        'Changed' {
                             $script:ChangedCount++
                             Write-Log "EXCLUDED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: (not in profile) | Verified"
                             $statusMessage = 'Excluded from profile.'
                             $statusColor   = 'Green'
                         }
-                        'AlreadyAbsent' {
+                        'Unchanged' {
                             $statusMessage = 'Already not in profile.'
                             $statusColor   = 'Green'
                         }
-                        'RemoveFailed' {
+                        'Failed' {
                             $script:FailedCount++
                             Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude failed"
                             $statusMessage = 'Failed to exclude from profile.'
@@ -1476,8 +1390,8 @@ function Show-SettingDetail {
 function Invoke-ApplyAll {
     <#
     .SYNOPSIS
-        Applies the hardened value to all unhardened settings
-        in a section after user confirmation.
+        Applies the hardened value to the settings in a section
+        after user confirmation.
     #>
     [CmdletBinding()]
     param(
@@ -1503,12 +1417,14 @@ function Invoke-ApplyAll {
         return @{ Glyph = ''; Color = $null }
     }
 
-    # Collect the settings not already hardened, with their current state
-    $toApply = @()
-    $stateOf = @{}
+    # Collect the settings to apply, with their current state. Non-Home includes
+    # settings already hardened, since a registry read is not proof of policy state
+    $writesAlways = (-not $script:IsBuildMode) -and (-not $script:IsHomeEdition)
+    $toApply      = @()
+    $stateOf      = @{}
     foreach ($setting in $Settings) {
         $state = Get-SettingState -Setting $setting
-        if ($state -ne 'HARDENED') {
+        if ($writesAlways -or $state -ne 'HARDENED') {
             $toApply += $setting
             $stateOf["$($setting.Path)|$($setting.ValueName)"] = $state
         }
@@ -1589,57 +1505,49 @@ function Invoke-ApplyAll {
     $failed   = 0
     $action   = if ($script:IsBuildMode) { 'Set hardened' } else { 'Apply' }
 
-    foreach ($setting in $toApply) {
-        $scopeLabel    = if ($setting.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
-        $before        = Get-SettingCurrentValue -Path $setting.Path -ValueName $setting.ValueName
-        $beforeDisplay = if ($before.Exists) {
-            "$($before.Value)"
+    # Apply the section in one batch: one LGPO.exe call and one Group Policy refresh
+    $entries = foreach ($setting in $toApply) {
+        @{
+            Name      = $setting.Name
+            Path      = $setting.Path
+            ValueName = $setting.ValueName
+            ValueType = $setting.ValueType
+            Value     = $setting.HardenedValue
+        }
+    }
+    $results = @(Invoke-SettingApply -Settings @($entries))
+
+    foreach ($result in $results) {
+        $entry         = $result.Setting
+        $scopeLabel    = if ($entry.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
+        $afterDisplay  = if ($null -eq $entry.Value) { '(absent)' } else { "$($entry.Value)" }
+        $beforeDisplay = if ($result.Before.Exists) {
+            "$($result.Before.Value)"
         } elseif ($script:IsBuildMode) {
-            if ($before.ExplicitAbsence) { '(absent)' } else { '(not in profile)' }
+            if ($result.Before.ExplicitAbsence) { '(absent)' } else { '(not in profile)' }
         } else {
             '(absent)'
         }
 
-        if ($null -eq $setting.HardenedValue) {
-            $params = @{
-                Name      = $setting.Name
-                Path      = $setting.Path
-                ValueName = $setting.ValueName
-                ValueType = $setting.ValueType
-            }
-            $result       = Invoke-SettingRemove @params
-            $afterDisplay = '(absent)'
-        }
-        else {
-            $params = @{
-                Name      = $setting.Name
-                Path      = $setting.Path
-                ValueName = $setting.ValueName
-                ValueType = $setting.ValueType
-                Value     = $setting.HardenedValue
-            }
-            $result       = Invoke-SettingWrite @params
-            $afterDisplay = "$($setting.HardenedValue)"
-        }
-
-        switch ($result) {
-            { $_ -in 'Written','Removed' } {
+        # Unchanged cannot occur: unhardened settings always change, and non-Home rewrites all
+        switch ($result.Outcome) {
+            'Changed' {
                 $hardened++
                 $script:ChangedCount++
-                Write-Host "  [OK] $scopeLabel $($setting.Name)" -ForegroundColor Green
-                Write-Log "HARDENED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
+                Write-Host "  [OK] $scopeLabel $($entry.Name)" -ForegroundColor Green
+                Write-Log "HARDENED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
             }
             'VerifyFailed' {
                 $failed++
                 $script:FailedCount++
-                Write-Host "  [!!] $scopeLabel $($setting.Name) - verification failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | $action verification failed"
+                Write-Host "  [!!] $scopeLabel $($entry.Name) - verification failed" -ForegroundColor Red
+                Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action verification failed"
             }
-            { $_ -in 'WriteFailed','RemoveFailed' } {
+            'Failed' {
                 $failed++
                 $script:FailedCount++
-                Write-Host "  [!!] $scopeLabel $($setting.Name) - $($action.ToLower()) failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($setting.Name) | $($setting.Path)\$($setting.ValueName) | $action failed"
+                Write-Host "  [!!] $scopeLabel $($entry.Name) - $($action.ToLower()) failed" -ForegroundColor Red
+                Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action failed"
             }
         }
     }
@@ -1701,7 +1609,7 @@ function Invoke-ProfileMode {
         A pre-change snapshot is saved automatically.
     .OUTPUTS
         Returns $true if all settings were applied successfully,
-        $false if any setting failed to apply or validate.
+        $false if any setting failed to apply or verify.
     #>
     [CmdletBinding()]
     [OutputType([bool])]
@@ -1726,78 +1634,43 @@ function Invoke-ProfileMode {
 
     Write-Host ''
 
-    foreach ($entry in $ProfileData.Settings) {
+    # Apply the whole profile as one batch, then report each entry, the result's
+    # operation supplying the vocabulary that a write and a removal differ by
+    $results = @(Invoke-SettingApply -Settings @($ProfileData.Settings))
+
+    foreach ($result in $results) {
+        $entry      = $result.Setting
+        $isRemoval  = ($result.Operation -eq 'Remove')
         $scopeLabel = if ($entry.Path -like 'HKCU:*') { '[USER]' } else { '[DEVICE]' }
-        $before = Get-SettingCurrentValue -Path $entry.Path -ValueName $entry.ValueName
-        $beforeDisplay = if ($before.Exists) { "$($before.Value)" } else { '(absent)' }
+        $token      = if ($isRemoval) { 'REMOVED' } else { 'APPLIED' }
+        $action     = if ($isRemoval) { 'Remove' }  else { 'Apply' }
+        $descriptor = if ($isRemoval) { 'removed' } else { 'applied' }
 
-        if ($null -eq $entry.Value) {
-            # Remove: $null means absent; a value already absent is skipped
-            $params = @{
-                Name      = $entry.Name
-                Path      = $entry.Path
-                ValueName = $entry.ValueName
-                ValueType = $entry.ValueType
-            }
-            $result = Invoke-SettingRemove @params
+        $afterDisplay  = if ($isRemoval) { '(absent)' } else { "$($entry.Value)" }
+        $beforeDisplay = if ($result.Before.Exists) { "$($result.Before.Value)" } else { '(absent)' }
 
-            switch ($result) {
-                'Removed' {
-                    $changed++
-                    $script:ChangedCount++
-                    Write-Host "  [OK] $scopeLabel $($entry.Name) - removed" -ForegroundColor Green
-                    Write-Log "REMOVED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: (absent) | Verified"
-                }
-                'AlreadyAbsent' {
-                    $skipped++
-                }
-                'VerifyFailed' {
-                    $failed++
-                    $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel $($entry.Name) - verification failed" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Remove verification failed"
-                }
-                'RemoveFailed' {
-                    $failed++
-                    $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel $($entry.Name) - remove failed" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Remove failed"
-                }
+        switch ($result.Outcome) {
+            'Changed' {
+                $changed++
+                $script:ChangedCount++
+                Write-Host "  [OK] $scopeLabel $($entry.Name) - $descriptor" -ForegroundColor Green
+                Write-Log "$token $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
             }
-        }
-        else {
-            # Write: a value means present; one already correct is skipped
-            $params = @{
-                Name      = $entry.Name
-                Path      = $entry.Path
-                ValueName = $entry.ValueName
-                ValueType = $entry.ValueType
-                Value     = $entry.Value
+            'Unchanged' {
+                # Non-Home always writes, so it never reports this
+                $skipped++
             }
-            $result = Invoke-SettingWrite @params
-
-            switch ($result) {
-                'Written' {
-                    $changed++
-                    $script:ChangedCount++
-                    Write-Host "  [OK] $scopeLabel $($entry.Name) - applied" -ForegroundColor Green
-                    Write-Log "APPLIED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $($entry.Value) | Verified"
-                }
-                'AlreadyPresent' {
-                    $skipped++
-                }
-                'VerifyFailed' {
-                    $failed++
-                    $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel $($entry.Name) - verification failed" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Apply verification failed"
-                }
-                'WriteFailed' {
-                    $failed++
-                    $script:FailedCount++
-                    Write-Host "  [!!] $scopeLabel $($entry.Name) - apply failed" -ForegroundColor Red
-                    Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Apply failed"
-                }
+            'VerifyFailed' {
+                $failed++
+                $script:FailedCount++
+                Write-Host "  [!!] $scopeLabel $($entry.Name) - verification failed" -ForegroundColor Red
+                Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action verification failed"
+            }
+            'Failed' {
+                $failed++
+                $script:FailedCount++
+                Write-Host "  [!!] $scopeLabel $($entry.Name) - $($action.ToLower()) failed" -ForegroundColor Red
+                Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action failed"
             }
         }
     }
@@ -1907,43 +1780,37 @@ function Get-BuildSettingCurrentValue {
     return @{ Exists = $false; Value = $null; ExplicitAbsence = $false }
 }
 
-function Invoke-BuildSettingWrite {
+function Invoke-BuildApply {
     <#
     .SYNOPSIS
-        Writes a setting to the build profile.
+        Records a setting's target value in the build profile. A $null
+        target is stored as an entry instructing Profile Mode to remove
+        the value, not as the absence of an entry.
     .OUTPUTS
-        Returns 'Written', 'AlreadyPresent', or 'WriteFailed'.
+        Returns 'Changed', 'Unchanged', or 'Failed'.
     #>
     [CmdletBinding()]
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
-        [string]$Name,
-        [Parameter(Mandatory)]
-        [string]$Path,
-        [Parameter(Mandatory)]
-        [string]$ValueName,
-        [Parameter(Mandatory)]
-        [string]$ValueType,
-        [Parameter(Mandatory)]
-        $Value
+        [hashtable]$Setting
     )
 
-    # Pre-check: return early if the value is already correct
-    $key = "$Path|$ValueName"
+    # Pre-check: return early if an entry already records this target
+    $key = "$($Setting.Path)|$($Setting.ValueName)"
     if ($script:BuildData.Settings.ContainsKey($key) -and
-        $script:BuildData.Settings[$key].Value -eq $Value) {
-        return 'AlreadyPresent'
+        $script:BuildData.Settings[$key].Value -eq $Setting.Value) {
+        return 'Unchanged'
     }
 
     # Write: update in-memory store and persist to file; roll back on failure
     $previous = if ($script:BuildData.Settings.ContainsKey($key)) { $script:BuildData.Settings[$key] } else { $null }
     $script:BuildData.Settings[$key] = @{
-        Name      = $Name
-        Path      = $Path
-        ValueName = $ValueName
-        ValueType = $ValueType
-        Value     = $Value
+        Name      = $Setting.Name
+        Path      = $Setting.Path
+        ValueName = $Setting.ValueName
+        ValueType = $Setting.ValueType
+        Value     = $Setting.Value
     }
     try {
         Export-BuildProfile
@@ -1952,59 +1819,10 @@ function Invoke-BuildSettingWrite {
         if ($null -eq $previous) { $script:BuildData.Settings.Remove($key) }
         else                     { $script:BuildData.Settings[$key] = $previous }
         Write-LogError $_
-        return 'WriteFailed'
+        return 'Failed'
     }
 
-    return 'Written'
-}
-
-function Invoke-BuildSettingRemove {
-    <#
-    .SYNOPSIS
-        Records a removal instruction for a setting
-        in the build profile by writing a $null entry.
-    .OUTPUTS
-        Returns 'Removed', 'AlreadyAbsent', or 'RemoveFailed'.
-    #>
-    [CmdletBinding()]
-    [OutputType([string])]
-    param(
-        [Parameter(Mandatory)]
-        [string]$Name,
-        [Parameter(Mandatory)]
-        [string]$Path,
-        [Parameter(Mandatory)]
-        [string]$ValueName,
-        [Parameter(Mandatory)]
-        [string]$ValueType
-    )
-
-    # Pre-check: return early if a removal entry already exists
-    $key = "$Path|$ValueName"
-    if ($script:BuildData.Settings.ContainsKey($key) -and $null -eq $script:BuildData.Settings[$key].Value) {
-        return 'AlreadyAbsent'
-    }
-
-    # Write: store a $null removal entry; roll back on failure
-    $previous = if ($script:BuildData.Settings.ContainsKey($key)) { $script:BuildData.Settings[$key] } else { $null }
-    $script:BuildData.Settings[$key] = @{
-        Name      = $Name
-        Path      = $Path
-        ValueName = $ValueName
-        ValueType = $ValueType
-        Value     = $null
-    }
-    try {
-        Export-BuildProfile
-    }
-    catch {
-        if ($null -eq $previous) { $script:BuildData.Settings.Remove($key) }
-        else                     { $script:BuildData.Settings[$key] = $previous }
-        Write-LogError $_
-        return 'RemoveFailed'
-    }
-
-    return 'Removed'
+    return 'Changed'
 }
 
 function Invoke-BuildSettingExclude {
@@ -2012,7 +1830,7 @@ function Invoke-BuildSettingExclude {
     .SYNOPSIS
         Removes a setting entry from the build profile entirely.
     .OUTPUTS
-        Returns 'Removed', 'AlreadyAbsent', or 'RemoveFailed'.
+        Returns 'Changed', 'Unchanged', or 'Failed'.
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -2026,7 +1844,7 @@ function Invoke-BuildSettingExclude {
     # Pre-check: return early if no entry exists
     $key = "$Path|$ValueName"
     if (-not $script:BuildData.Settings.ContainsKey($key)) {
-        return 'AlreadyAbsent'
+        return 'Unchanged'
     }
 
     # Remove: delete from in-memory store and persist to file; roll back on failure
@@ -2038,10 +1856,10 @@ function Invoke-BuildSettingExclude {
     catch {
         $script:BuildData.Settings[$key] = $previous
         Write-LogError $_
-        return 'RemoveFailed'
+        return 'Failed'
     }
 
-    return 'Removed'
+    return 'Changed'
 }
 
 #endregion
