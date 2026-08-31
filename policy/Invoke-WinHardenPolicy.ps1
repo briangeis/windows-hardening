@@ -139,8 +139,9 @@ $script:VerifyMaxRetries   = 100
 $script:VerifyRetryDelayMs = 50
 
 # Build Mode profile data: profile file contents held in memory for the session
-$script:IsBuildMode = $false
-$script:BuildData   = @{ Meta = @{}; Settings = @{} }
+$script:IsBuildMode      = $false
+$script:BuildData        = @{ Meta = @{}; Settings = @{} }
+$script:BuildProfilePath = $Build
 
 # Resolved log file path: generated from -LogPath or defaulted if omitted
 $script:LogPath = if (-not $LogPath) {
@@ -291,7 +292,9 @@ function Initialize-EditionContext {
         for Pro, Enterprise, Education, and LTSC editions.
     #>
     [CmdletBinding()]
-    param()
+    param(
+        [string]$LGPOPath
+    )
 
     function GetWindowsEdition {
         try {
@@ -309,12 +312,12 @@ function Initialize-EditionContext {
         }
     }
 
-    function ResolveLGPOPath {
+    function ResolveLGPOPath([string]$Path) {
         # If -LGPOPath was provided, treat it as a hard requirement
-        if ($LGPOPath) {
-            if (Test-Path $LGPOPath -PathType Leaf) { return $LGPOPath }
+        if ($Path) {
+            if (Test-Path $Path -PathType Leaf) { return $Path }
             $params = @{
-                Message = "LGPO.exe not found at the specified path: $LGPOPath"
+                Message = "LGPO.exe not found at the specified path: $Path"
                 Detail  = 'Verify the path is correct and the file exists.'
             }
             Write-FatalError @params
@@ -346,7 +349,7 @@ function Initialize-EditionContext {
     }
     else {
         $script:IsHomeEdition = $false
-        $script:LGPOExePath   = ResolveLGPOPath
+        $script:LGPOExePath   = ResolveLGPOPath $LGPOPath
     }
 }
 
@@ -1081,7 +1084,7 @@ function Invoke-Menu {
 
                 # Status line: mode plus the device (Interactive) or profile (Build)
                 $modeWord     = if ($script:IsBuildMode) { 'build' } else { 'interactive' }
-                $statusTarget = if ($script:IsBuildMode) { [System.IO.Path]::GetFileName($Build) } else { $script:HostName }
+                $statusTarget = if ($script:IsBuildMode) { [System.IO.Path]::GetFileName($script:BuildProfilePath) } else { $script:HostName }
                 $statusLine   = "$modeWord  -  $statusTarget"
 
                 Clear-Host
@@ -1255,7 +1258,7 @@ function Show-SettingDetail {
         Write-Host $hints -ForegroundColor DarkYellow
         Write-Host ''
         $modeWord     = if ($script:IsBuildMode) { 'build' } else { 'interactive' }
-        $statusTarget = if ($script:IsBuildMode) { [System.IO.Path]::GetFileName($Build) } else { $script:HostName }
+        $statusTarget = if ($script:IsBuildMode) { [System.IO.Path]::GetFileName($script:BuildProfilePath) } else { $script:HostName }
         Write-Host "  $modeWord  -  $statusTarget" -ForegroundColor DarkGray
 
         # Feedback: last line, below the status line, persisting until the next action
@@ -1698,8 +1701,8 @@ function Import-BuildProfile {
     # Start from the existing profile when present, otherwise empty
     $existingSource   = @()
     $existingSettings = @{}
-    if (Test-Path $Build -PathType Leaf) {
-        $profileData = Import-ProfileFile -Path $Build
+    if (Test-Path $script:BuildProfilePath -PathType Leaf) {
+        $profileData = Import-ProfileFile -Path $script:BuildProfilePath
         if ($profileData.ContainsKey('Meta') -and $profileData.Meta.ContainsKey('Source')) {
             $existingSource = @($profileData.Meta.Source)
         }
@@ -1747,7 +1750,7 @@ function Export-BuildProfile {
         Source      = $script:BuildData.Meta.Source
     }
 
-    Export-ProfileFile -Meta $meta -Entries $entries -OutputPath $Build
+    Export-ProfileFile -Meta $meta -Entries $entries -OutputPath $script:BuildProfilePath
 }
 
 function Get-BuildSettingCurrentValue {
@@ -1974,7 +1977,7 @@ switch ($PSCmdlet.ParameterSetName) {
 
         $definitions = Import-DefinitionsFile -Path $DefinitionsPath
 
-        Initialize-EditionContext
+        Initialize-EditionContext -LGPOPath $LGPOPath
 
         $snapshotPath = Get-SnapshotProfilePath
         Export-SnapshotProfile -Definitions $definitions -OutputPath $snapshotPath
@@ -1993,7 +1996,7 @@ switch ($PSCmdlet.ParameterSetName) {
             Write-FatalError 'Profile file contains no settings.'
         }
 
-        Initialize-EditionContext
+        Initialize-EditionContext -LGPOPath $LGPOPath
 
         Write-Host ''
         Write-Host "  Profile: $ProfilePath"
