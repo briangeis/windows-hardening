@@ -255,7 +255,7 @@ function Write-FatalError {
 
 #region PREREQUISITES
 
-function Test-Prerequisites {
+function Test-Prerequisite {
     <#
     .SYNOPSIS
         Validates that the script can run in the current environment.
@@ -1064,7 +1064,7 @@ function Invoke-Menu {
                 }
                 else {
                     foreach ($child in $children) {
-                        $counts = Get-SettingCounts -Node $child
+                        $counts = Get-SettingCount -Node $child
                         $items += @{
                             Name     = $child.Name
                             Trailing = @("  ($($counts.Selected)/$($counts.Total))", 'DarkGray')
@@ -1559,7 +1559,7 @@ function Invoke-ApplyAll {
     [void][Console]::ReadKey($true)
 }
 
-function Get-SettingCounts {
+function Get-SettingCount {
     <#
     .SYNOPSIS
         Counts the settings under a category or section,
@@ -1591,7 +1591,7 @@ function Get-SettingCounts {
     $total    = 0
     $children = if ($Node.Categories) { $Node.Categories } else { $Node.Sections }
     foreach ($child in $children) {
-        $c         = Get-SettingCounts -Node $child
+        $c         = Get-SettingCount -Node $child
         $selected += $c.Selected
         $total     += $c.Total
     }
@@ -1970,7 +1970,7 @@ function Export-SnapshotProfile {
 switch ($PSCmdlet.ParameterSetName) {
     'Interactive' {
         Write-LogSessionStart -Mode 'Interactive' -DefinitionsPath $DefinitionsPath
-        Test-Prerequisites -RequireElevation $true
+        Test-Prerequisite -RequireElevation $true
 
         $definitions = Import-DefinitionsFile -Path $DefinitionsPath
 
@@ -1985,7 +1985,7 @@ switch ($PSCmdlet.ParameterSetName) {
     }
     'Profile' {
         Write-LogSessionStart -Mode 'Profile' -ProfilePath $ProfilePath
-        Test-Prerequisites -RequireElevation $true
+        Test-Prerequisite -RequireElevation $true
 
         $profileData = Import-ProfileFile -Path $ProfilePath
 
@@ -2005,7 +2005,7 @@ switch ($PSCmdlet.ParameterSetName) {
     }
     'Build' {
         Write-LogSessionStart -Mode 'Build' -DefinitionsPath $DefinitionsPath -ProfilePath $Build
-        Test-Prerequisites -RequireElevation $false
+        Test-Prerequisite -RequireElevation $false
 
         $definitions = Import-DefinitionsFile -Path $DefinitionsPath
 
@@ -2017,7 +2017,7 @@ switch ($PSCmdlet.ParameterSetName) {
     }
     'Snapshot' {
         Write-LogSessionStart -Mode 'Snapshot' -DefinitionsPath $DefinitionsPath
-        Test-Prerequisites -RequireElevation $true
+        Test-Prerequisite -RequireElevation $true
 
         $definitions = Import-DefinitionsFile -Path $DefinitionsPath
 
