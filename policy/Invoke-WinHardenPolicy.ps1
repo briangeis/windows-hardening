@@ -155,7 +155,7 @@ $script:LogPath = if (-not $LogPath) {
 
 #region LOGGING
 
-function Write-Log {
+function Write-LogEntry {
     <#
     .SYNOPSIS
         Appends a timestamped entry to the persistent log file.
@@ -190,7 +190,7 @@ function Write-LogError {
     } else {
         'Registry operation'
     }
-    Write-Log "${source}: $ErrorRecord"
+    Write-LogEntry "${source}: $ErrorRecord"
 }
 
 function Write-LogSessionStart {
@@ -214,12 +214,12 @@ function Write-LogSessionStart {
         'Unknown OS'
     }
 
-    Write-Log "Session started - $script:HostName - $osInfo - $Mode Mode"
+    Write-LogEntry "Session started - $script:HostName - $osInfo - $Mode Mode"
     if ($DefinitionsPath) {
-        Write-Log "Definitions file: $DefinitionsPath"
+        Write-LogEntry "Definitions file: $DefinitionsPath"
     }
     if ($ProfilePath) {
-        Write-Log "Profile file: $ProfilePath"
+        Write-LogEntry "Profile file: $ProfilePath"
     }
 }
 
@@ -230,7 +230,7 @@ function Write-LogSessionEnd {
     #>
     [CmdletBinding()]
     param()
-    Write-Log "Session ended - $($script:ChangedCount) changed, $($script:FailedCount) failed"
+    Write-LogEntry "Session ended - $($script:ChangedCount) changed, $($script:FailedCount) failed"
 }
 
 function Write-FatalError {
@@ -244,7 +244,7 @@ function Write-FatalError {
         [string]$Message,
         [string]$Detail = ''
     )
-    Write-Log "ERROR: $Message"
+    Write-LogEntry "ERROR: $Message"
     Write-LogSessionEnd
     Write-Host "  [X] $Message" -ForegroundColor Red
     if ($Detail) { Write-Host "      $Detail" -ForegroundColor Red }
@@ -797,9 +797,9 @@ function Invoke-SettingApply {
         if ($read.Error) {
             Write-LogError $read.Error
         } elseif ($read.Exists) {
-            Write-Log "Verify: read $($read.Value), expected $expected"
+            Write-LogEntry "Verify: read $($read.Value), expected $expected"
         } else {
-            Write-Log "Verify: read (absent), expected $expected"
+            Write-LogEntry "Verify: read (absent), expected $expected"
         }
         $result.Outcome = 'VerifyFailed'
     }
@@ -908,12 +908,12 @@ function Invoke-LGPOApply {
         [System.IO.File]::WriteAllText($tempFile, $builder.ToString(), [System.Text.Encoding]::ASCII)
         $lgpoOutput = & $script:LGPOExePath /t $tempFile 2>&1
         if ($LASTEXITCODE -ne 0) {
-            Write-Log "LGPO.exe: $($lgpoOutput -join ' ')"
+            Write-LogEntry "LGPO.exe: $($lgpoOutput -join ' ')"
             return $false
         }
         $count = @($Settings).Count
         $noun  = if ($count -eq 1) { 'entry' } else { 'entries' }
-        Write-Log "LGPO.exe: $count $noun written to Local Group Policy"
+        Write-LogEntry "LGPO.exe: $count $noun written to Local Group Policy"
     }
     catch {
         Write-LogError $_
@@ -1285,7 +1285,7 @@ function Show-SettingDetail {
                 switch ($result.Outcome) {
                     'Changed' {
                         $script:ChangedCount++
-                        Write-Log "HARDENED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
+                        Write-LogEntry "HARDENED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
                         $statusMessage = if ($script:IsBuildMode) { 'Hardened value set in profile.' } else { 'Applied and verified.' }
                         $statusColor   = 'Green'
                     }
@@ -1297,13 +1297,13 @@ function Show-SettingDetail {
                     'VerifyFailed' {
                         # A profile write fails outright, so Build never reaches this case
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action verification failed"
+                        Write-LogEntry "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action verification failed"
                         $statusMessage = 'Applied but verification failed.'
                         $statusColor   = 'Red'
                     }
                     'Failed' {
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action failed"
+                        Write-LogEntry "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action failed"
                         $statusMessage = if ($script:IsBuildMode) { 'Failed to set the hardened value.' } else { 'Failed to apply.' }
                         $statusColor   = 'Red'
                     }
@@ -1326,7 +1326,7 @@ function Show-SettingDetail {
                 switch ($result.Outcome) {
                     'Changed' {
                         $script:ChangedCount++
-                        Write-Log "DEFAULT $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
+                        Write-LogEntry "DEFAULT $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
                         $statusMessage = if ($script:IsBuildMode) { 'Default value set in profile.' } else { 'Reset to default.' }
                         $statusColor   = 'Green'
                     }
@@ -1338,13 +1338,13 @@ function Show-SettingDetail {
                     'VerifyFailed' {
                         # A profile write fails outright, so Build never reaches this case
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action verification failed"
+                        Write-LogEntry "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action verification failed"
                         $statusMessage = 'Reset but verification failed.'
                         $statusColor   = 'Red'
                     }
                     'Failed' {
                         $script:FailedCount++
-                        Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action failed"
+                        Write-LogEntry "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | $action failed"
                         $statusMessage = if ($script:IsBuildMode) { 'Failed to set the default value.' } else { 'Failed to reset.' }
                         $statusColor   = 'Red'
                     }
@@ -1363,7 +1363,7 @@ function Show-SettingDetail {
                     switch ($result) {
                         'Changed' {
                             $script:ChangedCount++
-                            Write-Log "EXCLUDED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: (not in profile) | Verified"
+                            Write-LogEntry "EXCLUDED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Before: $beforeDisplay | After: (not in profile) | Verified"
                             $statusMessage = 'Excluded from profile.'
                             $statusColor   = 'Green'
                         }
@@ -1373,7 +1373,7 @@ function Show-SettingDetail {
                         }
                         'Failed' {
                             $script:FailedCount++
-                            Write-Log "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude failed"
+                            Write-LogEntry "FAILED $scopeLabel $($Setting.Name) | $($Setting.Path)\$($Setting.ValueName) | Exclude failed"
                             $statusMessage = 'Failed to exclude from profile.'
                             $statusColor   = 'Red'
                         }
@@ -1535,19 +1535,19 @@ function Invoke-ApplyAll {
                 $hardened++
                 $script:ChangedCount++
                 Write-Host "  [OK] $scopeLabel $($entry.Name)" -ForegroundColor Green
-                Write-Log "HARDENED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
+                Write-LogEntry "HARDENED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
             }
             'VerifyFailed' {
                 $failed++
                 $script:FailedCount++
                 Write-Host "  [!!] $scopeLabel $($entry.Name) - verification failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action verification failed"
+                Write-LogEntry "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action verification failed"
             }
             'Failed' {
                 $failed++
                 $script:FailedCount++
                 Write-Host "  [!!] $scopeLabel $($entry.Name) - $($action.ToLower()) failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action failed"
+                Write-LogEntry "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action failed"
             }
         }
     }
@@ -1654,7 +1654,7 @@ function Invoke-ProfileMode {
                 $changed++
                 $script:ChangedCount++
                 Write-Host "  [OK] $scopeLabel $($entry.Name) - $descriptor" -ForegroundColor Green
-                Write-Log "$token $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
+                Write-LogEntry "$token $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | Before: $beforeDisplay | After: $afterDisplay | Verified"
             }
             'Unchanged' {
                 # Non-Home always writes, so it never reports this
@@ -1664,13 +1664,13 @@ function Invoke-ProfileMode {
                 $failed++
                 $script:FailedCount++
                 Write-Host "  [!!] $scopeLabel $($entry.Name) - verification failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action verification failed"
+                Write-LogEntry "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action verification failed"
             }
             'Failed' {
                 $failed++
                 $script:FailedCount++
                 Write-Host "  [!!] $scopeLabel $($entry.Name) - $($action.ToLower()) failed" -ForegroundColor Red
-                Write-Log "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action failed"
+                Write-LogEntry "FAILED $scopeLabel $($entry.Name) | $($entry.Path)\$($entry.ValueName) | $action failed"
             }
         }
     }
@@ -1937,7 +1937,7 @@ function Export-SnapshotProfile {
 
         # Omit on a persistent error: a false absence would remove it on apply
         if ($current.Error) {
-            Write-Log "Snapshot: read failed for $($setting.Name), setting omitted: $($current.Error)"
+            Write-LogEntry "Snapshot: read failed for $($setting.Name), setting omitted: $($current.Error)"
             continue
         }
 
@@ -1960,7 +1960,7 @@ function Export-SnapshotProfile {
     }
 
     Export-ProfileFile -Meta $meta -Entries $entries -OutputPath $OutputPath
-    Write-Log "Snapshot saved: $OutputPath"
+    Write-LogEntry "Snapshot saved: $OutputPath"
 }
 
 #endregion
