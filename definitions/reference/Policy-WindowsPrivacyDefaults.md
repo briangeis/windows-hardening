@@ -145,7 +145,7 @@ Blocking DRM internet access prevents Windows Media DRM clients from acquiring o
 
 ### Disable Hibernation and Disable Fast Startup (Data at Rest)
 
-Setting `HibernateEnabled` to `0` prevents new hibernation writes but does not remove the existing `hiberfile.sys`. The file may contain a RAM snapshot from the most recent shutdown, including browser sessions and application data. Run `powercfg /H off` separately to disable hibernation and remove the file. Fast Startup depends on the same hibernation infrastructure and should be disabled alongside it. Applying **Disable Fast Startup** without first disabling hibernation may allow Fast Startup to re-activate.
+Setting `HibernateEnabled` to `0` prevents new hibernation writes but does not remove the existing `hiberfile.sys`. The file may contain a RAM snapshot from the most recent shutdown, including browser sessions and application data. Run `powercfg /H off` separately to disable hibernation and remove the file. **Disable Fast Startup** takes effect on its own and does not require hibernation to be disabled first, since the two settings write independent values in separate keys. What disabling hibernation adds is durability rather than efficacy: while hibernation is enabled, Fast Startup stays available in Control Panel and `powercfg /H on` restores `HiberbootEnabled` to `1`. Disabling hibernation removes the feature outright, so nothing remains to re-enable. On a device that keeps hibernation, which is the common case on a laptop, treat Fast Startup as a setting to re-verify after power configuration changes.
 
 ## Interdependent Settings
 

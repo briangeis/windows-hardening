@@ -290,7 +290,7 @@
                             DefaultValue  = 1
                             GPOPath       = $null
                             GPOState      = $null
-                            Caution       = 'Applying without Disable Hibernation may let Fast Startup re-activate.'
+                            Caution       = 'May be re-enabled by power configuration changes if hibernation is on.'
                         }
                         @{
                             Name          = 'Disable Indexing of Encrypted Files'
