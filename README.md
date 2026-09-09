@@ -56,6 +56,14 @@ Each curated profile is a ready-to-apply configuration for a target such as Wind
 
 The full list of available profiles is maintained in [profiles/](profiles/).
 
+## Compliance Mappings
+
+Each compliance mapping records how a curated profile relates to the controls of a named security and privacy framework, written for a system owner or assessor accounting for control coverage. Where the profiles record what to apply and why, a mapping records what the applied result contributes against a framework and what it leaves unaddressed.
+
+[Policy-Windows-NIST-800-53.md](compliance/Policy-Windows-NIST-800-53.md) maps the 134 settings of the Windows base profile and the No Store Apps layer to NIST SP 800-53 Revision 5, Release 5.2.0. It records which control objectives the baseline supports and which it leaves unaddressed, which settings do not take effect on which Windows versions and editions, the five settings that improve one control objective at the cost of another, and the 28 catalog settings the baseline declines, each with the control objective the exclusion protects.
+
+The full list of available mappings is maintained in [compliance/](compliance/).
+
 ## Setup
 
 Run PowerShell as Administrator, then enter the following commands in order.
