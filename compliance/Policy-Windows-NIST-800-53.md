@@ -9,7 +9,7 @@ Mapping of the curated Windows configuration baseline to the security and privac
 <tr><td><b>Target</b></td><td>Windows 11 25H2, standalone and not joined to a domain</td></tr>
 <tr><td><b>Settings</b></td><td>134 (112 base, 22 layer)</td></tr>
 <tr><td><b>Author</b></td><td>Brian Geis</td></tr>
-<tr><td><b>Version</b></td><td>1.1</td></tr>
+<tr><td><b>Version</b></td><td>1.2</td></tr>
 <tr><td><b>Reviewed</b></td><td>2026-09-10</td></tr>
 </table>
 
@@ -579,7 +579,11 @@ Several of these are unaddressable by device configuration on a standalone syste
 
 ## 7. Where the Baseline Works Against a Control Objective
 
-Seven settings improve one control objective at the cost of another. The five cases below cover the substantial ones, together with Find My Device, whose cost no control covers directly. All are deliberate, and all should reach a system owner before the baseline is applied rather than being discovered during assessment.
+Nine settings carry a cost alongside their benefit. For seven of them the cost falls on another control objective. For the other two, Find My Device and `Disable Disk Health Model Updates`, it falls on a capability no control covers.
+
+Five cases below treat the substantial ones. The two smallest degradations, `Disable Enhanced Notifications` and `Disable Disk Health Model Updates`, are noted at the end of the section rather than given a case of their own.
+
+All are deliberate, and all should reach a system owner before the baseline is applied rather than being discovered during assessment.
 
 ### 7.1 Defender Cloud Protection
 
@@ -615,7 +619,7 @@ Crash dumps written to disk before the setting is applied are not removed. A sys
 
 **Verdict: the cost is nil in context.** This setting is in the No Store Apps layer, and the same layer disables Store applications entirely. An application that cannot launch does not need patching. This is worth stating because it demonstrates that a layer is internally coherent rather than a collection of related settings, and because the same setting applied without the rest of the layer would carry a real SI-2 cost.
 
-Two minor degradations are noted without a section of their own. `Disable Enhanced Notifications` reduces Defender alerting to the user, a small SI-4 reduction. `Disable Disk Health Model Updates` removes a failure-prediction data feed, an availability rather than a security cost.
+`Disable Enhanced Notifications` reduces Defender alerting to the user, a small SI-4 reduction. `Disable Disk Health Model Updates` removes a failure-prediction data feed, an availability rather than a security cost.
 
 ## 8. Settings the Baseline Declines
 
@@ -706,3 +710,4 @@ Settings in `Policy-WindowsPrivacyDefaults` were identified and verified through
 |:-------:|------------|--------|
 | 1.0     | 2026-09-09 | Initial issue |
 | 1.1     | 2026-09-10 | Corrected control counts and characterizations. Conclusions unchanged |
+| 1.2     | 2026-09-10 | Clarified section 7 membership. Counts and conclusions unchanged |
