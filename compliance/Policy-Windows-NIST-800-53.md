@@ -9,8 +9,8 @@ Mapping of the curated Windows configuration baseline to the security and privac
 <tr><td><b>Target</b></td><td>Windows 11 25H2, standalone and not joined to a domain</td></tr>
 <tr><td><b>Settings</b></td><td>134 (112 base, 22 layer)</td></tr>
 <tr><td><b>Author</b></td><td>Brian Geis</td></tr>
-<tr><td><b>Version</b></td><td>1.0</td></tr>
-<tr><td><b>Reviewed</b></td><td>2026-09-09</td></tr>
+<tr><td><b>Version</b></td><td>1.1</td></tr>
+<tr><td><b>Reviewed</b></td><td>2026-09-10</td></tr>
 </table>
 
 ## Contents
@@ -72,13 +72,13 @@ Mapping of the curated Windows configuration baseline to the security and privac
 
 The curated Windows baseline applies 134 configuration settings to a standalone Windows device: 112 in the base profile and 22 in the optional No Store Apps layer. This document maps each to the NIST SP 800-53 control objectives it advances, with the largest concentrations in personally identifiable information processing purposes (PT-3), least functionality (CM-7), and boundary protection (SC-7). Four findings bear on how that coverage should be read.
 
-**Most of what this baseline contributes is against organization-implemented controls.** NIST designates PT-3 and SI-12 as organization-implemented, and together they carry 48 of the 134 assignments. A device configuration can support those objectives and can never satisfy them. Any assessment crediting this baseline needs the organizational half supplied separately, and [Section 6.1](#61-control-origination) gives the split for every control cited.
+**Only 25 of the 134 assignments are against controls a system implements on its own.** NIST marks 64 organization-implemented and the remaining 45 both, including all 38 for PT-3 and all 10 for SI-12. A device configuration can support those objectives and can never satisfy them alone. Any assessment crediting this baseline needs the organizational half supplied separately, and [Section 6.1](#61-control-origination) gives the split for every control cited.
 
 **Twenty-one settings do not take effect on a current Windows 11 device.** The baseline serves Windows 10 and Windows 11 from one profile deliberately, so it carries settings that take no effect on newer builds, and others conditional on hardware or licensing. Coverage should be read against the configuration being assessed rather than the count applied. The conditions are enumerated per setting in [Section 6.2](#62-scoping-considerations).
 
 **Enforcement differs by Windows edition, and the difference is substantial.** On Pro and higher, 123 of the 134 settings are written to Local Group Policy and re-applied at every policy refresh, so a manual change is reverted. On Home, and for the 11 settings that fall outside the policy branches on any edition, the write happens once and nothing re-asserts it. [Section 3.3](#33-enforcement-mechanism) and [Section 9](#9-notes-for-assessors) set out what each case does and does not demonstrate.
 
-**Five settings improve one control objective at the cost of another, and 28 catalog settings are declined rather than applied.** Both sets are deliberate and both are recorded with the reasoning, in [Section 7](#7-where-the-baseline-works-against-a-control-objective) and [Section 8](#8-settings-the-baseline-declines). Each exclusion names the control objective it protects, and the declined set includes every setting that would break clock synchronization, certificate trust, or security patching, none of which this baseline trades for privacy.
+**Seven settings improve one control objective at the cost of another, and 28 catalog settings are declined rather than applied.** Both sets are deliberate and both are recorded with the reasoning, in [Section 7](#7-where-the-baseline-works-against-a-control-objective) and [Section 8](#8-settings-the-baseline-declines). Each exclusion names the control objective it protects, and the declined set includes every setting that would break clock synchronization, certificate trust, or security patching, none of which this baseline trades for privacy.
 
 Taken together, the baseline is a device-layer contribution to a control program rather than a substitute for one. It does what device configuration can do, and records where that ends.
 
@@ -104,7 +104,7 @@ This document makes a deliberately narrow claim.
 
 **It asserts** that applying a given setting advances the stated control objective on the target device, and identifies where a setting advances only part of an objective or advances it incidentally.
 
-**It does not assert** that the baseline satisfies any control, that a device applying the baseline is compliant with any framework, or that this mapping constitutes an assessment. It issues no findings. Control satisfaction depends on organizational policy, procedure, monitoring, and evidence that a device configuration cannot supply, and [Section 6.1](#61-control-origination) shows that the majority of this baseline's contributions are against controls NIST designates as organization-implemented.
+**It does not assert** that the baseline satisfies any control, that a device applying the baseline is compliant with any framework, or that this mapping constitutes an assessment. It issues no findings. Whether a control is satisfied depends on organizational policy, procedure, monitoring, and evidence that a device configuration cannot supply, and [Section 6.1](#61-control-origination) shows how much of this baseline's contribution is against controls NIST designates as organization-implemented.
 
 The verb throughout is **supports**. A configuration setting contributes to a control objective. It does not satisfy a control. The word *satisfies* appears in this document only in explicit negation.
 
@@ -375,7 +375,7 @@ Narratives are provided for the controls carrying the most weight in this baseli
 
 ### 5.1 PT-3, Personally Identifiable Information Processing Purposes
 
-**38 settings, the largest grouping in the baseline. Origination: O.**
+**38 settings and 60 citations, the largest grouping in the baseline. Origination: O.**
 
 PT-3 has four elements. The baseline reaches exactly one of them.
 
@@ -424,7 +424,7 @@ SI-12 requires managing and retaining information in accordance with applicable 
 
 The control is organization-implemented, and the gap is worth naming. SI-12 asks an organization to determine retention requirements and manage information against them. The baseline supplies no retention determination. It removes accumulation the user did not ask for and could not easily inspect, which supports the objective without meeting it.
 
-`Disable Clipboard History` is the setting most worth surfacing to a system owner. A clipboard retains whatever was copied into it, which routinely includes credentials pasted from a password manager, and also personal, payment, and employee data. The retention is invisible and the exposure is broad.
+`Disable Clipboard History` is the setting here a system owner most needs to know about. A clipboard retains whatever was copied into it, which routinely includes credentials pasted from a password manager, and also personal, payment, and employee data. The retention is invisible and the exposure is broad.
 
 ### 5.5 AC-20, Use of External Systems
 
@@ -467,7 +467,7 @@ The first control for these settings is PT-3, because the objective they serve i
 
 `Disable Local Account Security Questions` supports IA-5, Authenticator Management, by removing the security-question recovery mechanism for local accounts. Security questions are a weak authenticator: answers are frequently discoverable, are not revocable, and are reused across services. Removing the mechanism eliminates an alternate authentication path weaker than the primary one.
 
-`Disable Lock Screen App Notifications` is assigned to AC-11(1) as a partial contribution, and the limit should be stated. AC-11(1), Pattern-Hiding Displays, requires concealing information *previously visible* on the display. Notifications rendered after the device locks are new information, not previously visible information, so the control text does not squarely cover the behavior. The objective is nonetheless served: an email notification exposes sender, subject, and time to an unauthenticated observer, which in a sensitive environment is disclosure on its own. No Rev. 5 control addresses post-lock notification rendering directly, and AC-11(1) is the nearest.
+`Disable Lock Screen App Notifications` is assigned to AC-11(1) as a partial contribution, and the limit should be stated. AC-11(1), Pattern-Hiding Displays, requires concealing information *previously visible* on the display. Notifications rendered after the device locks are new information, not previously visible information, so the control text does not directly cover the behavior. The objective is nonetheless served: an email notification exposes sender, subject, and time to an unauthenticated observer, which in a sensitive environment is disclosure on its own. No Rev. 5 control addresses post-lock notification rendering directly, and AC-11(1) is the nearest.
 
 `Deny Voice Activation Above Lock` supports AC-11 directly, preventing microphone interaction with a locked device.
 
@@ -525,7 +525,9 @@ NIST designates every control as organization-implemented (`O`), system-implemen
 
 `First` counts settings whose primary assignment is the row. `All` includes partial and incidental contributions.
 
-**The two largest groupings are organization-implemented.** PT-3 carries 38 first assignments and SI-12 carries 10, and NIST marks both `O`. Together that is 36 percent of the baseline supporting controls that no device configuration can implement. This is the honest headline of the coverage analysis, and it is more useful than a percentage: it tells a system owner that the majority of what this baseline contributes must be paired with organizational process to become control satisfaction.
+**Only 25 of the 134 assignments are against controls a system implements on its own.** Of the rest, 64 fall on controls NIST marks `O` and 45 on controls marked `O/S`. PT-3 and SI-12 are the two largest organization-implemented groupings and carry 48 between them.
+
+This is the honest headline of the coverage analysis, and it is more useful than a coverage percentage, because it tells a system owner how much of what this baseline contributes must be paired with organizational process before any control is satisfied.
 
 `MP-7` deserves the same caution. It is organization-implemented, so the three interdependent AutoPlay settings support it and do not address it.
 
@@ -577,7 +579,7 @@ Several of these are unaddressable by device configuration on a standalone syste
 
 ## 7. Where the Baseline Works Against a Control Objective
 
-Five settings improve one control objective at the cost of another. All are deliberate, and all should be surfaced to a system owner before the baseline is applied rather than discovered during assessment.
+Seven settings improve one control objective at the cost of another. The five cases below cover the substantial ones, together with Find My Device, whose cost no control covers directly. All are deliberate, and all should reach a system owner before the baseline is applied rather than being discovered during assessment.
 
 ### 7.1 Defender Cloud Protection
 
@@ -605,7 +607,7 @@ Crash dumps written to disk before the setting is applied are not removed. A sys
 
 `Disable Find My Device` supports PT-3 and contributes to SC-42 by closing a continuous, high-sensitivity location stream. The cost is device recovery capability after theft.
 
-**Verdict: the privacy cost is continuous and the recovery benefit is conditional**, requiring both location services and a Microsoft account, and mattering mainly on portable devices. Worth noting that the cost side of this trade has no control counterpart in SP 800-53. Device recovery is not a control objective, so a coverage table alone would make this decision look free when it is not.
+**Verdict: the privacy cost is continuous and the recovery benefit is conditional**, requiring both location services and a Microsoft account, and mattering mainly on portable devices. The nearest control on the cost side is PE-20, Asset Monitoring and Tracking, which employs asset location technologies to track assets within organization-defined controlled areas. The mapping does not assign it. Find My Device recovers a device that has left, where PE-20 concerns assets remaining in authorized locations, and the fit is too loose to credit. It is worth naming because PE-20's own discussion directs organizations to consult privacy counsel before deploying asset location technologies, which is the same tension this setting resolves in the other direction.
 
 ### 7.5 Store Application Updates
 
@@ -700,6 +702,7 @@ Settings in `Policy-WindowsPrivacyDefaults` were identified and verified through
 
 ## 12. Revision History
 
-| Version | Date       | Change        |
-|:-------:|------------|---------------|
+| Version | Date       | Change |
+|:-------:|------------|--------|
 | 1.0     | 2026-09-09 | Initial issue |
+| 1.1     | 2026-09-10 | Corrected control counts and characterizations. Conclusions unchanged |
