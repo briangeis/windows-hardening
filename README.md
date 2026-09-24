@@ -60,7 +60,9 @@ The full list of available profiles is maintained in [profiles/](profiles/).
 
 Each compliance mapping records how a curated profile relates to the controls of a named security and privacy framework, written for a system owner or assessor accounting for control coverage. Where the profiles record what to apply and why, a mapping records what the applied result contributes against a framework and what it leaves unaddressed.
 
-[Policy-Windows-NIST-800-53.md](compliance/Policy-Windows-NIST-800-53.md) maps the 134 settings of the Windows base profile and the No Store Apps layer to NIST SP 800-53 Revision 5, Release 5.2.0. It records which control objectives the baseline supports and which it leaves unaddressed, which settings do not take effect on which Windows versions and editions, the seven settings that improve one control objective at the cost of another, and the 28 catalog settings the baseline declines, each with the control objective the exclusion protects.
+[Policy-Windows-NIST-800-53.md](compliance/Policy-Windows-NIST-800-53.md) maps the 134 settings of the Windows base profile and the No Store Apps layer to NIST SP 800-53 Revision 5, Release 5.2.0. It records which control objectives the baseline supports and which it leaves unaddressed, which settings do not take effect on which Windows versions and editions, the six settings that improve one control objective at the cost of another, and the 28 catalog settings the baseline declines, each with the control objective the exclusion protects.
+
+[Policy-Windows-NIST-800-171.md](compliance/Policy-Windows-NIST-800-171.md) is its companion for NIST SP 800-171 Revision 2, the requirements CMMC Level 2 assesses, organized by requirement. It records which assessment objectives the baseline reaches and which remain the organization's, how each setting's 800-53 assignment carried into 800-171, the 34 settings that close a channel able to carry Controlled Unclassified Information, and the verdicts that change under 800-171.
 
 The full list of available mappings is maintained in [compliance/](compliance/).
 
