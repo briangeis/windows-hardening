@@ -9,8 +9,8 @@ Mapping of the curated Windows configuration baseline to the security and privac
 <tr><td><b>Target</b></td><td>Windows 11 25H2, standalone and not joined to a domain</td></tr>
 <tr><td><b>Settings</b></td><td>134 (112 base, 22 layer)</td></tr>
 <tr><td><b>Author</b></td><td>Brian Geis</td></tr>
-<tr><td><b>Version</b></td><td>1.2</td></tr>
-<tr><td><b>Reviewed</b></td><td>2026-09-10</td></tr>
+<tr><td><b>Version</b></td><td>1.3</td></tr>
+<tr><td><b>Reviewed</b></td><td>2026-09-23</td></tr>
 </table>
 
 ## Contents
@@ -56,10 +56,9 @@ Mapping of the curated Windows configuration baseline to the security and privac
 &nbsp;&nbsp;6.3 [Controls Not Addressed](#63-controls-not-addressed)  
 7. [Where the Baseline Works Against a Control Objective](#7-where-the-baseline-works-against-a-control-objective)  
 &nbsp;&nbsp;7.1 [Defender Cloud Protection](#71-defender-cloud-protection)  
-&nbsp;&nbsp;7.2 [Windows Error Reporting](#72-windows-error-reporting)  
-&nbsp;&nbsp;7.3 [SmartScreen for Store Apps and Internet Explorer](#73-smartscreen-for-store-apps-and-internet-explorer)  
-&nbsp;&nbsp;7.4 [Find My Device](#74-find-my-device)  
-&nbsp;&nbsp;7.5 [Store Application Updates](#75-store-application-updates)  
+&nbsp;&nbsp;7.2 [SmartScreen for Store Apps and Internet Explorer](#72-smartscreen-for-store-apps-and-internet-explorer)  
+&nbsp;&nbsp;7.3 [Find My Device](#73-find-my-device)  
+&nbsp;&nbsp;7.4 [Store Application Updates](#74-store-application-updates)  
 8. [Settings the Baseline Declines](#8-settings-the-baseline-declines)  
 &nbsp;&nbsp;8.1 [Windows Update](#81-windows-update)  
 &nbsp;&nbsp;8.2 [Time Synchronization and Trust Anchors](#82-time-synchronization-and-trust-anchors)  
@@ -72,13 +71,13 @@ Mapping of the curated Windows configuration baseline to the security and privac
 
 The curated Windows baseline applies 134 configuration settings to a standalone Windows device: 112 in the base profile and 22 in the optional No Store Apps layer. This document maps each to the NIST SP 800-53 control objectives it advances, with the largest concentrations in personally identifiable information processing purposes (PT-3), least functionality (CM-7), and boundary protection (SC-7). Four findings bear on how that coverage should be read.
 
-**Only 25 of the 134 assignments are against controls a system implements on its own.** NIST marks 64 organization-implemented and the remaining 45 both, including all 38 for PT-3 and all 10 for SI-12. A device configuration can support those objectives and can never satisfy them alone. Any assessment crediting this baseline needs the organizational half supplied separately, and [Section 6.1](#61-control-origination) gives the split for every control cited.
+**Only 25 of the 134 assignments are against controls a system implements on its own.** NIST marks 64 organization-implemented, including all 38 for PT-3 and all 10 for SI-12, and the remaining 45 both. A device configuration can support those objectives and can never satisfy them alone. Any assessment crediting this baseline needs the organizational half supplied separately, and [Section 6.1](#61-control-origination) gives the split for every control cited.
 
 **Twenty-one settings do not take effect on a current Windows 11 device.** The baseline serves Windows 10 and Windows 11 from one profile deliberately, so it carries settings that take no effect on newer builds, and others conditional on hardware or licensing. Coverage should be read against the configuration being assessed rather than the count applied. The conditions are enumerated per setting in [Section 6.2](#62-scoping-considerations).
 
 **Enforcement differs by Windows edition, and the difference is substantial.** On Pro and higher, 123 of the 134 settings are written to Local Group Policy and re-applied at every policy refresh, so a manual change is reverted. On Home, and for the 11 settings that fall outside the policy branches on any edition, the write happens once and nothing re-asserts it. [Section 3.3](#33-enforcement-mechanism) and [Section 9](#9-notes-for-assessors) set out what each case does and does not demonstrate.
 
-**Seven settings improve one control objective at the cost of another, and 28 catalog settings are declined rather than applied.** Both sets are deliberate and both are recorded with the reasoning, in [Section 7](#7-where-the-baseline-works-against-a-control-objective) and [Section 8](#8-settings-the-baseline-declines). Each exclusion names the control objective it protects, and the declined set includes every setting that would break clock synchronization, certificate trust, or security patching, none of which this baseline trades for privacy.
+**Six settings improve one control objective at the cost of another, and 28 catalog settings are declined rather than applied.** Both sets are deliberate and both are recorded with the reasoning, in [Section 7](#7-where-the-baseline-works-against-a-control-objective) and [Section 8](#8-settings-the-baseline-declines). Each exclusion names the control objective it protects, and the declined set includes every setting that would break clock synchronization, certificate trust, or security patching, none of which this baseline trades for privacy.
 
 Taken together, the baseline is a device-layer contribution to a control program rather than a substitute for one. It does what device configuration can do, and records where that ends.
 
@@ -115,7 +114,7 @@ Assignments were made by reading the control text and its assessment objectives,
 This is a **supportive relationship mapping** in the sense of NIST IR 8278A Rev. 1: it records how a supporting concept, a configuration setting, helps achieve a supported concept, a control. The set-theory relationships of the OLIR program do not apply, because a registry setting is not a subset, superset, or equivalent of a control. The strength scale is defined here:
 
 | Relationship       | Meaning |
-|:------------------:|---------|
+|--------------------|---------|
 | Supports           | Advances the control objective directly and materially |
 | Partially supports | Advances one element of a multi-element objective |
 | Incidental         | Advances the objective as a side effect of a different primary purpose |
@@ -148,10 +147,10 @@ On Home edition, where Local Group Policy is unavailable, the toolkit writes reg
 
 That is a continuously operating enforcement mechanism, and it covers most of the baseline:
 
-| Registry location                                    | Settings | Behavior after application |
-|------------------------------------------------------|:--------:|----------------------------|
-| Under a `\Policies\` key                             | 123      | Managed by Group Policy and re-applied at every refresh on non-Home editions |
-| Outside the `\Policies\` keys                        | 11       | Written once and not re-asserted on any edition |
+| Registry location             | Settings | Behavior after application |
+|-------------------------------|:--------:|----------------------------|
+| Under a `\Policies\` key      | 123      | Managed by Group Policy and re-applied at every refresh on non-Home editions |
+| Outside the `\Policies\` keys | 11       | Written once and not re-asserted on any edition |
 
 The 11 exceptions are settings whose target values do not live under a policy branch, so Group Policy does not manage them even where it applied them: `Disable Fast Startup`, `Disable Advertising ID (Feature)`, `Disable App Launch Tracking`, `Disable Language List Access`, `Disable License Manager Service`, `Disable Microsoft Account Sign-In Assistant`, `Disable OneDrive Network Traffic Before Sign-In`, `Disable SmartScreen for Store Apps`, `Disable ActiveX VersionList Download`, `Set Feedback Period to Zero`, and `Set Feedback Count to Zero`. These behave on every edition the way the whole baseline behaves on Home.
 
@@ -163,13 +162,13 @@ Local Group Policy is superseded by domain policy where one exists, so this enfo
 
 Some controls are supported by the toolkit's artifacts rather than by any individual setting. These are reported separately and are **not** counted among the 134 setting assignments, because folding a different kind of claim into the setting counts would inflate the coverage figures.
 
-| Control                                       | Origination | Artifact and contribution |
-|:---------------------------------------------:|:-----------:|---------------------------|
-| CM-2 Baseline Configuration                   | O           | The curated profile is a documented, version-controlled configuration baseline for the device. Supports CM-2a |
-| CM-2(3) Retention of Previous Configurations  | O           | Snapshot Mode captures system state before any change, retaining the prior configuration to support rollback |
-| CM-6 Configuration Settings                   | O/S         | The definitions files are the documented setting catalog, the profiles establish the baseline, the scripts implement it. Supports CM-6a and CM-6b |
-| CM-6 Configuration Settings                   | O/S         | The profile reference documents identify and document 28 deviations from the catalog with reasons. Supports CM-6c. Approval remains organizational |
-| CM-3 Configuration Change Control             | O           | Snapshot comparison provides the record against which configuration change can be identified. Incidental, and detection is manual on Home. On non-Home editions Group Policy reverts unauthorized change to the 123 managed settings without detection being required |
+| Control                                      | Origination | Artifact and contribution |
+|----------------------------------------------|:-----------:|---------------------------|
+| CM-2 Baseline Configuration                  | O           | The curated profile is a documented, version-controlled configuration baseline for the device. Supports CM-2a |
+| CM-2(3) Retention of Previous Configurations | O           | Snapshot Mode captures system state before any change, retaining the prior configuration to support rollback |
+| CM-6 Configuration Settings                  | O/S         | The definitions files are the documented setting catalog, the profiles establish the baseline, the scripts implement it. Supports CM-6a and CM-6b |
+| CM-6 Configuration Settings                  | O/S         | The profile reference documents identify and document 28 deviations from the catalog with reasons. Supports CM-6c. Approval remains organizational |
+| CM-3 Configuration Change Control            | O           | Snapshot comparison provides the record against which configuration change can be identified. Incidental, and detection is manual on Home. On non-Home editions Group Policy reverts unauthorized change to the 123 managed settings without detection being required |
 
 ## 4. Control Mapping
 
@@ -235,7 +234,7 @@ Settings are grouped by their category in the definitions files. `Profile` ident
 | Deny App Access to Notifications   | Base    | PT-3    | Supports     | SI-12 (incidental)         |
 | Deny Voice Activation              | Base    | PT-3    | Supports     | SC-15 (partially supports) |
 | Deny Voice Activation Above Lock   | Base    | AC-11   | Supports     | SC-15 (supports)           |
-| Deny App Access to Tasks           | Base    | PT-3    | Supports     | -                          |
+| Deny App Access to Tasks           | Base    | PT-3    | Supports     | AC-3 (partially supports)  |
 | Deny App Access to Diagnostics     | Base    | AC-3    | Supports     | CM-7 (partially supports)  |
 
 ### 4.4 Windows Features
@@ -379,16 +378,16 @@ Narratives are provided for the controls carrying the most weight in this baseli
 
 PT-3 has four elements. The baseline reaches exactly one of them.
 
-| Element | Requirement | Baseline |
-|---------|-------------|----------|
-| PT-3a   | Identify and document the purposes for processing PII | Organizational |
-| PT-3b   | Describe the purposes in public privacy notices and policies | Organizational |
+| Element | Requirement                                                                   | Baseline                             |
+|---------|-------------------------------------------------------------------------------|--------------------------------------|
+| PT-3a   | Identify and document the purposes for processing PII                         | Organizational                       |
+| PT-3b   | Describe the purposes in public privacy notices and policies                  | Organizational                       |
 | PT-3c   | Restrict processing of PII to what is compatible with the identified purposes | All 38 settings support this element |
-| PT-3d   | Monitor changes in processing and implement mechanisms accordingly | Organizational |
+| PT-3d   | Monitor changes in processing and implement mechanisms accordingly            | Organizational                       |
 
 Every PT-3 contribution in this baseline lands on element (c), which is purpose limitation in the privacy sense: processing is confined to what the identified purpose supports. That is a more useful statement than any count, and it is the shape of most contributions here: the device can restrict processing, and it cannot identify purposes, publish notices, or monitor change.
 
-The settings fall into three groups by mechanism. **Collection channels operating outside the diagnostic pipeline**: Windows Error Reporting, Application Impact Telemetry, and the inventory collector each route data to Microsoft through mechanisms unaffected by the `AllowTelemetry` level. Disabling them closes paths that remain open when diagnostic data is already at its minimum, which is the most consequential contribution in the file because it addresses exposure a system owner would reasonably believe was already closed. **Data minimization within retained collection**: excluding the device name, limiting diagnostic log collection, and limiting dump collection reduce what is retained and transmitted where collection cannot be disabled. **On-device records accumulating without user action**: document and application history, search history, and clipboard history, addressed under SI-12 where retention is the objective.
+The settings fall into three groups by mechanism. **Collection channels with policies of their own**: Windows Error Reporting, Application Impact Telemetry, and the inventory collector each have a policy separate from the `AllowTelemetry` level, and disabling one closes that channel whatever the level permits. That is the most consequential contribution in the file, because it addresses exposure a system owner would reasonably believe was already closed. **Data minimization within retained collection**: excluding the device name, limiting diagnostic log collection, and limiting dump collection reduce what is retained and transmitted where collection cannot be disabled. **On-device records accumulating without user action**: document and application history, search history, and clipboard history, addressed under SI-12 where retention is the objective.
 
 `Exclude Device Name from Diagnostic Data` is assigned to SI-19, De-identification, rather than to PT-3 as its first control. SI-19a requires removing identifying elements from datasets, which is precisely what the setting does to a telemetry payload. SI-19b, evaluating the effectiveness of de-identification, is organizational and untouched.
 
@@ -497,31 +496,31 @@ The larger CM-6 contribution is at the artifact level rather than the setting le
 
 NIST designates every control as organization-implemented (`O`), system-implemented (`S`), or both (`O/S`), carried in the OSCAL catalog as an implementation level. This is the framework's own position on the responsibility split, and it is the most important structural fact about this baseline.
 
-| Control  | Title                                            | First | All | Origination |
-|:--------:|--------------------------------------------------|:-----:|:---:|:-----------:|
-| PT-3     | Personally Identifiable Information Processing Purposes | 38 | 60 | O    |
-| CM-7     | Least Functionality                              |    38 |  48 | O/S         |
-| SC-7     | Boundary Protection                              |    19 |  24 | S           |
-| SI-12    | Information Management and Retention             |    10 |  14 | O           |
-| AC-20    | Use of External Systems                          |     8 |  10 | O           |
-| CM-6     | Configuration Settings                           |     4 |   6 | O/S         |
-| CM-3     | Configuration Change Control                     |     3 |   3 | O           |
-| MP-7     | Media Use                                        |     3 |   3 | O           |
-| SC-28    | Protection of Information at Rest                |     3 |   3 | S           |
-| AC-3     | Access Enforcement                               |     1 |   9 | S           |
-| AC-11    | Device Lock                                      |     1 |   2 | S           |
-| IA-5     | Authenticator Management                         |     1 |   2 | O/S         |
-| AC-11(1) | Device Lock, Pattern-Hiding Displays             |     1 |   1 | S           |
-| CM-11    | User-Installed Software                          |     1 |   1 | O           |
-| IA-11    | Re-authentication                                |     1 |   1 | O/S         |
-| SC-18    | Mobile Code                                      |     1 |   1 | O           |
-| SI-19    | De-identification                                |     1 |   1 | O/S         |
-| SC-42    | Sensor Capability and Data                       |     0 |   6 | S           |
-| SC-15    | Collaborative Computing Devices and Applications |     0 |   4 | S           |
-| SI-3     | Malicious Code Protection                        |     0 |   3 | O/S         |
-| SI-7     | Software, Firmware, and Information Integrity    |     0 |   2 | O/S         |
-| CM-10    | Software Usage Restrictions                      |     0 |   1 | O           |
-| Total    |                                                  |   134 | 205 |             |
+| Control  | Title                                                   | First | All | Origination |
+|----------|---------------------------------------------------------|:-----:|:---:|:-----------:|
+| PT-3     | Personally Identifiable Information Processing Purposes | 38    | 60  | O           |
+| CM-7     | Least Functionality                                     | 38    | 48  | O/S         |
+| SC-7     | Boundary Protection                                     | 19    | 24  | S           |
+| SI-12    | Information Management and Retention                    | 10    | 14  | O           |
+| AC-20    | Use of External Systems                                 | 8     | 10  | O           |
+| CM-6     | Configuration Settings                                  | 4     | 6   | O/S         |
+| CM-3     | Configuration Change Control                            | 3     | 3   | O           |
+| MP-7     | Media Use                                               | 3     | 3   | O           |
+| SC-28    | Protection of Information at Rest                       | 3     | 3   | S           |
+| AC-3     | Access Enforcement                                      | 1     | 10  | S           |
+| AC-11    | Device Lock                                             | 1     | 2   | S           |
+| IA-5     | Authenticator Management                                | 1     | 2   | O/S         |
+| AC-11(1) | Device Lock, Pattern-Hiding Displays                    | 1     | 1   | S           |
+| CM-11    | User-Installed Software                                 | 1     | 1   | O           |
+| IA-11    | Re-authentication                                       | 1     | 1   | O/S         |
+| SC-18    | Mobile Code                                             | 1     | 1   | O           |
+| SI-19    | De-identification                                       | 1     | 1   | O/S         |
+| SC-42    | Sensor Capability and Data                              | 0     | 6   | S           |
+| SC-15    | Collaborative Computing Devices and Applications        | 0     | 4   | S           |
+| SI-3     | Malicious Code Protection                               | 0     | 3   | O/S         |
+| SI-7     | Software, Firmware, and Information Integrity           | 0     | 2   | O/S         |
+| CM-10    | Software Usage Restrictions                             | 0     | 1   | O           |
+| Total    |                                                         | 134   | 206 |             |
 
 `First` counts settings whose primary assignment is the row. `All` includes partial and incidental contributions.
 
@@ -537,16 +536,16 @@ This is the honest headline of the coverage analysis, and it is more useful than
 
 The SP 800-53 glossary defines **scoping considerations** as part of tailoring guidance providing specific considerations on the applicability of controls, enumerating policy or regulatory, technology, physical infrastructure, system component allocation, public access, scalability, common control, operational, and security objective. Every case below is a technology, operational, or licensing consideration applied at the setting level. Naming the consideration is more useful than calling the setting inert, because the assessor's own scoping decision depends on which condition applies to the device in front of them.
 
-| Condition | Count | Settings |
-|-----------|:-----:|:--------:|
-| Feature removed after Windows 10 | 4 | News and Interests, Activity Feed, Publish User Activities, Upload User Activities |
-| Feature removed in Windows 11 23H2 | 1 | Disable Cortana |
-| Policy deprecated in Windows 11 24H2 | 1 | Disable Windows Copilot |
-| Requires Copilot+ hardware | 1 | Disable Recall |
-| Volume-licensed devices only | 1 | Disable KMS Online Validation |
-| Internet Explorer application chrome, no surface on Windows 11 | 8 | Suggested Sites, Enhanced Suggestions, Set IE Home Page to Blank, Lock IE Home Page Setting, IE First Run Wizard, Set IE New Tab to Blank, Flip Ahead, Feed Background Sync |
-| Internet Explorer platform layer, effective only for content rendered in IE mode | 4 | ActiveX VersionList Download, IE SmartScreen, Browser Geolocation, Compatibility View Editing |
-| Registry scope shared with File Explorer, effect on Windows 11 unverified | 1 | Disable AutoComplete for Web Addresses |
+| Condition                                                                        | Count | Settings |
+|----------------------------------------------------------------------------------|:-----:|----------|
+| Feature removed after Windows 10                                                 | 4     | News and Interests, Activity Feed, Publish User Activities, Upload User Activities |
+| Feature removed in Windows 11 23H2                                               | 1     | Disable Cortana |
+| Policy deprecated in Windows 11 24H2                                             | 1     | Disable Windows Copilot |
+| Requires Copilot+ hardware                                                       | 1     | Disable Recall |
+| Volume-licensed devices only                                                     | 1     | Disable KMS Online Validation |
+| Internet Explorer application chrome, no surface on Windows 11                   | 8     | Suggested Sites, Enhanced Suggestions, Set IE Home Page to Blank, Lock IE Home Page Setting, IE First Run Wizard, Set IE New Tab to Blank, Flip Ahead, Feed Background Sync |
+| Internet Explorer platform layer, effective only for content rendered in IE mode | 4     | ActiveX VersionList Download, IE SmartScreen, Browser Geolocation, Compatibility View Editing |
+| Registry scope shared with File Explorer, effect on Windows 11 unverified        | 1     | Disable AutoComplete for Web Addresses |
 
 Only the first three are version conditions. Two are hardware and licensing conditions applying equally on Windows 10.
 
@@ -559,7 +558,7 @@ These settings are carried deliberately. One profile serves the whole supported 
 Coverage by control, where `Conditional` counts assignments subject to one of these considerations:
 
 | Control | Applied | Conditional | Unconditional on target |
-|:-------:|:-------:|:-----------:|:-----------------------:|
+|---------|:-------:|:-----------:|:-----------------------:|
 | PT-3    | 38      | 6           | 32                      |
 | CM-7    | 38      | 5           | 33                      |
 | SC-7    | 19      | 3           | 16                      |
@@ -573,15 +572,15 @@ SC-18, Mobile Code, has a single assignment, `Disable ActiveX VersionList Downlo
 
 ### 6.3 Controls Not Addressed
 
-The baseline does not address, and should not be credited toward: AU-2 through AU-11 (audit event selection, content, storage, protection, and retention), AC-2 (account management), AC-6 (least privilege), IA-2 (identification and authentication of users), SC-13 (cryptographic protection), SI-4 (system monitoring), SI-7 (software and information integrity, beyond two incidental contributions), CM-8 (system component inventory), and the CP, IR, RA, PL, PM, AT, and SA families in full. SI-2(7), Root Cause Analysis, added in Release 5.2.0, is wholly organizational and unaddressed.
+The baseline does not address, and should not be credited toward: AU-2 through AU-11 (audit event selection, content, storage, protection, and retention), AC-2 (account management), AC-6 (least privilege), IA-2 (identification and authentication of users), SC-13 (cryptographic protection), SI-4 (system monitoring), SI-7 (software and information integrity, beyond two partial contributions), CM-8 (system component inventory), and the CP, IR, RA, PL, PM, AT, and SA families in full. SI-2(7), Root Cause Analysis, added in Release 5.2.0, is wholly organizational and unaddressed.
 
 Several of these are unaddressable by device configuration on a standalone system with no centralized infrastructure. This is worth checking against NIST's own privacy control baseline, which contains 96 controls: this baseline's 134 settings touch three of them, PT-3, SI-12, and SI-19. The remainder are policy, program management, training, incident response, assessment, and planning controls. **NIST's privacy baseline is a program, not a configuration**, and a device baseline can only ever touch the part of it that a device implements.
 
 ## 7. Where the Baseline Works Against a Control Objective
 
-Nine settings carry a cost alongside their benefit. For seven of them the cost falls on another control objective. For the other two, Find My Device and `Disable Disk Health Model Updates`, it falls on a capability no control covers.
+Nine settings carry a cost alongside their benefit. For six of them the cost falls on another control objective. For the other three, `Disable Find My Device`, `Disable Windows Error Reporting`, and `Disable Disk Health Model Updates`, it falls on a capability no control covers.
 
-Five cases below treat the substantial ones. The two smallest degradations, `Disable Enhanced Notifications` and `Disable Disk Health Model Updates`, are noted at the end of the section rather than given a case of their own.
+Four cases below treat the substantial ones. The smallest costs, `Disable Enhanced Notifications`, `Disable Windows Error Reporting`, and `Disable Disk Health Model Updates`, are noted at the end of the section rather than given a case of their own.
 
 All are deliberate, and all should reach a system owner before the baseline is applied rather than being discovered during assessment.
 
@@ -593,33 +592,25 @@ The base accepts that reduction because the remaining malicious code protection 
 
 **Verdict: the base trades bounded, redundant detection capability for a continuous reporting channel, and records the trade here.** A system owner whose malware exposure justifies cloud-assisted detection should exclude both settings before applying the profile.
 
-### 7.2 Windows Error Reporting
-
-`Disable Windows Error Reporting` supports PT-3 by closing a collection channel that operates independently of the diagnostic data level. WER also produces crash analysis information used to diagnose application and system failures locally and contributes to the signal an administrator has about system health, so disabling it works against SI-4.
-
-Crash dumps written to disk before the setting is applied are not removed. A system owner applying this setting for privacy reasons should clear existing dumps separately.
-
-**Verdict: appropriate where crash diagnosis is not an operational requirement, and a real loss where it is.** The baseline has no way to distinguish the two cases.
-
-### 7.3 SmartScreen for Store Apps and Internet Explorer
+### 7.2 SmartScreen for Store Apps and Internet Explorer
 
 `Disable SmartScreen for Store Apps` closes a narrow URL reporting channel and removes a narrow SI-3 check on web content loaded by Store apps. `Disable IE SmartScreen` does the same within Internet Explorer.
 
 **Verdict: the base keeps the broad filter and drops the narrow ones.** System-wide SmartScreen stays, providing malware and phishing protection for files and applications. Store apps are vetted and carry little risk in the content they load, and Internet Explorer is not present on Windows 11. This is a decision about which filters to keep and is not a compensating control in the SP 800-53B sense: nothing is substituting for a control that could not be implemented.
 
-### 7.4 Find My Device
+### 7.3 Find My Device
 
 `Disable Find My Device` supports PT-3 and contributes to SC-42 by closing a continuous, high-sensitivity location stream. The cost is device recovery capability after theft.
 
 **Verdict: the privacy cost is continuous and the recovery benefit is conditional**, requiring both location services and a Microsoft account, and mattering mainly on portable devices. The nearest control on the cost side is PE-20, Asset Monitoring and Tracking, which employs asset location technologies to track assets within organization-defined controlled areas. The mapping does not assign it. Find My Device recovers a device that has left, where PE-20 concerns assets remaining in authorized locations, and the fit is too loose to credit. It is worth naming because PE-20's own discussion directs organizations to consult privacy counsel before deploying asset location technologies, which is the same tension this setting resolves in the other direction.
 
-### 7.5 Store Application Updates
+### 7.4 Store Application Updates
 
 `Disable Auto Download and Install of Updates` supports CM-3 by moving Store application updates from automatic to administrator-initiated, and works against SI-2 for those applications.
 
 **Verdict: the cost is nil in context.** This setting is in the No Store Apps layer, and the same layer disables Store applications entirely. An application that cannot launch does not need patching. This is worth stating because it demonstrates that a layer is internally coherent rather than a collection of related settings, and because the same setting applied without the rest of the layer would carry a real SI-2 cost.
 
-`Disable Enhanced Notifications` reduces Defender alerting to the user, a small SI-4 reduction. `Disable Disk Health Model Updates` removes a failure-prediction data feed, an availability rather than a security cost.
+`Disable Enhanced Notifications` reduces Defender alerting to the user, a small SI-4 reduction. `Disable Windows Error Reporting` forgoes Microsoft's analysis of crash reports, and `Disable Disk Health Model Updates` removes a failure-prediction data feed, capability costs rather than security ones. Crash dumps written to disk before Windows Error Reporting is disabled are not removed, and a system owner applying it for privacy reasons should clear existing dumps separately.
 
 ## 8. Settings the Baseline Declines
 
@@ -627,15 +618,15 @@ The definitions files catalog 162 settings. The curated profiles carry 134. The 
 
 These decisions are the configuration-level analogue of **tailoring**, which SP 800-53 defines as modifying a control baseline by applying scoping considerations, selecting compensating controls, assigning values to control parameters, and supplementing the baseline. The analogy should not be overdrawn: tailoring in SP 800-53B operates on a set of controls, and these decisions operate on a set of settings. The reasoning is parallel and the object is not the same. A reader arriving from ISO/IEC 27001 will recognize the shape of the table below, which serves the purpose a Statement of Applicability serves there: recording which controls apply, which do not, and the justification for each exclusion.
 
-| Declined setting or group | Count | Objective protected | Control |
-|---------------------------|:-----:|---------------------|:-------:|
-| Windows Update settings | 8 | The device continues to receive and install security patches without administrative action | SI-2 |
-| Microsoft Edge and Edge Update | 14 | Not a protection. Scope boundary, deferred to the Edge target | n/a |
-| Set Time Sync to NoSync, Disable NTP Client | 2 | Clock accuracy, on which certificate validity windows, time-based authenticators, and audit timestamps all depend | SC-45, AU-8, IA-5 |
-| Disable Automatic Root Certificate Updates | 1 | Certificate path validation continues to work as trust anchors change | SC-17 |
-| Disable SmartScreen (system-wide) | 1 | Broad malware and phishing protection for files and applications | SI-3 |
-| Disable NCSI Active Tests | 1 | Connectivity detection that applications and services depend on | Availability |
-| Disable Hibernation | 1 | Hibernation remains available. The data-at-rest gain applies only to an unencrypted disk | Functionality |
+| Declined setting or group                   | Count | Objective protected                                                                                               | Control           |
+|---------------------------------------------|:-----:|-------------------------------------------------------------------------------------------------------------------|:-----------------:|
+| Windows Update settings                     | 8     | The device continues to receive and install security patches without administrative action                        | SI-2              |
+| Microsoft Edge and Edge Update              | 14    | Not a protection. Scope boundary, deferred to the Edge target                                                     | None              |
+| Set Time Sync to NoSync, Disable NTP Client | 2     | Clock accuracy, on which certificate validity windows, time-based authenticators, and audit timestamps all depend | SC-45, AU-8, IA-5 |
+| Disable Automatic Root Certificate Updates  | 1     | Certificate path validation continues to work as trust anchors change                                             | SC-17             |
+| Disable SmartScreen (system-wide)           | 1     | Broad malware and phishing protection for files and applications                                                  | SI-3              |
+| Disable NCSI Active Tests                   | 1     | Connectivity detection that applications and services depend on                                                   | Availability      |
+| Disable Hibernation                         | 1     | Hibernation remains available. The data-at-rest gain applies only to an unencrypted disk                          | Functionality     |
 
 ### 8.1 Windows Update
 
@@ -707,7 +698,8 @@ Settings in `Policy-WindowsPrivacyDefaults` were identified and verified through
 ## 12. Revision History
 
 | Version | Date       | Change |
-|:-------:|------------|--------|
+|---------|------------|--------|
 | 1.0     | 2026-09-09 | Initial issue |
 | 1.1     | 2026-09-10 | Corrected control counts and characterizations. Conclusions unchanged |
 | 1.2     | 2026-09-10 | Clarified section 7 membership. Counts and conclusions unchanged |
+| 1.3     | 2026-09-23 | Withdrew the SI-4 cost of disabling Windows Error Reporting, clarified the relationship of three collection channels to the diagnostic data level, added AC-3 to Deny App Access to Tasks, corrected three characterizations, and aligned table columns. Conclusions unchanged |
