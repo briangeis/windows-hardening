@@ -27,7 +27,7 @@ The categories are organized navigation-first: each category answers a specific 
 
 *What additional data does Windows collect and report to Microsoft?*
 
-Contains data reporting and collection settings for channels that operate outside the diagnostic data pipeline governed by `AllowTelemetry` in [Policy-MicrosoftPrivacyConnections](Policy-MicrosoftPrivacyConnections.md). Windows Error Reporting, Application Impact Telemetry, and the inventory collector each route data to Microsoft through separate mechanisms unaffected by that setting. The Diagnostic Data section is complementary: its settings limit what Windows retains and reports even after `AllowTelemetry` is at minimum.
+Contains data reporting and collection settings for channels governed by policies of their own, separate from `AllowTelemetry` in [Policy-MicrosoftPrivacyConnections](Policy-MicrosoftPrivacyConnections.md). Windows Error Reporting, Application Impact Telemetry, and the inventory collector each route data to Microsoft through a separate mechanism, and disabling one closes that channel whatever the `AllowTelemetry` level permits. The Diagnostic Data section is complementary: its settings limit what Windows retains and reports even after `AllowTelemetry` is at minimum.
 
 | PSD1 Section              | HKLM | HKCU | Total |
 |---------------------------|:----:|:----:|:-----:|
